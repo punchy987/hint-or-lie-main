@@ -2,11 +2,24 @@
 const path = require('path');
 
 // --- CONFIGURATION DES CHEMINS ---
-// On définit la racine du projet pour éviter les erreurs de chemins relatifs sur Render
+// On remonte d'un seul niveau pour atteindre la racine de ton projet (où se trouve /config)
 const rootDir = path.join(__dirname, '..', '..');
 
-const { HINT_SECONDS, VOTE_SECONDS, LOBBY_READY_SECONDS } =
-  require(path.join(rootDir, 'config', 'index.js'));
+// Tentative de chargement sécurisée de la config
+let config;
+try {
+  config = require(path.join(rootDir, 'config', 'index.js'));
+} catch (e) {
+  // Si ça échoue, on essaie un niveau de moins (au cas où la structure Render diffère)
+  try {
+    config = require(path.join(__dirname, '..', 'config', 'index.js'));
+  } catch (e2) {
+    console.error("❌ Erreur critique : Impossible de trouver config/index.js");
+    throw e2;
+  }
+}
+
+const { HINT_SECONDS, VOTE_SECONDS, LOBBY_READY_SECONDS } = config;
 
 const { rooms, snapshot, broadcast, createRoom } =
   require(path.join(__dirname, 'state', 'room.js'));
@@ -26,7 +39,6 @@ let makePersistence = () => ({
 });
 
 try {
-  // On utilise path.join pour plus de sécurité
   makePersistence = require(path.join(rootDir, 'utils', 'persistence.js')).makePersistence;
 } catch {
   console.log('ℹ️ Persistence non branchée (utils/persistence.js introuvable).');
@@ -95,7 +107,7 @@ module.exports = function setupSockets(io, db){
       const r = rooms.get(code);
       if (r && r.players.has(socket.id)) r.players.get(socket.id).deviceId = profile.deviceId;
 
-      // FIX : On envoie roomCreated pour le log et roomJoined pour que l'interface change
+      // FIX : On envoie les deux événements pour être sûr que le client réagisse
       socket.emit('roomCreated', { code });
       socket.emit('roomJoined', { code, id: code }); 
       
@@ -120,7 +132,6 @@ module.exports = function setupSockets(io, db){
         deviceId: profile.deviceId
       });
 
-      // Rejoint en cours de manche → spectateur
       if (r.state === 'hints' || r.state === 'voting') {
         const p = r.players.get(socket.id);
         p.spectator = true;
@@ -144,14 +155,12 @@ module.exports = function setupSockets(io, db){
       io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
     });
 
-    // ---- leaveRoom
+    // ---- Les autres fonctions restent identiques ----
     socket.on('leaveRoom', ()=>{
       const code = joined.code; if(!code) return;
       const r = rooms.get(code); if(!r) return;
-
       r.players.delete(socket.id);
       if (r.active?.has(socket.id)) r.active.delete(socket.id);
-
       if (r.lobbyReady?.has(socket.id)){
         r.lobbyReady.delete(socket.id);
         io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
@@ -161,12 +170,10 @@ module.exports = function setupSockets(io, db){
         r.readyNext.delete(socket.id);
         io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: r.players.size });
       }
-
       if (r.hostId === socket.id){
         const first = r.players.keys().next().value;
         if (first) r.hostId = first; else { rooms.delete(code); socket.leave(code); joined.code = null; return; }
       }
-
       if ((r.state === 'hints' || r.state === 'voting') && r.active && r.active.size < 3) {
         clearRoomTimer(r);
         for (const id of r.active) {
@@ -178,25 +185,19 @@ module.exports = function setupSockets(io, db){
         r.readyNext  = new Set();
         r.used = {};
         r.impostor = null;
-
         io.to(code).emit('lobbyCountdownCancelled');
         io.to(code).emit('errorMsg', 'Pas assez de joueurs actifs, retour au lobby');
       }
-
       socket.leave(code); joined.code = null;
       broadcast(io, code);
       socket.emit('leftRoom');
     });
 
-    // ---- playerReadyLobby
     socket.on('playerReadyLobby', ({ ready })=>{
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'lobby') return;
-
       r.lobbyReady ||= new Set();
       if (ready) r.lobbyReady.add(socket.id); else r.lobbyReady.delete(socket.id);
-
       io.to(joined.code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
-
       if (r.lobbyReady.size === r.players.size && r.players.size >= 3){
         clearRoomTimer(r);
         startPhaseTimer(io, joined.code, LOBBY_READY_SECONDS, 'lobby', ()=> controller.startRound(joined.code));
@@ -207,7 +208,6 @@ module.exports = function setupSockets(io, db){
       }
     });
 
-    // ---- startRound
     socket.on('startRound', ()=>{
       const r = rooms.get(joined.code); if(!r) return;
       if (r.hostId !== socket.id) return socket.emit('errorMsg',"Seul l'hôte peut démarrer");
@@ -215,74 +215,55 @@ module.exports = function setupSockets(io, db){
       socket.emit('actionAck', { action:'startRound', status:'ok' });
     });
 
-    // ---- submitHint
     socket.on('submitHint', ({ hint })=>{
       const r = rooms.get(joined.code); if(!r || r.state!=='hints') return;
       const p = r.players.get(socket.id); if(!p) return;
-
       if (!r.active?.has(socket.id)) return socket.emit('errorMsg', 'Tu participeras au prochain tour (spectateur)');
       if (typeof p.hint === 'string') return;
-
       const raw = String(hint||'').trim().slice(0,40);
       const mySecret = r.words.common;
       const check = isHintAllowed(mySecret, raw, r.words.domain);
       if (!check.ok) return socket.emit('hintRejected', { reason: check.reason });
-
       r.usedHints ||= new Set();
       const key = normalizeLocal(raw);
       if (r.usedHints.has(key)) return socket.emit('hintRejected', { reason: "Indice déjà utilisé par un autre joueur." });
       r.usedHints.add(key);
-
       p.hint = raw;
       socket.emit('hintAck');
-
       if (!p.isImpostor) {
         r.liveCrewHints ||= [];
         const item = { id: socket.id, name: p.name, hint: raw };
         r.liveCrewHints.push({ name: p.name, hint: raw });
-
         if (r.impostor) {
           const impSock = io.sockets.sockets.get(r.impostor);
           if (impSock) impSock.emit('crewHintAdded', item);
           else io.to(r.impostor).emit('crewHintAdded', item);
         }
       }
-
       const submitted = Array.from(r.active).filter(id => typeof r.players.get(id)?.hint === 'string').length;
       io.to(joined.code).emit('phaseProgress', { phase:'hints', submitted, total: r.active.size });
-
       controller.maybeStartVoting(joined.code);
       broadcast(io, joined.code);
     });
 
-    // ---- submitVote
     socket.on('submitVote', ({ hintId, targetId } = {}) => {
       const r = rooms.get(joined.code); if (!r || r.state !== 'voting') return;
       const me = r.players.get(socket.id); if (!me) return;
-
       if (!r.active?.has(socket.id)) return socket.emit('errorMsg', 'Tu voteras à la prochaine manche (spectateur)');
-
       let authorId = null;
-      if (hintId && r.hintAuthor && typeof r.hintAuthor.get === 'function') {
-        authorId = r.hintAuthor.get(hintId) || null;
-      }
+      if (hintId && r.hintAuthor && typeof r.hintAuthor.get === 'function') authorId = r.hintAuthor.get(hintId) || null;
       if (!authorId && targetId && r.players.has(targetId)) authorId = targetId;
       if (!authorId && hintId && r.players.has(hintId)) authorId = hintId;
       if (!authorId) return;
-
       me.vote = authorId;
       socket.emit('voteAck');
-
       const submitted = Array.from(r.active).reduce((acc, id) => acc + (r.players.get(id)?.vote ? 1 : 0), 0);
       const total = r.active.size;
-
       io.to(joined.code).emit('phaseProgress', { phase: 'voting', submitted, total });
-
       if (submitted === total) controller.finishVoting(joined.code);
       else broadcast(io, joined.code);
     });
 
-    // ---- playerReadyNext
     socket.on('playerReadyNext', ()=>{
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'reveal') return;
       r.readyNext ||= new Set();
@@ -291,7 +272,6 @@ module.exports = function setupSockets(io, db){
       if (r.readyNext.size === r.players.size) startPhaseTimer(io, joined.code, 3, 'prestart', ()=> controller.startRound(joined.code));
     });
 
-    // ---- resetScores
     socket.on('resetScores', ()=>{
       const r = rooms.get(joined.code); if(!r) return;
       if (r.hostId !== socket.id) return socket.emit('errorMsg',"Seul l'hôte peut réinitialiser");
@@ -303,19 +283,15 @@ module.exports = function setupSockets(io, db){
       broadcast(io, joined.code);
     });
 
-    // ---- disconnect
     socket.on('disconnect', () => {
       const code = joined.code; if (!code) return;
       const r = rooms.get(code); if (!r) return;
-
       const me = r.players.get(socket.id);
       const name = me?.name || 'Un joueur';
       const wasHost = (r.hostId === socket.id);
       const wasImpostor = !!me?.isImpostor;
-
       r.players.delete(socket.id);
       if (r.active?.has(socket.id)) r.active.delete(socket.id);
-
       if (r.lobbyReady?.has(socket.id)) {
         r.lobbyReady.delete(socket.id);
         io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
@@ -325,15 +301,12 @@ module.exports = function setupSockets(io, db){
         r.readyNext.delete(socket.id);
         io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: r.players.size });
       }
-
       if (r.players.size === 0) { rooms.delete(code); return; }
       if (wasHost) {
         const first = r.players.keys().next().value;
         if (first) r.hostId = first;
       }
-
       io.to(code).emit('system', { text: `👋 ${name} a quitté la partie` });
-
       if ((r.state === 'hints' || r.state === 'voting') && r.active && r.active.size < 3) {
         clearRoomTimer(r);
         for (const id of r.active) {
@@ -350,7 +323,6 @@ module.exports = function setupSockets(io, db){
         broadcast(io, code);
         return;
       }
-
       if (r.state === 'hints') {
         const submitted = Array.from(r.active || []).filter(id => typeof r.players.get(id)?.hint === 'string').length;
         io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: (r.active?.size || 0) });
@@ -360,14 +332,12 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: (r.active?.size || 0) });
         if (r.active && submitted === r.active.size) controller.finishVoting(code);
       }
-
       if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
         clearRoomTimer(r);
         for (const id of r.active || []) {
           const p = r.players.get(id);
           if (p && !p.isImpostor) p.score = (p.score || 0) + 1;
         }
-
         io.to(code).emit('roundResult', {
           round: r.round,
           impostorId: socket.id,
@@ -381,11 +351,9 @@ module.exports = function setupSockets(io, db){
           impostorCaught: true,
           domain: r.words?.domain
         });
-
         r.state = 'reveal';
         r.readyNext = new Set();
         io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
-
         const arr = Array.from(r.players.values());
         const maxScore = Math.max(0, ...arr.map(p => p.score || 0));
         if (maxScore >= 10) {
