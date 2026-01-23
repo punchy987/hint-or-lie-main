@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hint or Lie · by Mits</title>
 
-  <!-- Perf -->
   <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
 
-  <!-- Socket.IO (avant nos scripts) -->
   <script defer src="/socket.io/socket.io.js"></script>
 
-  <!-- PWA & styles -->
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/style.css">
   <meta name="theme-color" content="#0f0b14">
@@ -24,31 +21,29 @@
   <link rel="stylesheet" href="css/08-lobby-header.css">
 </head>
 <body class="stars">
-<div id="role-reveal-overlay">
+
+  <div id="role-reveal-overlay" style="display: none;">
     <div class="reveal-content">
       <h2 class="reveal-sup">TU ES...</h2>
       <h1 id="reveal-role-text">IMPOSTEUR</h1>
     </div>
   </div>
-  <div class="wrap">
-  <!-- Bouton d’install PWA (affiché si possible par ton JS si tu veux) -->
-  <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
-    Installer l’app
-  </button>
 
-  <!-- MODAL GAME OVER -->
-  <div id="modal">
-    <div class="box">
-      <h3>Vainqueur 🎉</h3>
-      <p id="winners-text"></p>
-      <div class="row">
-        <button id="btn-modal-lobby" type="button" class="btn-secondary">Retour au salon</button>
+  <div class="wrap">
+    <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
+      Installer l’app
+    </button>
+
+    <div id="modal">
+      <div class="box">
+        <h3>Vainqueur 🎉</h3>
+        <p id="winners-text"></p>
+        <div class="row">
+          <button id="btn-modal-lobby" type="button" class="btn-secondary">Retour au salon</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="wrap">
-    <!-- HOME -->
     <div class="card" id="screen-home">
       <div class="hero">
         <img src="/icons/icon-192.png" alt="Hint or Lie" style="width:62px;height:62px;flex:0 0 62px;filter: drop-shadow(0 8px 18px rgba(255,168,77,.25));border-radius:14px;object-fit:cover" onerror="this.style.display='none'">
@@ -104,7 +99,6 @@
       </div>
     </div>
 
-    <!-- LOBBY -->
     <div class="card" id="screen-lobby" style="display:none">
       <div class="row">
         <div class="pill" id="host-badge" style="display:none">Tu es l'hôte</div>
@@ -139,16 +133,15 @@
       </div>
     </div>
 
-    <!-- HINT -->
     <div class="card" id="screen-hint" style="display:none">
       <div class="phase-bar">
         <div class="phase-left">
           <span id="my-role" class="role">Rôle</span>
         </div>
-<div class="phase-center">
-  <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
-  <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
-</div>
+        <div class="phase-center">
+          <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
+          <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
+        </div>
         <div class="phase-right">
           <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
           <span class="kpi" id="timer-hints">00:45</span>
@@ -156,16 +149,13 @@
         </div>
       </div>
 
-      <!-- Nouveau texte imposteur (affiché/masqué par hints.js selon le rôle) -->
       <div id="impostor-tip" class="tip">🤫 Tu n’as pas de mot. Observe les indices et invente un indice crédible.</div>
 
-      <!-- Plus de "Ton mot" / instruction : simplification -->
       <input id="hint-input" placeholder="Ton indice" maxlength="40" />
       <div class="row"><button id="btn-send-hint" type="button">Envoyer l'indice</button></div>
       <p class="muted" id="hint-status"></p>
     </div>
 
-    <!-- VOTE -->
     <div class="card" id="screen-vote" style="display:none">
       <div class="phase-bar">
         <div class="phase-left"></div>
@@ -185,7 +175,6 @@
       <div id="vote-buttons" class="grid-votes"></div>
     </div>
 
-    <!-- RESULT -->
     <div class="card" id="screen-result" style="display:none">
       <div class="phase-bar">
         <div class="phase-left"></div>
@@ -209,28 +198,23 @@
     </div>
   </div>
 
-  <!-- SCOREBOARD -->
   <div id="scoreboard">
     <h4>Scores</h4>
     <ul id="score-list"></ul>
   </div>
 
-  <!-- Toast -->
   <p class="muted" id="toast" style="display:none;text-align:center" aria-live="polite"></p>
 
-  <!-- Scripts: core, features, pwa, boot -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script defer src="/js/core/dom.js"></script>
   <script defer src="/js/core/helpers.js"></script>
   <script defer src="/js/core/state.js"></script>
   <script defer src="/js/core/socket.js"></script>
-
   <script defer src="/js/features/home.js"></script>
   <script defer src="/js/features/hints.js"></script>
   <script defer src="/js/features/vote.js"></script>
   <script defer src="/js/features/results.js"></script>
   <script defer src="/js/features/leaderboard.js"></script>
-
   <script defer src="/js/pwa/update.js"></script>
   <script defer src="/js/dev/guard.js"></script>
   <script defer src="/js/main.js"></script>

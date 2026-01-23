@@ -28,6 +28,7 @@ body {
   background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
   background-size: 30px 30px;
   transition: background 0.5s ease;
+  overflow-x: hidden;
 }
 
 /* 2. BOÎTE PRINCIPALE */
@@ -35,6 +36,8 @@ body {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .card {
@@ -50,7 +53,7 @@ body {
   transition: border-color 0.3s;
 }
 
-/* 3. NAVIGATION (Onglets Rejoindre/Créer) - RÉPARÉ */
+/* 3. NAVIGATION (Onglets Rejoindre/Créer) */
 .tabs { margin-top: 10px; }
 .tab-nav {
   display: flex;
@@ -65,7 +68,7 @@ body {
   padding: 8px 16px;
   border-radius: 8px;
   box-shadow: none;
-  flex: 0 1 auto; /* Ne prend pas toute la largeur */
+  flex: 0 1 auto;
   font-size: 0.95rem;
 }
 .tab-btn[aria-selected="true"] {
@@ -76,9 +79,9 @@ body {
 .tab-pane { display: none; }
 .tab-pane.active { display: block; animation: fadeIn 0.3s; }
 
-/* 4. MODAL (Vainqueur) - RÉPARÉ */
+/* 4. MODAL (Vainqueur) */
 #modal {
-  display: none; /* Caché par défaut */
+  display: none;
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.9);
   z-index: 2000;
@@ -86,7 +89,7 @@ body {
   justify-content: center;
   backdrop-filter: blur(5px);
 }
-#modal.visible { display: flex; } /* Affiché quand le JS le demande */
+#modal.visible { display: flex; }
 #modal .box {
   background: var(--card-bg);
   padding: 40px;
@@ -98,7 +101,7 @@ body {
   box-shadow: 0 0 50px rgba(139, 92, 246, 0.4);
 }
 
-/* 5. ELEMENTS UI (Pills, Titres...) */
+/* 5. ELEMENTS UI */
 h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 .section-title {
   text-transform: uppercase;
@@ -113,7 +116,6 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 .hero { display: flex; align-items: center; gap: 20px; margin-bottom: 10px; }
 .title-line h1 { font-size: 2rem; background: -webkit-linear-gradient(45deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-/* Petites bulles d'info (Manche, Timer...) */
 .pill {
   background: rgba(255,255,255,0.1);
   padding: 4px 10px;
@@ -174,7 +176,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
 .theme-chip b { color: var(--primary); }
 .kpi { font-variant-numeric: tabular-nums; font-weight: bold; color: var(--muted); }
 
-/* 8. STYLE DU VOTE (Tuiles) */
+/* 8. STYLE DU VOTE */
 #hints {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -197,13 +199,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
 }
 .vote-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); }
 .vote-card.selected { border-color: var(--primary); background: rgba(139, 92, 246, 0.2); }
-.vote-card strong { font-size: 1.2rem; display: block; word-break: break-word; }
 
-/* 9. SCOREBOARD (Pillules discrètes) */
+/* 9. SCOREBOARD */
 #scoreboard {
   margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid rgba(255,255,255,0.1);
+  width: 100%;
+  max-width: 600px;
 }
 #score-list {
   display: flex;
@@ -211,20 +214,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
   gap: 10px;
   list-style: none;
   padding: 0;
-  margin: 10px 0 0 0;
+  margin: 10px 0;
 }
-#score-list li {
-  background: rgba(0,0,0,0.4);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-#score-list li strong { color: white; }
-#score-list li span { color: var(--primary); font-weight: bold; }
 
 /* 10. IMPOSTEUR & JEU */
 .tip {
@@ -234,24 +225,54 @@ button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
   margin-bottom: 15px;
   border-left: 4px solid var(--muted);
 }
-#crew-live-box {
-  background: rgba(0,0,0,0.6) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-  color: #ddd !important;
-}
-#crew-live-list li { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 0; }
 
 /* 11. THEMES "JUICE" (Rouge / Bleu) */
 .theme-crew { background-image: radial-gradient(circle at center top, #172554 0%, #0f0b14 70%); }
 .theme-crew .card { border-top: 4px solid var(--crew); }
-.theme-crew .theme-chip b { color: var(--crew); }
 
 .theme-impostor { background-image: radial-gradient(circle at center top, #450a0a 0%, #0f0b14 70%); }
 .theme-impostor .card { border-top: 4px solid var(--danger); box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
-.theme-impostor .theme-chip b { color: var(--danger); }
 .theme-impostor button { background-color: var(--danger); }
-.theme-impostor button:hover { background-color: #dc2626; }
 
-@keyframes flash-red { 0% { background-color: #ef4444; } 100% { background-color: var(--bg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 12. GAME JUICE - ANNONCE DU RÔLE (FIX) */
+#role-reveal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(15, 11, 20, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+}
+
+.reveal-sup {
+  font-size: 1.2rem;
+  color: var(--muted);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+#reveal-role-text {
+  font-size: clamp(3rem, 10vw, 5rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255,255,255,0.3);
+  animation: revealPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Changement de couleur dynamique pour le texte du rôle */
+.theme-impostor #reveal-role-text { color: var(--danger); text-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+.theme-crew #reveal-role-text { color: var(--crew); text-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+
+@keyframes revealPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
