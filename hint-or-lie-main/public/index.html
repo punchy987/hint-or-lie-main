@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hint or Lie · by Mits</title>
+
+  <!-- Perf -->
+  <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
+
+  <!-- Socket.IO (avant nos scripts) -->
+  <script defer src="/socket.io/socket.io.js"></script>
+
+  <!-- PWA & styles -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css">
+  <meta name="theme-color" content="#0f0b14">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+  <link rel="stylesheet" href="css/07-scoreboard.css">
+  <link rel="stylesheet" href="css/08-lobby-header.css">
+</head>
+<body class="stars">
+<div id="role-reveal-overlay">
+    <div class="reveal-content">
+      <h2 class="reveal-sup">TU ES...</h2>
+      <h1 id="reveal-role-text">IMPOSTEUR</h1>
+    </div>
+  </div>
+  <div class="wrap">
+  <!-- Bouton d’install PWA (affiché si possible par ton JS si tu veux) -->
+  <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
+    Installer l’app
+  </button>
+
+  <!-- MODAL GAME OVER -->
+  <div id="modal">
+    <div class="box">
+      <h3>Vainqueur 🎉</h3>
+      <p id="winners-text"></p>
+      <div class="row">
+        <button id="btn-modal-lobby" type="button" class="btn-secondary">Retour au salon</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- HOME -->
+    <div class="card" id="screen-home">
+      <div class="hero">
+        <img src="/icons/icon-192.png" alt="Hint or Lie" style="width:62px;height:62px;flex:0 0 62px;filter: drop-shadow(0 8px 18px rgba(255,168,77,.25));border-radius:14px;object-fit:cover" onerror="this.style.display='none'">
+        <div>
+          <div class="title-line">
+            <h1>Hint or Lie</h1>
+            <span class="signature-badge" title="Créé par Mits">by Mits</span>
+          </div>
+          <div class="muted"><strong>Chaque indice compte.</strong> Bluffez, suspectez, et attrapez l’intrus.</div>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Actions">
+        <div class="tab-nav">
+          <button class="tab-btn" id="tab-join" role="tab" aria-controls="pane-join" aria-selected="true" type="button">Rejoindre</button>
+          <button class="tab-btn" id="tab-create" role="tab" aria-controls="pane-create" aria-selected="false" type="button">Créer</button>
+        </div>
+        <div id="pane-join" class="tab-pane active" role="tabpanel" aria-labelledby="tab-join">
+          <div class="row" style="align-items:flex-end">
+            <input id="name-join" placeholder="Ton pseudo" maxlength="16" />
+            <input id="join-code" placeholder="Code salle" maxlength="4" />
+            <button id="btn-join" type="button">Rejoindre</button>
+          </div>
+          <p class="muted" style="text-align:right;margin:6px 2px 0 0">Code de salle ex : <code>4831</code></p>
+        </div>
+        <div id="pane-create" class="tab-pane" role="tabpanel" aria-labelledby="tab-create">
+          <div class="row" style="align-items:flex-end">
+            <input id="name-create" placeholder="Ton pseudo" maxlength="16" />
+            <button id="btn-create" type="button">Créer une salle</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <button class="btn-secondary" id="btn-how" type="button">Règles rapides</button>
+      <div id="how" class="rules" style="display:none">
+        <h4>Règles — Hint or Lie</h4>
+        <ul>
+          <li>🎭 Un joueur n’a pas de mot — c’est l’imposteur</li>
+          <li>✍️ Les autres reçoivent un mot lié au thème et donnent 1 indice sans le révéler</li>
+          <li>🚫 Pas deux fois le même indice, ni le mot exact, ni le thème</li>
+          <li>👀 L’imposteur voit les indices des équipiers en direct et doit improviser</li>
+        </ul>
+      </div>
+
+      <div class="rules" id="lb" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <h4 style="margin:0">Classement — Top 10</h4>
+          <button class="btn-secondary" id="btn-lb-refresh" type="button">Actualiser</button>
+        </div>
+        <div id="lb-list" class="muted" style="margin-top:8px">Chargement…</div>
+      </div>
+    </div>
+
+    <!-- LOBBY -->
+    <div class="card" id="screen-lobby" style="display:none">
+      <div class="row">
+        <div class="pill" id="host-badge" style="display:none">Tu es l'hôte</div>
+        <div class="pill">Manche <span id="round-num">0</span></div>
+        <div class="pill">Code <span id="lobby-code"></span></div>
+        <div class="pill" id="lobby-ready-pill">0/0 prêts</div>
+        <div class="pill" id="timer-lobby" style="display:none">00:10</div>
+      </div>
+
+      <h3 class="section-title">Joueurs</h3>
+      <div id="players" class="list" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:8px"></div>
+
+      <div class="row" id="lobby-actions">
+        <button id="btn-ready" type="button">Je suis prêt</button>
+        <button id="btn-invite" type="button" class="btn-secondary">Inviter</button>
+        <button id="btn-back-home" type="button" class="btn-secondary">Retour à l’accueil</button>
+      </div>
+
+      <div class="rules">
+        <h4>Règles — Hint or Lie</h4>
+        <ul>
+          <li>🎯 But du jeu — la plupart ont le même mot ; l’imposteur n’a aucun mot</li>
+          <li>🧩 Mise en place — chacun reçoit son mot, sauf l’imposteur qui n’en a pas</li>
+          <li>✍️ Phase Indices — chacun donne 1 indice lié au mot/thème sans le révéler</li>
+          <li>🔒 Unicité des indices — pas deux fois le même indice ; mot exact et thème interdits</li>
+          <li>🕵️ Aide imposteur — il voit les indices des équipiers en direct et doit glisser un faux indice (Mensonge)</li>
+          <li>🗳️ Phase Vote — on vote pour l'indice le plus suspect</li>
+          <li>⚡ Fin du vote — quand tout le monde a voté; sinon à la fin du chrono</li>
+          <li>⭐ Points — équipiers +1 si le faux indice est trouvé ; sinon imposteur +2</li>
+          <li>🏁 Victoire — premier à 10 points</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HINT -->
+    <div class="card" id="screen-hint" style="display:none">
+      <div class="phase-bar">
+        <div class="phase-left">
+          <span id="my-role" class="role">Rôle</span>
+        </div>
+<div class="phase-center">
+  <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
+  <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
+</div>
+        <div class="phase-right">
+          <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
+          <span class="kpi" id="timer-hints">00:45</span>
+          <span class="kpi" id="progress-hints">0/0</span>
+        </div>
+      </div>
+
+      <!-- Nouveau texte imposteur (affiché/masqué par hints.js selon le rôle) -->
+      <div id="impostor-tip" class="tip">🤫 Tu n’as pas de mot. Observe les indices et invente un indice crédible.</div>
+
+      <!-- Plus de "Ton mot" / instruction : simplification -->
+      <input id="hint-input" placeholder="Ton indice" maxlength="40" />
+      <div class="row"><button id="btn-send-hint" type="button">Envoyer l'indice</button></div>
+      <p class="muted" id="hint-status"></p>
+    </div>
+
+    <!-- VOTE -->
+    <div class="card" id="screen-vote" style="display:none">
+      <div class="phase-bar">
+        <div class="phase-left"></div>
+        <div class="phase-center">
+          <span class="theme-chip">📌 Thème : <b id="theme-vote-name">?</b></span>
+        </div>
+        <div class="phase-right">
+          <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
+          <span class="kpi" id="timer-vote">00:40</span>
+          <span class="kpi" id="progress-vote">0/0</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">Vote</h3>
+      <p class="muted" style="margin-bottom:8px">🔎 Vote pour l’indice qui te paraît louche !</p>
+      <div id="hints" style="margin:8px 0"></div>
+      <div id="vote-buttons" class="grid-votes"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card" id="screen-result" style="display:none">
+      <div class="phase-bar">
+        <div class="phase-left"></div>
+        <div class="phase-center">
+          <span class="theme-chip">📌 Thème : <b id="res-domain">?</b></span>
+        </div>
+        <div class="phase-right">
+          <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
+          <span class="kpi" id="timer-reveal">--:--</span>
+          <span class="kpi" id="progress-ready">0/0 prêts</span>
+        </div>
+      </div>
+
+      <div id="personal-banner" class="result-banner">Résultat</div>
+      <h3 class="section-title">Résumé</h3>
+      <p>Mot commun : <strong id="res-common"></strong> <strong id="res-imp"></strong></p>
+      <p>Imposteur : <strong id="res-imp-name"></strong></p>
+      <div>Mensonge : <span id="res-imp-lie"></span></div>
+      <div id="res-votes" style="margin:8px 0"></div>
+      <div class="row"><button id="btn-next" type="button" style="display:none">Manche suivante</button></div>
+    </div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div id="scoreboard">
+    <h4>Scores</h4>
+    <ul id="score-list"></ul>
+  </div>
+
+  <!-- Toast -->
+  <p class="muted" id="toast" style="display:none;text-align:center" aria-live="polite"></p>
+
+  <!-- Scripts: core, features, pwa, boot -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script defer src="/js/core/dom.js"></script>
+  <script defer src="/js/core/helpers.js"></script>
+  <script defer src="/js/core/state.js"></script>
+  <script defer src="/js/core/socket.js"></script>
+
+  <script defer src="/js/features/home.js"></script>
+  <script defer src="/js/features/hints.js"></script>
+  <script defer src="/js/features/vote.js"></script>
+  <script defer src="/js/features/results.js"></script>
+  <script defer src="/js/features/leaderboard.js"></script>
+
+  <script defer src="/js/pwa/update.js"></script>
+  <script defer src="/js/dev/guard.js"></script>
+  <script defer src="/js/main.js"></script>
+
+</body>
+</html>
