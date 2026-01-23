@@ -5,20 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hint or Lie · by Mits</title>
 
-  <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
-
   <script defer src="/socket.io/socket.io.js"></script>
 
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/style.css">
-  <meta name="theme-color" content="#0f0b14">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+  <link rel="stylesheet" href="css/01-tokens.css">
+  <link rel="stylesheet" href="css/02-base.css">
   <link rel="stylesheet" href="css/07-scoreboard.css">
   <link rel="stylesheet" href="css/08-lobby-header.css">
+  
+  <link rel="stylesheet" href="/style.css">
+
+  <meta name="theme-color" content="#0f0b14">
+  <link rel="icon" type="image/png" href="/icons/icon-32.png">
 </head>
 <body class="stars">
 
@@ -30,11 +28,7 @@
   </div>
 
   <div class="wrap">
-    <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
-      Installer l’app
-    </button>
-
-    <div id="modal">
+    <div id="modal" style="display: none;">
       <div class="box">
         <h3>Vainqueur 🎉</h3>
         <p id="winners-text"></p>
@@ -46,112 +40,45 @@
 
     <div class="card" id="screen-home">
       <div class="hero">
-        <img src="/icons/icon-192.png" alt="Hint or Lie" style="width:62px;height:62px;flex:0 0 62px;filter: drop-shadow(0 8px 18px rgba(255,168,77,.25));border-radius:14px;object-fit:cover">
+        <img src="/icons/icon-192.png" alt="Logo" style="width:62px;border-radius:14px;">
         <div>
           <div class="title-line">
             <h1>Hint or Lie</h1>
-            <span class="signature-badge" title="Créé par Mits">by Mits</span>
+            <span class="signature-badge">by Mits</span>
           </div>
-          <div class="muted"><strong>Chaque indice compte.</strong> Bluffez, suspectez, et attrapez l’intrus.</div>
+          <p class="muted">Chaque indice compte.</p>
         </div>
       </div>
-
-      <div class="tabs" role="tablist">
+      <div class="tabs">
         <div class="tab-nav">
-          <button class="tab-btn" id="tab-join" role="tab" aria-selected="true" type="button">Rejoindre</button>
-          <button class="tab-btn" id="tab-create" role="tab" aria-selected="false" type="button">Créer</button>
+          <button class="tab-btn" id="tab-join" aria-selected="true">Rejoindre</button>
+          <button class="tab-btn" id="tab-create">Créer</button>
         </div>
-        <div id="pane-join" class="tab-pane active" role="tabpanel">
-          <div class="row" style="align-items:flex-end">
-            <input id="name-join" placeholder="Ton pseudo" maxlength="16" />
-            <input id="join-code" placeholder="Code salle" maxlength="4" />
-            <button id="btn-join" type="button">Rejoindre</button>
-          </div>
-          <p class="muted" style="text-align:right;margin:6px 2px 0 0">Code de salle ex : 4831</p>
+        <div id="pane-join" class="tab-pane active">
+           <div class="row">
+             <input id="name-join" placeholder="Pseudo">
+             <input id="join-code" placeholder="Code">
+             <button id="btn-join">Rejoindre</button>
+           </div>
         </div>
-        <div id="pane-create" class="tab-pane" role="tabpanel">
-          <div class="row" style="align-items:flex-end">
-            <input id="name-create" placeholder="Ton pseudo" maxlength="16" />
-            <button id="btn-create" type="button">Créer une salle</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="height:10px"></div>
-      <button class="btn-secondary" id="btn-how" type="button">Règles rapides</button>
-      <div id="how" class="rules" style="display:none">
-        <h4>Règles — Hint or Lie</h4>
-        <ul>
-          <li>🎭 Un joueur n’a pas de mot — c’est l’imposteur</li>
-          <li>✍️ Les équipiers ont un mot et donnent un indice</li>
-          <li>👀 L’imposteur voit les indices et doit bluffer</li>
-        </ul>
-      </div>
-
-      <div class="rules" id="lb" style="margin-top:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h4 style="margin:0">Classement — Top 10</h4>
-          <button class="btn-secondary" id="btn-lb-refresh" type="button">Actualiser</button>
-        </div>
-        <div id="lb-list" class="muted" style="margin-top:8px">Chargement…</div>
       </div>
     </div>
 
-    <div class="card" id="screen-lobby" style="display:none">
-      <div class="row">
-        <div class="pill" id="host-badge" style="display:none">Hôte</div>
-        <div class="pill">Manche <span id="round-num">0</span></div>
-        <div class="pill">Code <span id="lobby-code"></span></div>
-        <div class="pill" id="lobby-ready-pill">0/0 prêts</div>
-        <div class="pill" id="timer-lobby" style="display:none">00:10</div>
-      </div>
-      <h3 class="section-title">Joueurs</h3>
-      <div id="players" class="list" style="display:grid;gap:8px;margin-bottom:8px"></div>
-      <div class="row" id="lobby-actions">
-        <button id="btn-ready" type="button">Je suis prêt</button>
-        <button id="btn-back-home" type="button" class="btn-secondary">Accueil</button>
-      </div>
-    </div>
+    <div class="card" id="screen-lobby" style="display:none"></div>
 
     <div class="card" id="screen-hint" style="display:none">
       <div class="phase-bar">
-        <div class="phase-left"><span id="my-role" class="role">Rôle</span></div>
-        <div class="phase-center">
-          <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
-          <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
-        </div>
-        <div class="phase-right">
-          <div class="pill">Manche <span class="round-live">0</span></div>
-          <span class="kpi" id="timer-hints">00:45</span>
-        </div>
+        <span id="my-role" class="role">Rôle</span>
+        <span class="theme-chip">📌 <b id="theme-hint-name">?</b></span>
+        <span class="kpi" id="timer-hints">00:45</span>
       </div>
       <div id="impostor-tip" class="tip" style="display:none"></div>
-      <input id="hint-input" placeholder="Ton indice" maxlength="40" />
-      <div class="row"><button id="btn-send-hint" type="button">Envoyer l'indice</button></div>
-      <p class="muted" id="hint-status"></p>
+      <input id="hint-input" placeholder="Ton indice">
+      <button id="btn-send-hint">Envoyer l'indice</button>
     </div>
 
-    <div class="card" id="screen-vote" style="display:none">
-      <div class="phase-bar">
-        <div class="phase-center"><span class="theme-chip">📌 Thème : <b id="theme-vote-name">?</b></span></div>
-        <div class="phase-right">
-          <div class="pill">Manche <span class="round-live">0</span></div>
-          <span class="kpi" id="timer-vote">00:40</span>
-        </div>
-      </div>
-      <h3 class="section-title">Vote</h3>
-      <div id="hints" style="margin:8px 0"></div>
-      <div id="vote-buttons" class="grid-votes"></div>
-    </div>
-
-    <div class="card" id="screen-result" style="display:none">
-      <div id="personal-banner" class="result-banner">Résultat</div>
-      <h3 class="section-title">Résumé</h3>
-      <p>Mot commun : <strong id="res-common"></strong></p>
-      <p>Imposteur : <strong id="res-imp-name"></strong></p>
-      <div id="res-votes" style="margin:8px 0"></div>
-      <div class="row"><button id="btn-next" type="button" style="display:none">Suivant</button></div>
-    </div>
+    <div class="card" id="screen-vote" style="display:none"></div>
+    <div class="card" id="screen-result" style="display:none"></div>
   </div>
 
   <div id="scoreboard">
@@ -159,19 +86,10 @@
     <ul id="score-list"></ul>
   </div>
 
-  <p class="muted" id="toast" style="display:none;text-align:center"></p>
-
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script defer src="/js/core/dom.js"></script>
-  <script defer src="/js/core/helpers.js"></script>
   <script defer src="/js/core/state.js"></script>
   <script defer src="/js/core/socket.js"></script>
-  <script defer src="/js/features/home.js"></script>
   <script defer src="/js/features/hints.js"></script>
-  <script defer src="/js/features/vote.js"></script>
-  <script defer src="/js/features/results.js"></script>
-  <script defer src="/js/features/leaderboard.js"></script>
-  <script defer src="/js/pwa/update.js"></script>
   <script defer src="/js/main.js"></script>
 </body>
 </html>
