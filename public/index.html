@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hint or Lie · by Mits</title>
 
-<<<<<<< HEAD
-=======
   <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
-
->>>>>>> 53d5dea (fix affichage accueil)
   <script defer src="/socket.io/socket.io.js"></script>
 
   <link rel="manifest" href="/manifest.json">
@@ -17,7 +13,6 @@
   <link rel="stylesheet" href="css/02-base.css">
   <link rel="stylesheet" href="css/07-scoreboard.css">
   <link rel="stylesheet" href="css/08-lobby-header.css">
-  
   <link rel="stylesheet" href="/style.css">
 
   <meta name="theme-color" content="#0f0b14">
@@ -25,11 +20,7 @@
 </head>
 <body class="stars">
 
-<<<<<<< HEAD
-  <div id="role-reveal-overlay">
-=======
   <div id="role-reveal-overlay" style="display: none;">
->>>>>>> 53d5dea (fix affichage accueil)
     <div class="reveal-content">
       <h2 class="reveal-sup">TU ES...</h2>
       <h1 id="reveal-role-text">IMPOSTEUR</h1>
@@ -37,15 +28,11 @@
   </div>
 
   <div class="wrap">
-<<<<<<< HEAD
-    <div id="modal" style="display: none;">
-=======
     <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
       Installer l’app
     </button>
 
-    <div id="modal">
->>>>>>> 53d5dea (fix affichage accueil)
+    <div id="modal" style="display: none;">
       <div class="box">
         <h3>Vainqueur 🎉</h3>
         <p id="winners-text"></p>
@@ -114,27 +101,10 @@
         <button id="btn-ready">Je suis prêt</button>
         <button id="btn-back-home" class="btn-secondary">Quitter</button>
       </div>
-
-      <div class="rules">
-        <h4>Comment jouer</h4>
-        <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 20px;">
-          <li>🎯 But : Démasquer l'imposteur ou survivre en mentant.</li>
-          <li>🧩 Phase Indices : Donnez un indice lié à votre mot.</li>
-          <li>🕵️ Imposteur : Vous voyez les indices des autres en direct !</li>
-          <li>🗳️ Phase Vote : Votez pour l'indice le plus louche.</li>
-          <li>🏁 Victoire : Premier à 10 points.</li>
-        </ul>
-      </div>
     </div>
 
     <div class="card" id="screen-hint" style="display:none">
       <div class="phase-bar">
-<<<<<<< HEAD
-        <span id="my-role" class="role">Rôle</span>
-        <div class="phase-center">
-          <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
-          <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
-=======
         <div class="phase-left">
           <span id="my-role" class="role">Rôle</span>
         </div>
@@ -146,17 +116,11 @@
           <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
           <span class="kpi" id="timer-hints">00:45</span>
           <span class="kpi" id="progress-hints">0/0</span>
->>>>>>> 53d5dea (fix affichage accueil)
         </div>
-        <span class="kpi" id="timer-hints">00:45</span>
       </div>
-<<<<<<< HEAD
-      <div id="impostor-tip" class="tip" style="display:none"></div>
-=======
 
-      <div id="impostor-tip" class="tip">🤫 Tu n’as pas de mot. Observe les indices et invente un indice crédible.</div>
+      <div id="impostor-tip" class="tip" style="display:none">🤫 Tu n’as pas de mot. Observe les indices et invente un indice crédible.</div>
 
->>>>>>> 53d5dea (fix affichage accueil)
       <input id="hint-input" placeholder="Ton indice" maxlength="40" />
       <button id="btn-send-hint">Envoyer l'indice</button>
       <p id="hint-status" class="muted"></p>
@@ -173,27 +137,21 @@
 
     <div class="card" id="screen-result" style="display:none">
       <div id="personal-banner" class="result-banner">Résultat</div>
-      <div id="res-imp-name"></div> <p style="text-align:center">Mot commun : <strong id="res-common"></strong></p>
+      <div id="res-imp-name"></div> 
+      <p style="text-align:center">Mot commun : <strong id="res-common"></strong></p>
       <div id="res-votes" style="margin:10px 0"></div>
       <button id="btn-next">Manche suivante</button>
     </div>
   </div>
 
-<<<<<<< HEAD
-  <div id="scoreboard" class="scoreboard-inline">
-=======
   <div id="scoreboard">
->>>>>>> 53d5dea (fix affichage accueil)
     <h4>Scores</h4>
     <ul id="score-list"></ul>
   </div>
 
-<<<<<<< HEAD
-=======
   <p class="muted" id="toast" style="display:none;text-align:center" aria-live="polite"></p>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
->>>>>>> 53d5dea (fix affichage accueil)
   <script defer src="/js/core/dom.js"></script>
   <script defer src="/js/core/state.js"></script>
   <script defer src="/js/core/socket.js"></script>
@@ -202,11 +160,8 @@
   <script defer src="/js/features/vote.js"></script>
   <script defer src="/js/features/results.js"></script>
   <script defer src="/js/features/leaderboard.js"></script>
-<<<<<<< HEAD
-=======
   <script defer src="/js/pwa/update.js"></script>
   <script defer src="/js/dev/guard.js"></script>
->>>>>>> 53d5dea (fix affichage accueil)
   <script defer src="/js/main.js"></script>
 
 </body>
