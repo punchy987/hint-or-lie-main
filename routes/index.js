@@ -3,34 +3,34 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 
-// 1. Importation de la configuration
-// On remonte d'un cran vers la racine pour trouver /config
-const config = require('../config/index.js');
+// CORRECTIF DES CHEMINS POUR RENDER
+const rootDir = path.join(__dirname, '..');
 
-// 2. Importation du setup des Sockets
-// On pointe vers le fichier que tu m'as envoyé tout à l'heure
-const setupSockets = require('./sockets/index.js');
+// 1. Import de la config
+const config = require(path.join(rootDir, 'config', 'index.js'));
 
-// 3. Importation de l'état des salles (Room State)
-// CORRECTIF : Le fichier room.js est dans ./sockets/state/room.js
-// C'est cette ligne (ligne 25 dans tes logs) qui faisait crash le serveur
+// 2. Import de l'état des salles (nécessaire pour certaines routes)
+// On pointe bien vers sockets/state/room.js
 const { rooms } = require('./sockets/state/room.js');
 
-// --- ROUTES HTTP ---
+// 3. Import du setup des Sockets (pour l'exporter vers server.js)
+const setupSockets = require('./sockets/index.js');
 
-// Route de base pour vérifier que le serveur répond
+// --- TES ROUTES HTTP ---
+
+// Route de test
 router.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    rooms: rooms.size,
-    version: '1.0.3'
-  });
+  res.json({ status: 'ok', rooms: rooms.size });
 });
 
-// On peut ajouter ici d'autres routes API si nécessaire (leaderboard, etc.)
+// --- EXPORT POUR SERVER.JS ---
 
-// On exporte le routeur et la fonction de setup pour server.js
-module.exports = {
-  router,
-  setupSockets
-};
+// Cette fonction est celle que server.js appelle à la ligne 15
+function setupRoutes(app) {
+  app.use('/', router);
+}
+
+// On exporte la fonction directement ET en tant que propriété pour être sûr
+module.exports = setupRoutes;
+module.exports.setupRoutes = setupRoutes;
+module.exports.setupSockets = setupSockets;
