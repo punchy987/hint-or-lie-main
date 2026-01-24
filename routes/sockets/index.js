@@ -124,16 +124,45 @@ module.exports = function setupSockets(io, db){
       profile.lastPseudo = displayName;
       profile.deviceId   = String(deviceId || profile.deviceId || '').slice(0,64) || null;
 
-      r.players.set(socket.id, {
-        name: displayName, hint:null, vote:null, isImpostor:false, score:0,
-        deviceId: profile.deviceId
-      });
+      // Persistance: recherche d'un joueur déconnecté avec le même pseudo
+      let disconnectedPlayerEntry = null;
+      for (const [id, p] of r.players.entries()) {
+        if (p.name === displayName && p.disconnected) {
+          disconnectedPlayerEntry = [id, p];
+          break;
+        }
+      }
+
+      if (disconnectedPlayerEntry) {
+        const [oldId, pData] = disconnectedPlayerEntry;
+        r.players.delete(oldId); // Supprime l'ancienne entrée
+        if(r.active?.has(oldId)) {
+          r.active.delete(oldId);
+          r.active.add(socket.id);
+        }
+        // Restaure les données sur le nouveau socket.id
+        pData.disconnected = false;
+        pData.disconnectedSince = undefined;
+        r.players.set(socket.id, pData);
+        console.log(`[Socket] Joueur reconnecté: ${displayName} (nouveau ID: ${socket.id})`);
+
+        io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
+
+      } else {
+        r.players.set(socket.id, {
+          name: displayName, hint:null, vote:null, isImpostor:false, score:0,
+          deviceId: profile.deviceId
+        });
+      }
 
       // Rejoint en cours de manche → spectateur (ne pas gonfler les compteurs)
       if (r.state === 'hints' || r.state === 'voting') {
-        const p = r.players.get(socket.id);
-        p.spectator = true;
-        socket.emit('spectatorMode', { phase: r.state, message: 'Tu participeras à la prochaine manche' });
+        // Si le joueur n'est pas celui qui s'est reconnecté ou si la partie a continué sans lui
+        if (!disconnectedPlayerEntry || !r.active?.has(socket.id)) {
+          const p = r.players.get(socket.id);
+          p.spectator = true;
+          socket.emit('spectatorMode', { phase: r.state, message: 'Tu participeras à la prochaine manche' });
+        }
 
         if (r.active && r.active.size) {
           if (r.state === 'hints') {
@@ -157,31 +186,44 @@ module.exports = function setupSockets(io, db){
     socket.on('leaveRoom', ()=>{
       const code = joined.code; if(!code) return;
       const r = rooms.get(code); if(!r) return;
+      
+      const me = r.players.get(socket.id);
+      const name = me?.name || 'Un joueur';
 
+      // Suppression définitive du joueur
       r.players.delete(socket.id);
       if (r.active?.has(socket.id)) r.active.delete(socket.id);
+      if (r.lobbyReady?.has(socket.id)) r.lobbyReady.delete(socket.id);
+      if (r.readyNext?.has(socket.id)) r.readyNext.delete(socket.id);
 
-      if (r.lobbyReady?.has(socket.id)){
-        r.lobbyReady.delete(socket.id);
-        io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
-        if (r.timer?.phase === 'lobby'){ clearRoomTimer(r); io.to(code).emit('lobbyCountdownCancelled'); }
-      }
-      if (r.readyNext?.has(socket.id)){
-        r.readyNext.delete(socket.id);
-        io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: r.players.size });
+      // Si la salle est vide, supprimez-la
+      if (r.players.size === 0) {
+        rooms.delete(code);
+        socket.leave(code);
+        joined.code = null;
+        return;
       }
 
-      if (r.hostId === socket.id){
+      // Gérer le compte à rebours du lobby si un joueur part
+      if (r.timer?.phase === 'lobby') {
+        clearRoomTimer(r);
+        io.to(code).emit('lobbyCountdownCancelled');
+      }
+
+      // Transférer l'hôte si nécessaire
+      if (r.hostId === socket.id) {
         const first = r.players.keys().next().value;
-        if (first) r.hostId = first; else { rooms.delete(code); socket.leave(code); joined.code = null; return; }
+        if (first) r.hostId = first;
       }
+      
+      io.to(code).emit('system', { text: `👋 ${name} a quitté la partie.` });
 
       // Si on est en manche et que les actifs < 3 → retour lobby
-      if ((r.state === 'hints' || r.state === 'voting') && r.active && r.active.size < 3) {
+      const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
+      if ((r.state === 'hints' || r.state === 'voting') && activePlayers.length < 3) {
         clearRoomTimer(r);
-        for (const id of r.active) {
-          const p = r.players.get(id);
-          if (p) { p.hint = null; p.vote = null; p.isImpostor = false; }
+        for (const p of r.players.values()) {
+          p.hint = null; p.vote = null; p.isImpostor = false;
         }
         r.state = 'lobby';
         r.lobbyReady = new Set();
@@ -193,7 +235,8 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('errorMsg', 'Pas assez de joueurs actifs, retour au lobby');
       }
 
-      socket.leave(code); joined.code = null;
+      socket.leave(code);
+      joined.code = null;
       broadcast(io, code);
       socket.emit('leftRoom');
     });
@@ -339,41 +382,50 @@ module.exports = function setupSockets(io, db){
       const r = rooms.get(code); if (!r) return;
 
       const me = r.players.get(socket.id);
-      const name = me?.name || 'Un joueur';
+      if (!me) return; // Joueur déjà supprimé ou jamais vraiment ajouté
+
+      me.disconnected = true;
+      me.disconnectedSince = r.round;
+      const name = me.name || 'Un joueur';
       const wasHost = (r.hostId === socket.id);
-      const wasImpostor = !!me?.isImpostor;
+      const wasImpostor = !!me.isImpostor;
 
-      // retirer le joueur (players + active)
-      r.players.delete(socket.id);
-      if (r.active?.has(socket.id)) r.active.delete(socket.id);
+      // Ne pas supprimer le joueur, juste le marquer.
+      // Le nettoyage se fera au début des manches.
 
-      // nettoyer ready sets + éventuel compte à rebours lobby
-      if (r.lobbyReady?.has(socket.id)) {
-        r.lobbyReady.delete(socket.id);
-        io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
-        if (r.timer?.phase === 'lobby') { clearRoomTimer(r); io.to(code).emit('lobbyCountdownCancelled'); }
+      // si plus personne D'ACTIF → supprimer la room
+      const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
+      if (activePlayers.length === 0) {
+        rooms.delete(code);
+        return;
       }
-      if (r.readyNext?.has(socket.id)) {
-        r.readyNext.delete(socket.id);
-        io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: r.players.size });
-      }
-
-      // si plus personne → supprimer la room
-      if (r.players.size === 0) { rooms.delete(code); return; }
 
       // transfert d’hôte si besoin
       if (wasHost) {
-        const first = r.players.keys().next().value;
-        if (first) r.hostId = first;
+        const firstActive = Array.from(r.players.entries()).find(([id, p]) => !p.disconnected);
+        if (firstActive) {
+          r.hostId = firstActive[0];
+        }
       }
 
       // message système
       io.to(code).emit('system', { text: `👋 ${name} a quitté la partie` });
 
+      // Mettre à jour le nombre total de joueurs (uniquement les actifs)
+      const totalPlayers = activePlayers.length;
+      if (r.lobbyReady) {
+        io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: totalPlayers });
+      }
+      if (r.readyNext) {
+        io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: totalPlayers });
+      }
+
+
       // si on est en manche et que les actifs < 3 → retour lobby immédiat
-      if ((r.state === 'hints' || r.state === 'voting') && r.active && r.active.size < 3) {
+      const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+      if ((r.state === 'hints' || r.state === 'voting') && activeInGame.length < 3) {
         clearRoomTimer(r);
-        for (const id of r.active) {
+        for (const id of r.players.keys()) {
           const p = r.players.get(id);
           if (p) { p.hint = null; p.vote = null; p.isImpostor = false; }
         }
@@ -389,23 +441,23 @@ module.exports = function setupSockets(io, db){
         return;
       }
 
-      // réconcilier la phase en cours (compteurs avec r.active)
+      // réconcilier la phase en cours
       if (r.state === 'hints') {
-        const submitted = Array.from(r.active || []).filter(id => typeof r.players.get(id)?.hint === 'string').length;
-        io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: (r.active?.size || 0) });
-        if (r.active && submitted === r.active.size) controller.maybeStartVoting(code);
+        const submitted = activeInGame.filter(id => typeof r.players.get(id)?.hint === 'string').length;
+        io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: activeInGame.length });
+        if (submitted === activeInGame.length) controller.maybeStartVoting(code);
       } else if (r.state === 'voting') {
-        const submitted = Array.from(r.active || []).filter(id => !!r.players.get(id)?.vote).length;
-        io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: (r.active?.size || 0) });
-        if (r.active && submitted === r.active.size) controller.finishVoting(code);
+        const submitted = activeInGame.filter(id => !!r.players.get(id)?.vote).length;
+        io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: activeInGame.length });
+        if (submitted === activeInGame.length) controller.finishVoting(code);
       }
 
-      // cas spécial : l’imposteur a quitté pendant la manche → victoire équipiers immédiate
       if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
+        // ... la logique de victoire des équipiers reste la même
         clearRoomTimer(r);
         for (const id of r.active || []) {
           const p = r.players.get(id);
-          if (p && !p.isImpostor) p.score = (p.score || 0) + 1;
+          if (p && !p.isImpostor && !p.disconnected) p.score = (p.score || 0) + 1;
         }
 
         io.to(code).emit('roundResult', {
@@ -414,7 +466,7 @@ module.exports = function setupSockets(io, db){
           impostorName: name,
           common: r.words?.common,
           impostor: null,
-          impostorHint: null, // FIX: évitera le crash
+          impostorHint: null,
           commonDisplay: r.words?.common,
           impostorDisplay: "—",
           votes: {},
@@ -424,14 +476,13 @@ module.exports = function setupSockets(io, db){
 
         r.state = 'reveal';
         r.readyNext = new Set();
-        io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
+        io.to(code).emit('readyProgress', { ready: 0, total: totalPlayers });
 
-        // fin de partie éventuelle (seuil 10)
-        const arr = Array.from(r.players.values());
-        const maxScore = Math.max(0, ...arr.map(p => p.score || 0));
+        const scores = Array.from(r.players.values()).filter(p => !p.disconnected).map(p => p.score || 0);
+        const maxScore = Math.max(0, ...scores);
         if (maxScore >= 10) {
-          const winnersArr = Array.from(r.players.entries())
-            .filter(([_, p]) => (p.score || 0) === maxScore)
+           const winnersArr = Array.from(r.players.entries())
+            .filter(([_, p]) => !p.disconnected && (p.score || 0) === maxScore)
             .map(([id, p]) => ({ id, name: p.name, score: p.score || 0 }));
           io.to(code).emit('gameOver', { winners: winnersArr, round: r.round, autoReset: true });
 

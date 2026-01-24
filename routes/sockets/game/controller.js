@@ -15,12 +15,21 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
   function startRound(code) {
     const r = rooms.get(code); if (!r) return;
 
+    // Nettoyage des joueurs déconnectés depuis trop longtemps
+    for (const [id, p] of r.players.entries()) {
+      if (p.disconnected && (r.round - p.disconnectedSince) >= 2) {
+        r.players.delete(id);
+        if(r.active?.has(id)) r.active.delete(id);
+        console.log(`[GC] Joueur ${p.name} (id: ${id}) supprimé pour inactivité prolongée.`);
+      }
+    }
+
     clearRoomTimer(r);
     r.lobbyReady = new Set();
     r.readyNext  = new Set();
 
-    // Fige les joueurs actifs pour TOUT le round
-    r.active = new Set(Array.from(r.players.keys()));
+    // Fige les joueurs actifs pour TOUT le round (ceux qui ne sont pas déconnectés)
+    r.active = new Set(Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected).map(([id]) => id));
 
     if (r.active.size < 3) {
       io.to(code).emit('errorMsg', 'Minimum 3 joueurs');
