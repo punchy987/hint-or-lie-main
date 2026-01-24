@@ -26,13 +26,16 @@ button{
   background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));
   color:#2a0e16; cursor:pointer;
   box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 35%, transparent);
-  transition: transform .06s ease, filter .2s ease;
+  transition: transform .06s cubic-bezier(0.34, 1.56, 0.64, 1), filter .2s ease, box-shadow .2s ease;
 }
-button:hover{ filter:brightness(1.06) }
-button:active{ transform: translateY(1px) }
+button:hover{ filter:brightness(1.08); box-shadow: 0 16px 32px color-mix(in srgb, var(--accent) 45%, transparent); }
+button:active{ transform: scale(0.98) }
 .btn-secondary{
   background:#0f1523; border:1px solid var(--line); color:var(--text); font-weight:700; border-radius:14px; padding:12px 14px;
+  transition: transform .06s cubic-bezier(0.34, 1.56, 0.64, 1), background .2s ease, border-color .2s ease;
 }
+.btn-secondary:hover{ background: rgba(255,255,255,0.12); border-color: var(--accent); }
+.btn-secondary:active{ transform: scale(0.98) }
 
 /* Rôles */
 .role{
@@ -57,10 +60,19 @@ button:active{ transform: translateY(1px) }
 
 /* Tabs */
 .tabs{ margin-top:12px; border:1px solid var(--line); border-radius:14px; background:#140f1a }
-.tab-nav{ display:flex }
-.tab-btn{ flex:1; padding:12px 14px; border:0; background:transparent; color:#d9c1e3; font-weight:800; cursor:pointer }
-.tab-btn[aria-selected="true"]{ color:#2a0e16; background:var(--accent); border-radius:12px; margin:6px; box-shadow:0 6px 16px rgba(255,168,77,.25) }
-.tab-pane{ display:none; padding:14px }
+.tab-nav{ display:flex; border-bottom: 2px solid rgba(255,255,255,0.05); }
+.tab-btn{ 
+  flex:1; padding:12px 14px; border:0; background:transparent; color:#d9c1e3; font-weight:800; cursor:pointer;
+  border-bottom: 3px solid transparent;
+  transition: color .2s ease, border-bottom-color .2s ease;
+  position: relative;
+}
+.tab-btn:hover{ color: #fff7f1; }
+.tab-btn[aria-selected="true"]{ 
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-pane{ display:none; padding:14px; animation: fadeIn .3s ease-out }
 .tab-pane.active{ display:block }
 
 /* Rules / liste simple */
@@ -159,4 +171,33 @@ button:active{ transform: translateY(1px) }
 .error {
   color: var(--danger);
   font-weight: bold;
+}
+
+/* Indice imposteur (tip) — mise en valeur */
+.tip {
+  background: linear-gradient(180deg, rgba(255, 59, 59, 0.15), rgba(255, 59, 59, 0.08));
+  color: #ffb3b3;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid rgba(255, 59, 59, 0.3);
+  font-weight: 600;
+  font-size: 15px;
+  animation: slideInDown .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

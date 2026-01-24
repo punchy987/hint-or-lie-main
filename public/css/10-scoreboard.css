@@ -1,0 +1,120 @@
+/* === Scoreboard : Positionnement Fixed === */
+
+#scoreboard {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(15, 11, 20, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 90;
+  max-width: 240px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+  animation: slideInRight 0.4s ease-out;
+}
+
+#scoreboard.visible {
+  display: block;
+}
+
+#scoreboard h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+}
+
+#score-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#score-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.2s ease;
+}
+
+#score-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#score-list li span:first-child {
+  color: var(--text);
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#score-list li span:last-child {
+  color: var(--accent);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
+}
+
+/* Mobile : repositionner le scoreboard en bas */
+@media (max-width: 600px) {
+  #scoreboard {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+
+  #scoreboard.visible {
+    display: flex;
+  }
+
+  #scoreboard h4 {
+    margin: 0;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  #score-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+    overflow-x: auto;
+  }
+
+  #score-list li {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
