@@ -14,6 +14,7 @@ function startPhaseTimer(io, code, seconds, phase, onExpire){
   const room = _rooms.get(code); if(!room) return;
   clearRoomTimer(room);
   const deadline = Date.now() + seconds*1000;
+  const totalMs = seconds * 1000;
 
   const thisTimerInterval = setInterval(()=>{
     const currentRoom = _rooms.get(code);
@@ -29,7 +30,7 @@ function startPhaseTimer(io, code, seconds, phase, onExpire){
     }
 
     const leftMs = Math.max(0, deadline - Date.now());
-    io.to(code).emit('timer', { phase, leftMs });
+    io.to(code).emit('timer', { phase, leftMs, totalMs });
 
     if (leftMs <= 0){
       // This timer is expiring. Clear it from the room state BEFORE calling onExpire.

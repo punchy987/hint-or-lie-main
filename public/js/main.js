@@ -4,16 +4,10 @@
   const { $, fmt, state, socket, startPhaseAnim } = window.HOL;
 
   function initTimersFromServer() {
-    socket.on('timer', ({ phase, leftMs }) => {
+    socket.on('timer', ({ phase, leftMs, totalMs }) => {
       if (phase !== state.currentPhase) state.currentPhase = phase;
 
-      // Durée totale par phase (fallback = state.DUR)
-      const totalFor = (ph) => ph === 'hints' ? state.DUR.hints :
-        ph === 'voting' ? state.DUR.voting :
-        ph === 'prestart' ? state.DUR.prestart :
-        ph === 'lobby' ? (leftMs > 0 ? leftMs : 0) : 0;
-
-      startPhaseAnim(phase, totalFor(phase), leftMs);
+      startPhaseAnim(phase, totalMs || state.DUR[phase] || 0, leftMs);
 
       const left = Math.floor((leftMs + 20) / 1000);
       if (phase === 'hints') {
