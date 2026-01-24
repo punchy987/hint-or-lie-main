@@ -104,7 +104,8 @@
 
 @media (max-width:360px) {
   #score-list li {
-    grid-template-columns: 28px 1fr 40px;
+    grid-template-columns: 8px 28px 1fr 40px; /* LED | AVATAR | NAME | PTS */
+    gap: 8px;
     padding: 6px 4px;
     font-size: 14px;
   }
