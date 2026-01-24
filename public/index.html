@@ -73,16 +73,6 @@
           </div>
         </div>
       </div>
-      <div style="height:10px"></div>
-      <button class="btn-secondary" id="btn-how">Règles rapides</button>
-      <div id="how" class="rules" style="display:none">
-        <h4>Règles — Hint or Lie</h4>
-        <ul>
-          <li>🎭 Un joueur n’a pas de mot — c’est l’imposteur</li>
-          <li>✍️ Les équipiers donnent 1 indice lié au mot secret</li>
-          <li>👀 L’imposteur espionne et doit improviser un mensonge</li>
-        </ul>
-      </div>
     </div>
 
     <div class="card" id="screen-lobby" style="display:none">
@@ -141,9 +131,20 @@
       <div id="res-votes" style="margin:10px 0"></div>
       <button id="btn-next">Manche suivante</button>
     </div>
-  </div>
 
-  <div id="scoreboard" style="display:none;">
+    <div class="rules-persistent">
+        <button class="btn-secondary" id="btn-how">Règles rapides</button>
+        <div id="how" class="rules-box" style="display:none">
+            <h4>Règles — Hint or Lie</h4>
+            <ul>
+                <li>🎭 Un joueur n’a pas de mot — c’est l’imposteur</li>
+                <li>✍️ Les équipiers donnent 1 indice lié au mot secret</li>
+                <li>👀 L’imposteur espionne et doit improviser un mensonge</li>
+            </ul>
+        </div>
+    </div>
+
+  </div> <div id="scoreboard" style="display:none;">
     <h4>Scores</h4>
     <ul id="score-list"></ul>
   </div>

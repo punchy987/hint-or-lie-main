@@ -1,4 +1,3 @@
-// public/js/features/home.js
 (function () {
     const { $, el, onEnter, show, toast, getDeviceId, state, updateScoreboard, socket } = window.HOL;
 
@@ -63,11 +62,25 @@
             socket.emit('createRoom', { pseudo: name, name, deviceId: getDeviceId() });
         };
 
+        // GESTION DES REGLES AVEC GAME JUICE
         $('btn-how')?.addEventListener('click', () => {
             const panel = $('how');
+            const btn = $('btn-how');
             const visible = panel.style.display !== 'none';
-            panel.style.display = visible ? 'none' : 'block';
-            $('btn-how').textContent = visible ? 'Règles rapides' : 'Masquer les règles';
+
+            // Effet de jus : rebond au clic
+            btn.style.transform = "scale(0.92)";
+            setTimeout(() => btn.style.transform = "scale(1)", 100);
+
+            if (visible) {
+                panel.style.display = 'none';
+                btn.textContent = 'Règles rapides';
+            } else {
+                panel.style.display = 'block';
+                btn.textContent = 'Masquer les règles';
+                // Scroll fluide pour mobile
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         });
 
         $('btn-ready')?.addEventListener('click', () => {
@@ -144,7 +157,7 @@
 
                 snap.players.forEach(p => {
                     const card = document.createElement('div');
-                    card.className = 'player-card'; // Tu pourras styliser ça en CSS
+                    card.className = 'player-card'; 
                     card.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;border:1px solid rgba(255,255,255,0.1);';
                     
                     const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.name || 'default')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
