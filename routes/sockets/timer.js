@@ -14,12 +14,36 @@ function startPhaseTimer(io, code, seconds, phase, onExpire){
   const room = _rooms.get(code); if(!room) return;
   clearRoomTimer(room);
   const deadline = Date.now() + seconds*1000;
-  room.timer = { interval:null, deadline, phase };
-  room.timer.interval = setInterval(()=>{
+
+  const thisTimerInterval = setInterval(()=>{
+    const currentRoom = _rooms.get(code);
+    if (!currentRoom) {
+        clearInterval(thisTimerInterval);
+        return;
+    }
+
+    // If the room's current timer isn't this one, this one is stale and should just stop.
+    if (currentRoom.timer.interval !== thisTimerInterval) {
+        clearInterval(thisTimerInterval);
+        return;
+    }
+
     const leftMs = Math.max(0, deadline - Date.now());
     io.to(code).emit('timer', { phase, leftMs });
-    if (leftMs <= 0){ clearRoomTimer(room); onExpire?.(); }
+
+    if (leftMs <= 0){
+      // This timer is expiring. Clear it from the room state BEFORE calling onExpire.
+      // This prevents onExpire from clearing a *new* timer if it creates one.
+      clearInterval(thisTimerInterval);
+      currentRoom.timer = { interval:null, deadline:0, phase:null };
+
+      // Now call the original callback.
+      onExpire?.();
+    }
   }, 500);
+
+  // Store the new timer's identity in the room.
+  room.timer = { interval: thisTimerInterval, deadline, phase };
 }
 
 module.exports = { clearRoomTimer, startPhaseTimer };

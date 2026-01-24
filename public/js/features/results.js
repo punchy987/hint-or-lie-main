@@ -16,6 +16,11 @@
   function initSocket() {
     socket.on('roundResult', (res) => {
       show('screen-result');
+
+      // Reset "Next" button state
+      $('btn-next').disabled = false;
+      $('btn-next').textContent = 'Manche suivante';
+
       $('res-domain').textContent = res.domain || '?';
       $('res-common').textContent = res.common || '';
 
