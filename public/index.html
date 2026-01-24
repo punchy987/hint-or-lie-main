@@ -28,7 +28,7 @@
   </div>
 
   <div class="wrap">
-    <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;">
+    <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;z-index:100;">
       Installer l’app
     </button>
 
@@ -113,13 +113,12 @@
           <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
         </div>
         <div class="phase-right">
-          <div class="pill s" data-role="round">Manche <span class="round-live">0</span></div>
           <span class="kpi" id="timer-hints">00:45</span>
           <span class="kpi" id="progress-hints">0/0</span>
         </div>
       </div>
 
-      <div id="impostor-tip" class="tip" style="display:none">🤫 Tu n’as pas de mot. Observe les indices et invente un indice crédible.</div>
+      <div id="impostor-tip" class="tip" style="display:none">🤫 Tu n’as pas de mot. Observe les indices et invente un mensonge.</div>
 
       <input id="hint-input" placeholder="Ton indice" maxlength="40" />
       <button id="btn-send-hint">Envoyer l'indice</button>
@@ -131,20 +130,20 @@
         <span class="theme-chip">📌 Thème : <b id="theme-vote-name">?</b></span>
         <span class="kpi" id="timer-vote">00:40</span>
       </div>
-      <h3 class="section-title">Vote</h3>
+      <h3 class="section-title">Votez pour l'imposteur</h3>
       <div id="hints" style="margin:8px 0"></div>
     </div>
 
     <div class="card" id="screen-result" style="display:none">
       <div id="personal-banner" class="result-banner">Résultat</div>
-      <div id="res-imp-name"></div> 
+      <div id="res-imp-name" style="text-align:center; font-weight:bold; margin-bottom:10px;"></div> 
       <p style="text-align:center">Mot commun : <strong id="res-common"></strong></p>
       <div id="res-votes" style="margin:10px 0"></div>
       <button id="btn-next">Manche suivante</button>
     </div>
   </div>
 
-  <div id="scoreboard">
+  <div id="scoreboard" style="display:none;">
     <h4>Scores</h4>
     <ul id="score-list"></ul>
   </div>
@@ -152,16 +151,21 @@
   <p class="muted" id="toast" style="display:none;text-align:center" aria-live="polite"></p>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
   <script defer src="/js/core/dom.js"></script>
+  <script defer src="/js/core/helpers.js"></script>
   <script defer src="/js/core/state.js"></script>
   <script defer src="/js/core/socket.js"></script>
+
   <script defer src="/js/features/home.js"></script>
   <script defer src="/js/features/hints.js"></script>
   <script defer src="/js/features/vote.js"></script>
   <script defer src="/js/features/results.js"></script>
   <script defer src="/js/features/leaderboard.js"></script>
+  
   <script defer src="/js/pwa/update.js"></script>
   <script defer src="/js/dev/guard.js"></script>
+  
   <script defer src="/js/main.js"></script>
 
 </body>
