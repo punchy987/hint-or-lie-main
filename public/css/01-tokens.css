@@ -3,25 +3,27 @@
 
   /* Palette basée sur ton logo */
   --bg: #0f0b14;
-  --card: #17121f;
-  --line: rgba(72, 148, 72, 0.66);
+  --card: #1a1625;
+  --line: rgba(255,255,255,0.1);
 
-  --ink: #fff7f1;
-  --text: #fff7f1;
-  --muted: #bfa8c7;
+  --ink: #ffffff;
+  --text: #ffffff;
+  --muted: #a09ba8;
 
-  /* Couleurs principales */
-  --accent: #e26c0c;
-  --accent-2: #ff3b3b;     /* rouge imposteur */
-  --accent-3: #5bec26;     /* vert équipier */
+  /* Couleurs principales — VIOLET & ROUGE */
+  --primary: #8b5cf6;       /* Violet principal */
+  --primary-hover: #7c3aed; /* Violet hover */
+  --secondary: #4c1d95;     /* Violet foncé */
+  --danger: #ef4444;        /* Rouge danger */
 
   /* Alias pour clarté */
-  --danger: var(--accent-2);
-  --crew: #3b82f6;
-  --success: var(--accent-3);
+  --accent: var(--primary);      /* Violet au lieu d'orange */
+  --accent-2: var(--danger);     /* Rouge au lieu de rouge différent */
+  --accent-3: #5bec26;           /* Vert équipier (gardé) */
+  --crew: #3b82f6;               /* Bleu équipier */
 
   --shadow: rgba(0, 0, 0, 0.35);
-  --glow: 0 0 40px rgba(206, 17, 17, 0.18);
+  --glow: 0 0 40px rgba(139, 92, 246, 0.2); /* Glow violet au lieu d'orange */
 
   /* Responsive - breakpoints centralisés */
   --bp-mobile: 600px;

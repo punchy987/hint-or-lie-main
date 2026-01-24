@@ -28,17 +28,17 @@
         const remaining = Math.max(0, lastDeadline - now);
 
         if (phase === 'hints') {
-          const el = timer-hints; if (el) el.textContent = fmt(remaining);
-          if (remaining <= 0) { btn-send-hint?.setAttribute('disabled', 'true'); hint-input?.setAttribute('disabled', 'true'); }
+          const el = $('timer-hints'); if (el) el.textContent = fmt(remaining);
+          if (remaining <= 0) { $('btn-send-hint')?.setAttribute('disabled', 'true'); $('hint-input')?.setAttribute('disabled', 'true'); }
         } else if (phase === 'voting') {
-          const el = timer-vote; if (el) el.textContent = fmt(remaining);
-          if (remaining <= 0) { document.querySelectorAll('#vote-buttons button').forEach(b => b.disabled = true); }
+          const el = $('timer-vote'); if (el) el.textContent = fmt(remaining);
+          if (remaining <= 0) { document.querySelectorAll('#hints .vote-card').forEach(b => b.disabled = true); }
         } else if (phase === 'prestart') {
-          const el = timer-lobby; if (el) el.textContent = fmt(remaining);
+          const el = $('timer-lobby'); if (el) el.textContent = fmt(remaining);
         } else if (phase === 'reveal') {
-          const el = timer-reveal; if (el) el.textContent = fmt(remaining);
+          const el = $('timer-reveal'); if (el) el.textContent = fmt(remaining);
         } else if (phase === 'lobby') {
-          const el = timer-lobby; if (el) { el.textContent = fmt(remaining); if (remaining <= 0) el.style.display = 'none'; }
+          const el = $('timer-lobby'); if (el) { el.textContent = fmt(remaining); if (remaining <= 0) el.style.display = 'none'; }
         }
 
         if (remaining > 0) {
@@ -54,11 +54,11 @@
 
     socket.on('phaseProgress', ({ phase, submitted, total }) => {
       if (phase === 'hints') {
-        const el = progress-hints;
-        if (el) el.textContent = ${ submitted }/;
+        const el = $('progress-hints');
+        if (el) el.textContent = `${submitted}/${total}`;
       } else if (phase === 'voting') {
-        const el = progress-vote;
-        if (el) el.textContent = ${ submitted }/;
+        const el = $('progress-vote');
+        if (el) el.textContent = `${submitted}/${total}`;
       }
     });
 
@@ -76,13 +76,13 @@
       
       // Transition gameOver -> lobby : fermer la modale
       if (snap.state === 'lobby') {
-        const modal = modal;
+        const modal = $('modal');
         if (modal && modal.style.display === 'flex') {
           const box = modal.querySelector('.box');
           if (box && box.innerHTML.includes('PARTIE TERMINEE')) {
             modal.style.display = 'none';
             window.HOL.show('screen-lobby');
-            const btnReady = btn-ready;
+            const btnReady = $('btn-ready');
             if (btnReady) {
               btnReady.textContent = 'Je suis pret';
               btnReady.disabled = false;
@@ -95,7 +95,7 @@
     // NOUVEAU : Scores reinitialises (apres resetScores)
     socket.on('scoresReset', () => {
       window.HOL.show('screen-lobby');
-      const btnReady = btn-ready;
+      const btnReady = $('btn-ready');
       if (btnReady) {
         btnReady.textContent = 'Je suis pret';
         btnReady.disabled = false;

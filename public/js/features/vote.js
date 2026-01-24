@@ -22,9 +22,8 @@
   function renderHintsWithVote(hints) {
     const box = $('hints'); if (!box) return;
     
-    // Nettoyage de l'ancien système
-    const legacyButtons = $('vote-buttons'); 
-    if (legacyButtons) legacyButtons.innerHTML = ''; // On le vide, on ne s'en sert plus
+    // Nettoyage ancien système (si encore présent)
+    // Le conteneur #hints contient maintenant directement les cartes
 
     box.style.display = '';   
     box.innerHTML = ''; // On efface la liste précédente
