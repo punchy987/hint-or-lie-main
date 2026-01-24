@@ -46,25 +46,26 @@
 
 /* --- NOUVEAU STYLE DE VOTE : "CARTES" --- */
 #hints {
-  display: grid;
-  gap: .5rem;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
 }
 
 .vote-card {
-  padding: .8rem 1rem;
-  background: color-mix(in srgb, var(--card) 92%, black 8%);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--card) 50%, rebeccapurple 20%);
   border: 1px solid var(--line);
-  border-radius: .75rem;
+  border-radius: .9rem;
   font-weight: 600;
-  min-height: 48px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
   transition: all .15s ease;
-  width: 100%;
+  flex: 0 1 240px;
 }
 
 .vote-card:hover {
@@ -77,4 +78,17 @@
   color: #fff;
   border-color: var(--accent);
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: pop-selected .2s ease-out;
+}
+
+@keyframes pop-selected {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
