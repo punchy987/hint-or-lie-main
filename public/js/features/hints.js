@@ -74,7 +74,11 @@
       playRoleCinematic(isImpostor, () => {
         state.myIsImpostor = !!isImpostor;
         sending = false; locked = false;
-        if (ui.status()) ui.status().textContent = '';
+        const status = ui.status();
+        if (status) {
+          status.textContent = '';
+          status.classList.remove('error');
+        }
         show('screen-hint');
         resetPhaseProgress();
         applyRoleTheme(isImpostor);
@@ -110,7 +114,23 @@
 
     socket.on('hintAck', () => {
       locked = true; sending = false;
-      ui.status().textContent = 'Indice envoyé ✅';
+      const status = ui.status();
+      if (status) {
+        status.textContent = 'Indice envoyé ✅';
+        status.classList.remove('error');
+      }
+    });
+
+    socket.on('hintRejected', ({ reason }) => {
+      sending = false;
+      const btn = ui.send();
+      if (btn) btn.disabled = false;
+      const status = ui.status();
+      if (status) {
+        status.textContent = reason || 'Indice rejeté.';
+        status.classList.add('error');
+      }
+      toast(reason || 'Indice rejeté.', 'danger');
     });
 
     socket.on('crewHintsLive', ({ hints }) => {

@@ -155,3 +155,8 @@ button:active{ transform: translateY(1px) }
     justify-content: center;        /* tout centré */
   }
 }
+
+.error {
+  color: var(--danger);
+  font-weight: bold;
+}
