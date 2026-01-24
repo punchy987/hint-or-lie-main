@@ -28,6 +28,13 @@
     </div>
   </div>
 
+  <div id="result-reveal-overlay">
+    <div class="reveal-content">
+      <h1 id="reveal-result-text">VICTOIRE !</h1>
+    </div>
+  </div>
+
+
   <div class="wrap">
     <button id="btn-install" type="button" style="display:none;position:sticky;top:0;width:100%;background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-2) 35%, var(--accent) 65%));color:#4d0d17;border:0;padding:12px 16px;font-weight:800;z-index:100;">
       Installer l’app
@@ -130,9 +137,8 @@
       <div class="phase-bar">
         <span class="kpi" id="timer-reveal"></span>
       </div>
-      <div id="personal-banner" class="result-banner">Résultat</div>
       <div id="res-imp-name" style="text-align:center; font-weight:bold; margin-bottom:10px;"></div> 
-      <p style="text-align:center">Mot commun : <strong id="res-common"></strong></p>
+      <p style="text-align:center" class="result-common-word">Mot commun : <strong id="res-common"></strong></p>
       <div id="res-votes" style="margin:10px 0"></div>
       <button id="btn-next">Manche suivante</button>
     </div>
