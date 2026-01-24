@@ -1,5 +1,5 @@
 // public/js/core/state.js
-// État global + scoreboard + animations de phase
+// État global + animations de phase
 (function () {
   const HOL = window.HOL || (window.HOL = {});
 
@@ -21,49 +21,7 @@
     return 'Bronze';
   }
 
-  // ✅ Utilise HOL.el comme factory (et n’écrase rien d’existant)
-  function updateScoreboard(players) {
-    const ul = HOL.$('score-list'); if (!players || !ul) return;
-    ul.innerHTML = '';
-    players.slice().sort((a, b) => b.score - a.score).forEach(p => {
-      const li = document.createElement('li');
-      
-      // 1. LED de statut
-      const led = HOL.el('span', '', { class: 'status-led' });
-      if (p.disconnected) {
-        led.classList.add('is-disconnected');
-      } else if (p.spectator) {
-        led.classList.add('is-ready');  // Orange pour spectateur (en attente)
-      } else {
-        led.classList.add('is-active');  // Vert pour joueur actif
-      }
-      li.appendChild(led);
-
-      // 2. Avatar
-      const avatar = HOL.el('img', '', {
-        class: 'score-avatar',
-        src: `https://robohash.org/${p.deviceId || p.id}?set=set4&size=40x40`
-      });
-      li.appendChild(avatar);
-
-      // 3. Nom (avec mention si en attente)
-      let nameText = p.name;
-      if (p.spectator) nameText += ' (en attente)';
-      if (p.disconnected) nameText += ' (déconnecté)';
-      const nameSpan = HOL.el('span', nameText, { class: 'name' });
-      li.appendChild(nameSpan);
-
-      // 4. Score
-      li.appendChild(HOL.el('span', String(p.score), { class: 'pts' }));
-
-      // Highlight du joueur local
-      if (p.id === HOL.state.me.id) {
-        li.classList.add('me');
-      }
-      
-      ul.appendChild(li);
-    });
-  }
+  // ✅ updateScoreboard est fourni par leaderboard.js
 
   function resetPhaseProgress() {
     document.querySelectorAll('.phase-progress .bar').forEach(el => el.style.width = '0%');
@@ -110,10 +68,9 @@
   Object.assign(HOL, {
     state,
     tierFromWins,
-    updateScoreboard,
     resetPhaseProgress,
     startPhaseAnim,
     stopPhaseAnim,
-    // 👇 On n’ajoute PAS getDeviceId ici pour éviter d’écraser celui de helpers.js
+    // 👇 On n'ajoute PAS getDeviceId ici pour éviter d'écraser celui de helpers.js
   });
 })();

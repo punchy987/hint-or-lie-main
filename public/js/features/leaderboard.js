@@ -1,4 +1,5 @@
 // public/js/features/leaderboard.js
+// ✅ Scoreboard unifié avec structure grid : LED | AVATAR | NOM | PTS
 
 (function () {
   const { $ } = window.HOL;
@@ -9,51 +10,58 @@
 
     list.innerHTML = '';
     const sorted = [...(players || [])].sort((a, b) => (b.score || 0) - (a.score || 0));
-    const currentState = window.HOL.state?.state || 'lobby';
 
     sorted.forEach(p => {
       const li = document.createElement('li');
-      if (p.id === window.HOL.state.me?.id) li.className = 'me';
+      
+      // ✅ 1. LED (positionné en absolute, parent en relative)
+      const ledContainer = document.createElement('div');
+      ledContainer.style.cssText = 'position: relative; width: 10px; height: 32px;';
+      
+      const led = document.createElement('div');
+      led.className = 'status-led';
+      
+      // Logique de couleur
+      if (p.disconnected) {
+        led.classList.add('is-disconnected');
+      } else if (p.spectator) {
+        led.classList.add('is-ready');  // Orange pour spectateur
+      } else if (p.active) {
+        led.classList.add('is-active');  // Vert pour actif
+      }
+      
+      ledContainer.appendChild(led);
+      li.appendChild(ledContainer);
 
-      // Conteneur Avatar
-      const avatarBox = document.createElement('div');
-      avatarBox.className = 'avatar-box';
-
+      // ✅ 2. Avatar (taille forcée)
       const img = document.createElement('img');
       const seed = (p.name || '').trim() || 'default';
       img.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
       img.className = 'score-avatar';
+      img.style.cssText = 'width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: rgba(255, 255, 255, 0.05);';
+      li.appendChild(img);
+
+      // ✅ 3. Nom (avec mention si spectateur)
+      let nameText = p.name || 'Joueur';
+      if (p.spectator) nameText += ' (en attente)';
+      if (p.disconnected) nameText += ' (déconnecté)';
       
-      // LED de statut
-      const led = document.createElement('div');
-      let ledClass = 'status-led'; // Classe de base (éteinte/défaut)
-
-      // Logique de priorité des couleurs
-      if (p.disconnected) {
-        ledClass += ' is-disconnected'; // Priorité absolue : déconnecté
-      } else if (p.active) {
-        ledClass += ' is-active';       // En jeu (Vert)
-      } else if (currentState === 'lobby' && p.ready) {
-        ledClass += ' is-ready';        // En attente et Prêt (Orange)
-      }
-      // Sinon : reste "status-led" (éteinte/gris, ex: spectateur ou pas encore prêt)
-
-      led.className = ledClass;
-      
-      avatarBox.appendChild(img);
-      avatarBox.appendChild(led);
-
       const nameSpan = document.createElement('span');
       nameSpan.className = 'name';
-      nameSpan.textContent = p.name;
+      nameSpan.textContent = nameText;
+      li.appendChild(nameSpan);
 
+      // ✅ 4. Score
       const scoreSpan = document.createElement('span');
       scoreSpan.className = 'pts';
-      scoreSpan.textContent = p.score || 0;
-
-      li.appendChild(avatarBox);
-      li.appendChild(nameSpan);
+      scoreSpan.textContent = String(p.score || 0);
       li.appendChild(scoreSpan);
+
+      // Highlight du joueur local
+      if (p.id === window.HOL?.state?.me?.id) {
+        li.classList.add('me');
+      }
+
       list.appendChild(li);
     });
   }

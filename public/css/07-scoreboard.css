@@ -1,125 +1,137 @@
-/* 07-scoreboard.css
-   Scoreboard inline (collé à la carte) – mode LISTE COMPACTE
-   ---------------------------------------------------------- */
+/* 07-scoreboard.css - Liste des scores avec statut LED */
 
-/* caché par défaut, affiché quand helpers.js lui met .scoreboard-inline */
-#scoreboard { display: none; }
-#scoreboard * { box-sizing: border-box; }
-
-#scoreboard.scoreboard-inline {
-  display: block;
-  position: static;
-  width: 100%;
-  max-width: 680px;
-  margin: 12px auto 0;
-  background: linear-gradient(180deg, #1b1422, #14101b);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .20), inset 0 0 0 1px #21162b;
-  border-radius: 16px;
-  padding: 10px 12px;
-}
-
-#scoreboard h4 {
-  margin: 0 0 6px 0;
-  font-size: 15px;
-  letter-spacing: .2px;
-  color: #ffd9cc;
-  text-align: center;
-}
-
-/* ===== Liste compacte : LED | AVATAR | NOM | POINTS ===== */
 #score-list {
   list-style: none;
-  margin: 0;
   padding: 0;
-  border-top: 1px solid rgba(255, 255, 255, .08);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 #score-list li {
   display: grid;
-  grid-template-columns: 10px 32px 1fr 48px; /* LED | AVATAR | NOM | POINTS */
+  grid-template-columns: 10px 32px 1fr 48px;
   align-items: center;
   gap: 10px;
-  padding: 8px 6px;
-  min-height: 40px;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: all 200ms ease;
 }
-#score-list li:last-child { border-bottom: 0; }
 
-/* La LED de statut (Base : Éteinte / Gris sombre) */
+#score-list li:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+#score-list li.me {
+  background: rgba(255, 255, 255, 0.12);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* LED de statut - Positionnement */
+#score-list li > div:first-child {
+  position: relative;
+  width: 10px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .status-led {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 11px;
-  height: 11px;
-  background-color: #3f3f46; /* Gris sombre (éteint) */
-  border: 2px solid #1b1422; /* Bordure couleur fond pour découpe */
+  width: 11px !important;
+  height: 11px !important;
   border-radius: 50%;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  transition: all 200ms ease;
 }
 
-/* VERT : Joueur actif (en cours de partie) */
+/* Statuts LED */
 .status-led.is-active {
-  background-color: #4ade80;
-  box-shadow: 0 0 4px rgba(74, 222, 128, 0.6);
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
 }
 
-/* ORANGE : Joueur prêt (dans le lobby) */
 .status-led.is-ready {
-  background-color: #fb923c; /* Orange vif */
-  box-shadow: 0 0 4px rgba(251, 146, 60, 0.6);
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
 }
 
-/* ROUGE / TRANSPARENT : Déconnecté */
 .status-led.is-disconnected {
-  background-color: transparent;
-  border-color: #ef4444; /* Cercle rouge vide */
-  box-shadow: none;
+  background: #9ca3af;
+  box-shadow: 0 0 8px rgba(156, 163, 175, 0.4);
 }
 
-/* FIX AVATAR : Taille forcée pour éviter les robots géants */
-#score-list li .score-avatar {
+.status-led.is-offline {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5),
+              inset 0 0 2px rgba(139, 0, 0, 0.5);
+}
+
+/* Avatar */
+.score-avatar {
   width: 32px !important;
   height: 32px !important;
-  border-radius: 50%;
+  border-radius: 4px;
   object-fit: cover;
-  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
 }
 
-/* NOM : prend tout l'espace restant */
-#score-list li .name {
-  min-width: 0;
+/* Nom */
+#score-list li > span:nth-child(3) {
+  font-size: 14px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 800;
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* POINTS : colonne à droite */
-#score-list li .pts {
-  width: 48px;
+/* Score */
+.pts {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  font-family: 'Courier New', monospace;
   text-align: right;
-  font-weight: 900;
-  color: #ffd0c4;
+  color: var(--accent);
+  min-width: 48px;
 }
 
-/* Mise en valeur du joueur local */
-#score-list li.me {
-  background: rgba(139, 92, 246, 0.1);
-  border-left: 3px solid #8b5cf6;
-  padding-left: 10px;
-}
-
-@media (max-width:360px) {
+/* Mode mobile - version 360px */
+@media (max-width: 480px) {
   #score-list li {
-    grid-template-columns: 8px 28px 1fr 40px; /* LED | AVATAR | NAME | PTS */
+    grid-template-columns: 10px 28px 1fr 40px;
     gap: 8px;
-    padding: 6px 4px;
-    font-size: 14px;
+    padding: 6px 10px;
   }
-  #score-list li .score-avatar { width: 28px !important; height: 28px !important; }
+
+  .score-avatar {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  #score-list li > span:nth-child(3) {
+    font-size: 13px;
+  }
+
+  .pts {
+    font-size: 14px !important;
+    min-width: 40px;
+  }
+}
+
+/* Mode tablette */
+@media (max-width: 768px) {
+  #score-list li {
+    grid-template-columns: 10px 32px 1fr 44px;
+    gap: 8px;
+    padding: 7px 11px;
+  }
 }
