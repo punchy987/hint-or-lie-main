@@ -21,7 +21,7 @@
       $('btn-next').disabled = false;
       $('btn-next').textContent = 'Manche suivante';
 
-      $('res-domain').textContent = res.domain || '?';
+      // $('res-domain').textContent = res.domain || '?';
       $('res-common').textContent = res.common || '';
 
       const impName = res.impostorName || '(?)';
