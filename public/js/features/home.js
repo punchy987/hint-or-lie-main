@@ -85,15 +85,36 @@
 
         $('btn-ready')?.addEventListener('click', () => {
             const roomState = window.HOL?.state?.room?.state;
+            const br = $('btn-ready');
+
+            // Cas 1 : Phase reveal (après une manche)
             if (roomState === 'reveal') {
                 socket.emit('playerReadyNext');
-                const br = $('btn-ready');
-                if (br) { br.textContent = 'Prêt ✓'; br.disabled = true; }
+                if (br) {
+                    br.textContent = 'Prêt ✓';
+                    br.disabled = true;
+                }
                 return;
             }
-            state.myLobbyReady = !state.myLobbyReady;
-            $('btn-ready').textContent = state.myLobbyReady ? 'Annuler prêt' : 'Je suis prêt';
-            socket.emit('playerReadyLobby', { ready: state.myLobbyReady });
+
+            // Cas 2 : Phase lobby (avant manche ou après gameOver)
+            if (roomState === 'lobby') {
+                state.myLobbyReady = !state.myLobbyReady;
+                
+                if (br) {
+                    br.textContent = state.myLobbyReady ? 'Annuler prêt' : 'Je suis prêt';
+                    br.style.opacity = state.myLobbyReady ? '1' : '0.8';
+                }
+                
+                socket.emit('playerReadyLobby', { ready: state.myLobbyReady });
+                return;
+            }
+
+            // Cas 3 : En manche (hints/voting) → désactivé
+            if (br) {
+                br.disabled = true;
+                br.title = 'Manche en cours...';
+            }
         });
 
         $('btn-back-home')?.addEventListener('click', () => {
@@ -211,6 +232,19 @@
             
             modal.style.display = 'flex';
             // ✅ Message persiste jusqu'à la fin de la manche (pas de fermeture automatique)
+        });
+
+        // ✅ NOUVEAU : Réinitialiser les boutons à la sortie
+        socket.on('leftRoom', () => {
+            state.myLobbyReady = false;
+            const btnReady = $('btn-ready');
+            if (btnReady) {
+                btnReady.textContent = 'Je suis prêt';
+                btnReady.disabled = false;
+                btnReady.style.opacity = '0.8';
+                btnReady.title = '';
+            }
+            window.HOL.show('screen-home');
         });
     }
 

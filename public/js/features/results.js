@@ -285,7 +285,7 @@
     btnHome.onclick = () => {
       modal.style.display = 'none';
       socket.emit('leaveRoom');
-      show('screen-home');
+      // ✅ Attendre le signal leftRoom pour changer d'écran
     };
     btnHome.onmouseover = () => btnHome.style.opacity = '0.9';
     btnHome.onmouseout = () => btnHome.style.opacity = '1';
@@ -293,24 +293,44 @@
     const btnRestart = document.createElement('button');
     btnRestart.textContent = '🔄 Recommencer';
     btnRestart.type = 'button';
-    btnRestart.style.cssText = `
-      flex: 1;
-      padding: 12px;
-      background: var(--accent);
-      color: #4d0d17;
-      border: none;
-      border-radius: 8px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s;
-    `;
-    btnRestart.onclick = () => {
-      modal.style.display = 'none';
-      socket.emit('resetScores');
-      show('screen-lobby');
-    };
-    btnRestart.onmouseover = () => btnRestart.style.opacity = '0.9';
-    btnRestart.onmouseout = () => btnRestart.style.opacity = '1';
+
+    const isHost = window.HOL?.state?.room?.hostId === window.HOL?.state?.me?.id;
+
+    if (isHost) {
+      // ✅ Hôte peut recommencer
+      btnRestart.style.cssText = `
+        flex: 1;
+        padding: 12px;
+        background: var(--accent);
+        color: #4d0d17;
+        border: none;
+        border-radius: 8px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+      `;
+      btnRestart.onclick = () => {
+        modal.style.display = 'none';
+        socket.emit('resetScores');
+        // ✅ Attendre le signal scoresReset pour transition
+      };
+      btnRestart.onmouseover = () => btnRestart.style.opacity = '0.9';
+      btnRestart.onmouseout = () => btnRestart.style.opacity = '1';
+    } else {
+      // ✅ Non-hôte : désactivé
+      btnRestart.textContent = '🔄 Seul l\'hôte peut recommencer';
+      btnRestart.disabled = true;
+      btnRestart.style.cssText = `
+        flex: 1;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+        border: none;
+        border-radius: 8px;
+        font-weight: 800;
+        cursor: not-allowed;
+      `;
+    }
 
     actionsDiv.appendChild(btnHome);
     actionsDiv.appendChild(btnRestart);
