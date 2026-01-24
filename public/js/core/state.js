@@ -27,8 +27,40 @@
     ul.innerHTML = '';
     players.slice().sort((a, b) => b.score - a.score).forEach(p => {
       const li = document.createElement('li');
-      li.appendChild(HOL.el('span', p.name));
-      li.appendChild(HOL.el('span', String(p.score)));
+      
+      // 1. LED de statut
+      const led = HOL.el('span', '', { class: 'status-led' });
+      if (p.disconnected) {
+        led.classList.add('offline');
+      } else if (p.spectator) {
+        led.classList.add('waiting');
+      } else {
+        led.classList.add('online');
+      }
+      li.appendChild(led);
+
+      // 2. Avatar
+      const avatar = HOL.el('img', '', {
+        class: 'score-avatar',
+        src: `https://robohash.org/${p.deviceId || p.id}?set=set4&size=40x40`
+      });
+      li.appendChild(avatar);
+
+      // 3. Nom (avec mention si en attente)
+      let nameText = p.name;
+      if (p.spectator) nameText += ' (en attente)';
+      if (p.disconnected) nameText += ' (déconnecté)';
+      const nameSpan = HOL.el('span', nameText, { class: 'name' });
+      li.appendChild(nameSpan);
+
+      // 4. Score
+      li.appendChild(HOL.el('span', String(p.score), { class: 'pts' }));
+
+      // Highlight du joueur local
+      if (p.id === HOL.state.me.id) {
+        li.classList.add('me');
+      }
+      
       ul.appendChild(li);
     });
   }

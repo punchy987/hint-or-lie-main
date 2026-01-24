@@ -23,6 +23,11 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
         console.log(`[GC] Joueur ${p.name} (id: ${id}) supprimé pour inactivité prolongée.`);
       }
     }
+    
+    // Intégration des spectateurs pour la nouvelle manche
+    for (const p of r.players.values()) {
+      p.spectator = false;
+    }
 
     clearRoomTimer(r);
     r.lobbyReady = new Set();
@@ -116,10 +121,12 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
     const r = rooms.get(code); if (!r) return;
     if (r.state !== 'hints') return;
 
-    const submitted = Array.from(r.active).filter(id => typeof r.players.get(id)?.hint === 'string').length;
-    const total = r.active.size;
+    // Ne compte que les joueurs actifs et connectés
+    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
+    const total = activeConnected.length;
 
-    if (submitted === total) {
+    if (submitted === total && total > 0) {
       clearRoomTimer(r);
       r.state = 'voting';
 
@@ -128,10 +135,12 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
       r.hintAuthor = new Map();
       const now = Date.now();
 
+      // On inclut les indices de tous les joueurs du set `active` original, même déconnectés
       for (const id of r.active) {
         const p = r.players.get(id);
-        const text = ((p?.hint || '').trim());
-        const hid  = `H_${r.round || 1}_${id}`; // id stable pour ce round
+        if (!p || typeof p.hint !== 'string') continue; // Ne pas inclure si le joueur a été purgé ou n'a pas joué
+        const text = p.hint.trim();
+        const hid  = `H_${r.round || 1}_${id}`;
         r.hints.push({ id: hid, playerId: id, text, ts: now });
         r.hintAuthor.set(hid, id);
       }
@@ -154,12 +163,12 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
 
     clearRoomTimer(r);
 
-    let impId = null;
-    for (const id of r.active) { if (r.players.get(id)?.isImpostor) { impId = id; break; } }
+    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const impId = r.impostor;
 
     // === NEW: conversion éventuelle des votes "hintId" -> "playerId"
     if (r.hintAuthor && typeof r.hintAuthor.get === 'function') {
-      for (const id of r.active) {
+      for (const id of activeConnected) {
         const p = r.players.get(id);
         if (p?.vote && r.hintAuthor.has(p.vote)) {
           p.vote = r.hintAuthor.get(p.vote);
@@ -167,9 +176,9 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
       }
     }
 
-    // Tally des votes (sur playerId)
+    // Tally des votes (sur playerId) - uniquement des joueurs connectés
     const tally = {};
-    for (const id of r.active) {
+    for (const id of activeConnected) {
       const p = r.players.get(id);
       if (p?.vote) tally[p.vote] = (tally[p.vote] || 0) + 1;
     }
@@ -185,7 +194,7 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
 
     // Attribution des points
     if (caught) {
-      for (const id of r.active) {
+      for (const id of activeConnected) {
         const p = r.players.get(id);
         if (p && !p.isImpostor) p.score = (p.score || 0) + 1;
       }
@@ -196,15 +205,21 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
 
     // Détermination des vainqueurs de la manche
     const winners = new Set();
-    if (caught) for (const id of r.active) if (!r.players.get(id)?.isImpostor) winners.add(id);
-    else if (impId) winners.add(impId);
+    if (caught) {
+      for (const id of activeConnected) {
+        if (!r.players.get(id)?.isImpostor) winners.add(id);
+      }
+    } else if (impId) {
+      winners.add(impId);
+    }
 
     // Persistance (si Firestore branché)
-    for (const [id, p] of r.players.entries()) {
-      const didWin = winners.has(id);
-      if (p?.deviceId) {
-        upsertRoundResult?.({ deviceId: p.deviceId, pseudo: p.name, didWin, isImpostor: !!p.isImpostor });
-      }
+    for (const id of activeConnected) {
+       const p = r.players.get(id);
+       const didWin = winners.has(id);
+       if (p?.deviceId) {
+         upsertRoundResult?.({ deviceId: p.deviceId, pseudo: p.name, didWin, isImpostor: !!p.isImpostor });
+       }
     }
 // ... (après calcul de `caught`, attribution des points, winners, etc.)
 
@@ -214,7 +229,7 @@ const impostorHint =
 
 // Résultat de manche — version officielle
 const votesDetail = {};
-for (const id of r.active) {
+for (const id of activeConnected) {
   const p = r.players.get(id);
   if (p?.vote) {
     votesDetail[id] = p.vote;

@@ -27,7 +27,7 @@
   text-align: center;
 }
 
-/* ===== Liste compacte : AVATAR | NOM | POINTS ===== */
+/* ===== Liste compacte : LED | AVATAR | NOM | POINTS ===== */
 #score-list {
   list-style: none;
   margin: 0;
@@ -37,7 +37,7 @@
 
 #score-list li {
   display: grid;
-  grid-template-columns: 32px 1fr 48px; /* AVATAR | NOM | POINTS */
+  grid-template-columns: 10px 32px 1fr 48px; /* LED | AVATAR | NOM | POINTS */
   align-items: center;
   gap: 10px;
   padding: 8px 6px;
@@ -47,6 +47,26 @@
   border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 #score-list li:last-child { border-bottom: 0; }
+
+/* Indicateur de statut (LED) */
+.status-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #444; /* Couleur par défaut (éteint) */
+  box-shadow: 0 0 5px rgba(0,0,0,.5);
+}
+.status-led.online {
+  background-color: #2ecc71; /* Vert */
+  box-shadow: 0 0 7px #2ecc71a0;
+}
+.status-led.waiting {
+  background-color: #f39c12; /* Orange */
+  box-shadow: 0 0 7px #f39c12a0;
+}
+.status-led.offline {
+  background-color: #e74c3c; /* Rouge */
+}
 
 /* FIX AVATAR : Taille forcée pour éviter les robots géants */
 #score-list li .score-avatar {

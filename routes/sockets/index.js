@@ -446,15 +446,21 @@ module.exports = function setupSockets(io, db){
         return;
       }
 
-      // réconcilier la phase en cours
+      // réconcilier la phase en cours (compteurs avec r.active)
       if (r.state === 'hints') {
-        const submitted = activeInGame.filter(id => typeof r.players.get(id)?.hint === 'string').length;
-        io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: activeInGame.length });
-        if (submitted === activeInGame.length) controller.maybeStartVoting(code);
+        const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+        const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
+        io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: activeConnected.length });
+        if (submitted === activeConnected.length && activeConnected.length > 0) {
+          controller.maybeStartVoting(code);
+        }
       } else if (r.state === 'voting') {
-        const submitted = activeInGame.filter(id => !!r.players.get(id)?.vote).length;
-        io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: activeInGame.length });
-        if (submitted === activeInGame.length) controller.finishVoting(code);
+        const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+        const submitted = activeConnected.filter(id => !!r.players.get(id)?.vote).length;
+        io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: activeConnected.length });
+        if (submitted === activeConnected.length && activeConnected.length > 0) {
+          controller.finishVoting(code);
+        }
       }
 
       if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
