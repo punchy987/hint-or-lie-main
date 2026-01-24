@@ -38,6 +38,7 @@
     const roleText = $('reveal-role-text');
     if (!overlay || !roleText) { callback(); return; } 
 
+    overlay.style.display = ''; // Force le nettoyage du style inline pour laisser le CSS agir
     roleText.textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
     roleText.className = isImpostor ? 'impostor' : 'crew';
     overlay.classList.add('playing');
