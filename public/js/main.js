@@ -35,6 +35,16 @@
     window.HOL.show('screen-vote');
   }
     });
+
+    socket.on('phaseProgress', ({ phase, submitted, total }) => {
+      if (phase === 'hints') {
+        const el = $('progress-hints');
+        if (el) el.textContent = `${submitted}/${total}`;
+      } else if (phase === 'voting') {
+        const el = $('progress-vote');
+        if (el) el.textContent = `${submitted}/${total}`;
+      }
+    });
   }
 
   function init() {
