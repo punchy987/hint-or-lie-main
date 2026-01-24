@@ -149,26 +149,31 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
 
       } else {
+        // Vérification de l'unicité du pseudo pour les nouveaux joueurs
+        const isPseudoTaken = Array.from(r.players.values()).some(p => !p.disconnected && p.name === displayName);
+        if (isPseudoTaken) {
+          socket.leave(code);
+          joined.code = null;
+          return socket.emit('errorMsg', 'Ce pseudo est déjà pris, merci d\'en choisir un autre.');
+        }
+
         r.players.set(socket.id, {
           name: displayName, hint:null, vote:null, isImpostor:false, score:0,
           deviceId: profile.deviceId
         });
       }
 
-      // Rejoint en cours de manche → spectateur (ne pas gonfler les compteurs)
-      if (r.state === 'hints' || r.state === 'voting') {
-        // Si le joueur n'est pas celui qui s'est reconnecté ou si la partie a continué sans lui
-        if (!disconnectedPlayerEntry || !r.active?.has(socket.id)) {
-          const p = r.players.get(socket.id);
-          p.spectator = true;
-          socket.emit('spectatorMode', { phase: r.state, message: 'Tu participeras à la prochaine manche' });
-        }
+      // Rejoint en cours de manche → spectateur
+      if (r.state !== 'lobby') {
+        const p = r.players.get(socket.id);
+        p.spectator = true;
+        socket.emit('spectatorMode', { phase: r.state, message: 'Manche en cours...' });
 
         if (r.active && r.active.size) {
           if (r.state === 'hints') {
             const submitted = Array.from(r.active).filter(id => typeof r.players.get(id)?.hint === 'string').length;
             io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: r.active.size });
-          } else {
+          } else if (r.state === 'voting') {
             const submitted = Array.from(r.active).filter(id => !!r.players.get(id)?.vote).length;
             io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: r.active.size });
           }

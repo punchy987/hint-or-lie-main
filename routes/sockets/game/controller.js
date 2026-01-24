@@ -241,36 +241,28 @@ io.to(code).emit('roundResult', {
     broadcast(io, code);
 
     // Fin de partie (10 pts)
-    const arr = Array.from(r.players.values());
-    const maxScore = Math.max(0, ...arr.map(p => p.score || 0));
+    const activePlayers = Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected);
+    const maxScore = Math.max(0, ...activePlayers.map(([_, p]) => p.score || 0));
 
     if (maxScore >= 10) {
-      const winnersArr = Array.from(r.players.entries())
+      const winnersArr = activePlayers
         .filter(([_, p]) => (p.score || 0) === maxScore)
-        .map(([id, p]) => ({ id, name: p.name, score: p.score || 0 }));
+        .map(([id, p]) => ({ id, name: p.name, score: p.score || 0, deviceId: p.deviceId }));
 
-      io.to(code).emit('gameOver', { winners: winnersArr, round: r.round, autoReset: true });
+      r.state = 'gameOver'; // État final pour bloquer les interactions
+      io.to(code).emit('gameOver', { winners: winnersArr, round: r.round }); // Pas de autoReset
 
       if (typeof applyPenaltyIfNotWinner === 'function') {
         const winnerIds = new Set(winnersArr.map(w => w.id));
-        for (const [id, p] of r.players.entries()) {
+        for (const [id, p] of activePlayers) {
           if (!winnerIds.has(id) && p?.deviceId) {
             applyPenaltyIfNotWinner({ deviceId: p.deviceId, pseudo: p.name }).catch(() => {});
           }
         }
       }
 
-      // reset complet
-      for (const p of r.players.values()) {
-        p.score = 0; p.hint = null; p.vote = null; p.isImpostor = false;
-      }
-      r.round = 0;
-      r.state = 'lobby';
-      r.lobbyReady = new Set();
-      r.readyNext  = new Set();
-      r.used = {};
-      clearRoomTimer(r);
-      broadcast(io, code);
+      broadcast(io, code); // On notifie tout le monde du nouvel état 'gameOver'
+      return; // On arrête là, le reset sera manuel
     }
   }
 
