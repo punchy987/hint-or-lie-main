@@ -77,32 +77,19 @@
 .phase-bar + *{
   margin-top: 10px;
 }
-/* === PATCH: phase bar + chips (desktop + par défaut) === */
-.phase-bar {
+/* Layoutage des zones left/center/right (voir 03-components pour détails) */
+.phase-left, .phase-center, .phase-right {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  flex-wrap: wrap; /* autorise le retour à la ligne si besoin */
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.phase-center {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;  /* plusieurs lignes si nécessaire */
-  min-width: 0;     /* permet l'ellipsis à l'intérieur */
-}
-
-/* Style commun des chips (Thème / Mot) */
-.theme-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  white-space: nowrap;
-  max-width: 100%;
-}
+/* Alignements */
+.phase-left   { justify-content: flex-start; }
+.phase-center { justify-content: center; }
+.phase-right  { justify-content: flex-end; }
 
 /* Tronquer le texte de la valeur dans la chip */
 .theme-chip b {
@@ -115,3 +102,50 @@
 
 /* petit espace quand plusieurs chips se suivent */
 .theme-chip + .theme-chip { margin-left: 6px; }
+
+/* === VOTE : Cartes / Tuiles (géré par vote.js) === */
+#hints {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.vote-card {
+  appearance: none; -webkit-appearance: none;
+  background: linear-gradient(180deg, #1b1422, #14101b);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 10px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.1s, border-color 0.2s, box-shadow 0.2s;
+  word-break: break-word;
+}
+.vote-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(255,168,77,.15);
+}
+.vote-card.selected {
+  background: var(--accent);
+  color: #2a0e16;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 168, 77, 0.3);
+  transform: scale(1.02);
+  z-index: 1;
+}
+.vote-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}

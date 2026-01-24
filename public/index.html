@@ -9,12 +9,18 @@
   <script defer src="/socket.io/socket.io.js"></script>
 
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="css/01-tokens.css">
-  <link rel="stylesheet" href="css/02-base.css">
-  <link rel="stylesheet" href="css/07-scoreboard.css">
-  <link rel="stylesheet" href="css/08-lobby-header.css">
-  <link rel="stylesheet" href="css/06-vote.css">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/01-tokens.css">
+  <link rel="stylesheet" href="/css/02-base.css">
+  <link rel="stylesheet" href="/css/03-components.css">
+  <link rel="stylesheet" href="/css/04-phase.css">
+  <link rel="stylesheet" href="/css/05-hints.css">
+  <link rel="stylesheet" href="/css/06-vote.css">
+  <link rel="stylesheet" href="/css/07-modal-score.css">
+  <link rel="stylesheet" href="/css/07-scoreboard.css">
+  <link rel="stylesheet" href="/css/08-lobby-header.css">
+  <link rel="stylesheet" href="/css/09-spectator.css">
+  <link rel="stylesheet" href="/css/99-pwa-update.css">
+  <link rel="stylesheet" href="/css/98-responsive.css">
 
   <meta name="theme-color" content="#0f0b14">
   <link rel="icon" type="image/png" href="/icons/icon-32.png">
@@ -44,6 +50,13 @@
       <div class="box">
         <!-- Contenu généré dynamiquement par results.js -->
       </div>
+    </div>
+
+    <div id="spectator-waiting" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #17121f; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 32px; text-align: center; z-index: 1000; max-width: 90%; box-shadow: 0 24px 60px rgba(0,0,0,0.4);">
+      <h2 style="margin: 0 0 12px; color: #fff7f1;">⏳ En attente</h2>
+      <p style="color: #bfa8c7; margin: 0 0 20px; max-width: 300px;">Une manche est en cours. Vous rejoindrez automatiquement à la prochaine manche.</p>
+      <div style="margin: 24px 0; color: #ffc28a; font-weight: 800; font-size: 18px;" id="spectator-phase">Phase : -</div>
+      <button class="btn-secondary" style="width: 100%; margin-top: 16px;" id="btn-leave-spectator">Quitter</button>
     </div>
 
     <div class="card" id="screen-home">

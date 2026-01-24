@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^node -e \"const fs=require\\('fs'\\);const f='\\./public/css/03-components\\.css';let c=fs\\.readFileSync\\(f,'utf8'\\);c=c\\.replace\\(/\\\\/\\\\\\*\\\\s\\*===\\\\s\\*Phase bar:\\.\\*\\?@media\\.\\*\\?560px\\\\s\\*\\\\\\{\\[\\^\\}\\]\\*\\\\\\}\\\\s\\*\\\\\\}/s,'/\\* Phase bar layout moved to 04-phase\\.css \\*/'\\);fs\\.writeFileSync\\(f,c\\);\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

@@ -1,0 +1,59 @@
+/* === Spectateur : Modale "En attente" === */
+
+#spectator-waiting {
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+#spectator-waiting h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  color: var(--ink);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+#spectator-phase {
+  margin: 24px 0;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 18px;
+  animation: slideInRight 0.6s ease-out 0.2s both;
+}
+
+#spectator-waiting p {
+  color: var(--muted);
+  margin: 0 0 20px;
+  max-width: 300px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    text-shadow: 0 0 10px rgba(255, 168, 77, 0.5);
+  }
+  50% { 
+    text-shadow: 0 0 20px rgba(255, 168, 77, 0.8);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

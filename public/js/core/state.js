@@ -9,6 +9,7 @@
     myIsImpostor: false,
     myLobbyReady: false,
     currentPhase: null,
+    roundDomain: null,  // domaine/thème de la manche
     DUR: { hints: 45_000, voting: 40_000, prestart: 4_000 }, // valeurs par défaut (le serveur pilote le timer)
     phaseAnim: { phase: null, deadline: 0, total: 0, raf: null },
   };

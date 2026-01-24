@@ -142,6 +142,24 @@ module.exports = function setupSockets(io, db){
 
         io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
 
+        // ✅ NOUVEAU : Envoyer l'état du jeu au client reconnecté
+        const gameState = {
+          state: r.state,
+          phase: r.state,
+          round: r.round || 0,
+          players: Array.from(r.players.values()).map(p => ({ 
+            id: p.id, 
+            name: p.name, 
+            score: p.score || 0,
+            isImpostor: p.isImpostor,
+            disconnected: p.disconnected
+          })),
+          scores: Object.fromEntries(
+            Array.from(r.players.entries()).map(([id, p]) => [id, p.score || 0])
+          )
+        };
+        socket.emit('gameStateSync', gameState);
+
         // ✅ NOUVEAU : Si c'était un spectateur ET qu'on est encore en partie → rester spectateur
         if (r.state !== 'lobby' && pData.spectator) {
           socket.emit('spectatorMode', { 

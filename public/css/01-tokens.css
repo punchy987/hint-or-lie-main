@@ -2,18 +2,28 @@
   color-scheme: dark;
 
   /* Palette basée sur ton logo */
-  --bg:#0f0b14d2;
-  --card:#17121f;
-  --line:#489448a8;
+  --bg: #0f0b14;
+  --card: #17121f;
+  --line: rgba(72, 148, 72, 0.66);
 
-  --ink:#fff7f1;    /* texte global clair */
-  --text:#fff7f1;
-  --muted:#bfa8c7;  /* texte secondaire */
+  --ink: #fff7f1;
+  --text: #fff7f1;
+  --muted: #bfa8c7;
 
-  --accent:#e26c0cb9;   /* orange neutre / CTA par défaut */
-  --accent-2:#ff3b3baf; /* rouge imposteur */
-  --accent-3:#5bec26a1; /* vert équipier / succès */
+  /* Couleurs principales */
+  --accent: #e26c0c;
+  --accent-2: #ff3b3b;     /* rouge imposteur */
+  --accent-3: #5bec26;     /* vert équipier */
 
-  --shadow: rgba(0,0,0,.35);
-  --glow: 0 0 40px rgba(206, 17, 17, 0.18); /* halo doux orange */
+  /* Alias pour clarté */
+  --danger: var(--accent-2);
+  --crew: #3b82f6;
+  --success: var(--accent-3);
+
+  --shadow: rgba(0, 0, 0, 0.35);
+  --glow: 0 0 40px rgba(206, 17, 17, 0.18);
+
+  /* Responsive - breakpoints centralisés */
+  --bp-mobile: 600px;
+  --bp-tablet: 900px;
 }
