@@ -64,6 +64,9 @@
           <button class="tab-btn" id="tab-create">Créer</button>
         </div>
         <div id="pane-join" class="tab-pane active">
+          <div id="avatar-preview-box" style="display:flex;justify-content:center;margin-bottom:15px;">
+            <img id="avatar-preview-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" style="width:80px;height:80px;border-radius:50%;background:#2a2535;border:3px solid #8b5cf6;padding:5px;transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);" />
+          </div>
           <div class="row" style="align-items:flex-end">
             <input id="name-join" placeholder="Ton pseudo" maxlength="16" />
             <input id="join-code" placeholder="Code" maxlength="4" />
@@ -71,6 +74,9 @@
           </div>
         </div>
         <div id="pane-create" class="tab-pane">
+          <div id="avatar-preview-box-create" style="display:flex;justify-content:center;margin-bottom:15px;">
+            <img id="avatar-preview-img-create" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" style="width:80px;height:80px;border-radius:50%;background:#2a2535;border:3px solid #8b5cf6;padding:5px;transition:transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);" />
+          </div>
           <div class="row">
             <input id="name-create" placeholder="Ton pseudo" maxlength="16" />
             <button id="btn-create">Créer une salle</button>
