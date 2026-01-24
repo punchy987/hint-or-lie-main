@@ -1,3 +1,45 @@
 /* Mot affiché au-dessus de l’input */
 .hint-word{ font-size:34px; font-weight:900; letter-spacing:.3px; margin:4px 0 8px }
 
+/* === Live hints for Impostor === */
+#crew-live-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.live-hint-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hint-appear 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.live-hint-name {
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-right: 12px;
+}
+
+.live-hint-text {
+  font-style: italic;
+  color: #fff;
+  text-align: right;
+}
+
+@keyframes hint-appear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

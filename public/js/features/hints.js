@@ -74,6 +74,7 @@
       playRoleCinematic(isImpostor, () => {
         state.myIsImpostor = !!isImpostor;
         sending = false; locked = false;
+        if (ui.status()) ui.status().textContent = '';
         show('screen-hint');
         resetPhaseProgress();
         applyRoleTheme(isImpostor);
@@ -118,7 +119,19 @@
       liveList.innerHTML = '';
       hints.forEach(h => {
         const li = document.createElement('li');
-        li.textContent = `${h.name} : "${h.hint}"`;
+        li.className = 'live-hint-item';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'live-hint-name';
+        nameSpan.textContent = h.name;
+
+        const hintSpan = document.createElement('span');
+        hintSpan.className = 'live-hint-text';
+        hintSpan.textContent = `"${h.hint}"`;
+
+        li.appendChild(nameSpan);
+        li.appendChild(hintSpan);
+
         liveList.appendChild(li);
       });
     });
@@ -127,7 +140,22 @@
       if (!state.myIsImpostor) return;
       ensureLiveUI();
       const li = document.createElement('li');
-      li.textContent = `${h.name} : "${h.hint}"`;
+      li.className = 'live-hint-item';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'live-hint-name';
+      nameSpan.textContent = h.name;
+
+      const hintSpan = document.createElement('span');
+      hintSpan.className = 'live-hint-text';
+      hintSpan.textContent = `"${h.hint}"`;
+
+      li.appendChild(nameSpan);
+      li.appendChild(hintSpan);
+      
+      const delay = liveList.children.length * 100;
+      li.style.animationDelay = `${delay}ms`;
+
       liveList.appendChild(li);
     });
 
