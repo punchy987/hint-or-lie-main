@@ -57,6 +57,63 @@
         banner.textContent = win ? 'VICTOIRE !' : 'DÉFAITE...';
         banner.style.color = win ? 'var(--crew)' : 'var(--danger)';
       }
+
+      // Display votes detail
+      const votesContainer = $('res-votes');
+      votesContainer.innerHTML = ''; // Clear previous votes
+
+      if (res.votesDetail && state.room && state.room.players) {
+        const title = document.createElement('h4');
+        title.textContent = 'Détail des votes';
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        votesContainer.appendChild(title);
+
+        const votesList = document.createElement('div');
+        votesList.style.display = 'flex';
+        votesList.style.flexDirection = 'column';
+        votesList.style.gap = '8px';
+        votesList.style.alignItems = 'center';
+
+        const playersById = new Map(state.room.players.map(p => [p.id, p.name]));
+
+        for (const [voterId, votedId] of Object.entries(res.votesDetail)) {
+          const voterName = playersById.get(voterId);
+          const votedName = playersById.get(votedId);
+
+          if (voterName && votedName) {
+            const voteElement = document.createElement('div');
+            voteElement.style.display = 'flex';
+            voteElement.style.alignItems = 'center';
+            voteElement.style.gap = '8px';
+            voteElement.style.padding = '4px 8px';
+            voteElement.style.background = 'rgba(255, 255, 255, 0.05)';
+            voteElement.style.borderRadius = '6px';
+
+            const voterSpan = document.createElement('span');
+            voterSpan.textContent = voterName;
+            voterSpan.style.fontWeight = 'bold';
+            
+            const arrowSpan = document.createElement('span');
+            arrowSpan.textContent = '→';
+
+            const votedSpan = document.createElement('span');
+            votedSpan.textContent = votedName;
+            
+            if (votedId === res.impostorId) {
+              votedSpan.style.color = 'var(--danger)';
+              votedSpan.style.fontWeight = 'bold';
+            }
+
+            voteElement.appendChild(voterSpan);
+            voteElement.appendChild(arrowSpan);
+            voteElement.appendChild(votedSpan);
+            
+            votesList.appendChild(voteElement);
+          }
+        }
+        votesContainer.appendChild(votesList);
+      }
     });
 
     socket.on('gameOver', ({ winners }) => {

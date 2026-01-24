@@ -204,6 +204,13 @@ const impostorHint =
   (Array.isArray(r.hints) ? r.hints.find(h => h.playerId === impId)?.text : '') || '—';
 
 // Résultat de manche — version officielle
+const votesDetail = {};
+for (const id of r.active) {
+  const p = r.players.get(id);
+  if (p?.vote) {
+    votesDetail[id] = p.vote;
+  }
+}
 io.to(code).emit('roundResult', {
   round: r.round,
   impostorId: impId,
@@ -214,6 +221,7 @@ io.to(code).emit('roundResult', {
   commonDisplay: labelWordByDomain(r.words.common, r.words.domain),
   impostorDisplay: '—',
   votes: tally,
+  votesDetail: votesDetail,
   impostorCaught: caught,
   domain: r.words.domain,
 });
