@@ -350,38 +350,12 @@ module.exports = function setupSockets(io, db){
         return socket.emit('errorMsg', 'Tu voteras à la prochaine manche (spectateur)');
       }
 
-      // Résolution robuste de l'auteur à partir de l'indice
-      let authorId = null;
-      if (hintId && r.hintAuthor && typeof r.hintAuthor.get === 'function') {
-        authorId = r.hintAuthor.get(hintId) || null; // format nouveau
-      }
-      if (!authorId && targetId && r.players.has(targetId)) {
-        authorId = targetId; // rétro-compat: targetId = playerId
-      }
-      if (!authorId && hintId && r.players.has(hintId)) {
-        authorId = hintId; // rétro-compat: anciens payloads (id == playerId)
-      }
-      if (!authorId) return;
+      const voteVal = hintId || targetId;
+      if (!voteVal) return;
 
-      // Enregistre le vote (toujours un playerId)
-      me.vote = authorId;
+      // ✅ Utilisation du contrôleur pour centraliser la logique (vote + fin anticipée)
+      controller.handleVote(joined.code, socket.id, voteVal);
       socket.emit('voteAck');
-
-      // Compteur
-      const submitted = Array.from(r.active).reduce(
-        (acc, id) => acc + (r.players.get(id)?.vote ? 1 : 0),
-        0
-      );
-      const total = r.active.size;
-
-      io.to(joined.code).emit('phaseProgress', { phase: 'voting', submitted, total });
-
-      // Fin anticipée
-      if (submitted === total) {
-        controller.finishVoting(joined.code);
-      } else {
-        broadcast(io, joined.code);
-      }
     });
 
     // ---- playerReadyNext (reveal -> manche suivante)

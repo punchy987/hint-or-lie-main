@@ -157,6 +157,27 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
     }
   }
 
+  // ✅ NOUVEAU : Gestion du vote unitaire pour fin anticipée
+  function handleVote(code, playerId, voteId) {
+    const r = rooms.get(code);
+    if (!r || r.state !== 'voting') return;
+
+    const p = r.players.get(playerId);
+    if (!p) return;
+
+    p.vote = voteId; // On stocke l'ID de l'indice (sera converti dans finishVoting)
+
+    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const submitted = activeConnected.filter(id => r.players.get(id)?.vote).length;
+    const total = activeConnected.length;
+
+    io.to(code).emit('phaseProgress', { phase: 'voting', submitted, total, round: r.round });
+
+    if (submitted === total && total > 0) {
+      finishVoting(code);
+    }
+  }
+
   function finishVoting(code) {
     const r = rooms.get(code); if (!r) return;
     if (r.state !== 'voting') return;
@@ -326,7 +347,7 @@ io.to(code).emit('roundResult', {
     }
   }
 
-  return { startRound, maybeStartVoting, finishVoting };
+  return { startRound, maybeStartVoting, finishVoting, handleVote };
 }
 
 module.exports = { createController };
