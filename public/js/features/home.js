@@ -4,10 +4,11 @@
     function updateAvatarPreview(name) {
         const seed = (name || '').trim() || 'Joueur';
         const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-        const img = $('avatar-preview-img');
-        const img2 = $('avatar-preview-img-create');
-        if (img) img.src = url;
-        if (img2) img2.src = url;
+        // Mettre à jour les deux images
+        const imgs = document.querySelectorAll('[id^="avatar-preview-img"]');
+        imgs.forEach(img => {
+            img.src = url;
+        });
     }
 
     function initTabs() {
@@ -50,6 +51,7 @@
 
         $('btn-create').onclick = () => {
             const name = $('name-create')?.value.trim() || 'Joueur';
+            console.log('[Home] Création de salle avec le pseudo:', name);
             socket.emit('hello', { deviceId: getDeviceId(), pseudo: name });
             socket.emit('createRoom', { name: name, deviceId: getDeviceId() });
         };

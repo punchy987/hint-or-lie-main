@@ -78,10 +78,12 @@ module.exports = function setupSockets(io, db){
 // ---- createRoom
     socket.on('createRoom', ({ name, deviceId, pseudo } = {}) => {
       try {
+        console.log('[Socket] createRoom reçu - name:', name, 'pseudo:', pseudo, 'deviceId:', deviceId);
         const displayName = String(name || pseudo || profile.lastPseudo || 'Joueur').slice(0, 16);
+        console.log('[Socket] displayName calculé:', displayName);
         
         const code = createRoom(socket.id, displayName);
-        console.log('[Socket] Salle créée avec le code:', code);
+        console.log('[Socket] Salle créée avec le code:', code, 'pour socketId:', socket.id);
 
         socket.join(code);
         joined.code = code;
@@ -89,10 +91,12 @@ module.exports = function setupSockets(io, db){
         profile.deviceId = String(deviceId || profile.deviceId || '').slice(0, 64) || null;
 
         const r = rooms.get(code);
+        console.log('[Socket] Room trouvée?', r ? 'OUI' : 'NON');
         if (r && r.players.has(socket.id)) {
           r.players.get(socket.id).deviceId = profile.deviceId;
         }
 
+        console.log('[Socket] Émission de roomCreated avec code:', code);
         socket.emit('roomCreated', { code });
         broadcast(io, code);
       } catch (err) {
