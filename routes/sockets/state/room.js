@@ -58,6 +58,9 @@ function snapshot(code) {
     id,
     name:  p.name,
     score: p.score,
+    disconnected: !!p.disconnected,
+    ready: r.lobbyReady.has(id),
+    active: r.active.has(id),
   }));
 
   return {

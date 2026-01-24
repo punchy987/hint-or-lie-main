@@ -48,24 +48,36 @@
 }
 #score-list li:last-child { border-bottom: 0; }
 
-/* Indicateur de statut (LED) */
+/* La LED de statut (Base : Éteinte / Gris sombre) */
 .status-led {
-  width: 10px;
-  height: 10px;
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 11px;
+  height: 11px;
+  background-color: #3f3f46; /* Gris sombre (éteint) */
+  border: 2px solid #1b1422; /* Bordure couleur fond pour découpe */
   border-radius: 50%;
-  background-color: #444; /* Couleur par défaut (éteint) */
-  box-shadow: 0 0 5px rgba(0,0,0,.5);
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
-.status-led.online {
-  background-color: #2ecc71; /* Vert */
-  box-shadow: 0 0 7px #2ecc71a0;
+
+/* VERT : Joueur actif (en cours de partie) */
+.status-led.is-active {
+  background-color: #4ade80;
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.6);
 }
-.status-led.waiting {
-  background-color: #f39c12; /* Orange */
-  box-shadow: 0 0 7px #f39c12a0;
+
+/* ORANGE : Joueur prêt (dans le lobby) */
+.status-led.is-ready {
+  background-color: #fb923c; /* Orange vif */
+  box-shadow: 0 0 4px rgba(251, 146, 60, 0.6);
 }
-.status-led.offline {
-  background-color: #e74c3c; /* Rouge */
+
+/* ROUGE / TRANSPARENT : Déconnecté */
+.status-led.is-disconnected {
+  background-color: transparent;
+  border-color: #ef4444; /* Cercle rouge vide */
+  box-shadow: none;
 }
 
 /* FIX AVATAR : Taille forcée pour éviter les robots géants */
