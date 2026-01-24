@@ -79,6 +79,7 @@
   border-color: var(--accent);
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
   animation: pop-selected .2s ease-out;
+  outline: 3px solid white;
 }
 
 @keyframes pop-selected {

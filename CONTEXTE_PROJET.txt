@@ -25,70 +25,84 @@ STRUCTURE DU PROJET HINT OR LIE
 --- FICHIER : public\css\02-base.css ---
 /* Fix global de mise en page */
 *, *::before, *::after { box-sizing: border-box; }
+
 /* Sécurité responsive des médias */
 img, svg, canvas, video { max-width: 100%; height: auto; display: block; }
 
 /* Page */
 html, body {
   height: 100%;
+  margin: 0;
   overflow-y: auto;
   overscroll-behavior: auto;
-  overscroll-behavior-y: auto;
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Fond + étoiles */
-body{
-  margin:0; color:var(--ink);
-  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans";
+/* 1. FOND DE BASE (Couleur + Image SVG) */
+body {
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg);
+  position: relative;
+}
+
+/* Le Background SVG est géré ici, une seule fois */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2; /* Tout au fond */
+  pointer-events: none;
   background:
-    radial-gradient(1200px 800px at 20% -10%, rgba(175,97,14,.644), transparent 60%),
-    radial-gradient(1200px 800px at 120% 10%, rgba(238,63,63,.08), transparent 60%),
-    var(--bg);
-}
-.stars::before,.stars::after{
-  content:""; position:fixed; inset:-20% -10% -10% -10%; pointer-events:none; z-index:-1;
-  background-image: radial-gradient(#ffffff66 1px, transparent 1px);
-  background-size:3px 3px; opacity:.10; filter:drop-shadow(0 0 2px #ffffff33);
-  animation: drift 160s linear infinite;
-}
-.stars::after{ opacity:.08; background-size:2px 2px; animation-duration:220s; }
-@keyframes drift{ from{transform:translateY(0)} to{transform:translateY(200px)} }
-
-/* Layout générique */
-.wrap{ max-width:880px; margin:0 auto; padding:16px }
-.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-.muted{ color:var(--muted) }
-h1,h2,h3,h4{ margin:0 0 8px }
-
-/* === BACKGROUND SVG plein écran === */
-:root{
-  --bg-overlay-top: rgba(0,0,0,.45);
-  --bg-overlay-bottom: rgba(0,0,0,.65);
-}
-/* assure que le contenu passe AU-DESSUS du fond */
-.wrap, main, #app, #root { position: relative; z-index: 1; }
-
-body::before{
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(120% 100% at 50% 0%, var(--bg-overlay-top), var(--bg-overlay-bottom)),
+    radial-gradient(120% 100% at 50% 0%, rgba(0,0,0,.45), rgba(0,0,0,.65)),
     center / cover no-repeat url("/images/background-hero.svg?v=1");
   will-change: transform;
 }
-@media (max-width:800px){
-  body::before{ background-position: 50% 35%; }
-}
-/* FORCE le background si classe .stars présente */
-body.stars::before{
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(120% 100% at 50% 0%, rgba(0,0,0,.45), rgba(0,0,0,.65)),
-    center / cover no-repeat url("/images/background-hero.svg?v=1") !important;
-  opacity:1 !important; filter:none !important;
+
+/* 2. LES ÉTOILES (S'activent uniquement avec la classe .stars) */
+.stars::before,
+.stars::after {
+  content: "";
+  position: fixed;
+  inset: -20% -10% -10% -10%;
+  pointer-events: none;
+  z-index: -1; /* Placées ENTRE le fond et le texte */
+  background-image: radial-gradient(#ffffff66 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: .10;
+  filter: drop-shadow(0 0 2px #ffffff33);
+  animation: drift 160s linear infinite;
 }
 
+.stars::after {
+  opacity: .08;
+  background-size: 2px 2px;
+  animation-duration: 220s;
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(200px); }
+}
+
+/* Layout générique */
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 16px;
+  position: relative;
+  z-index: 1; /* Le contenu passe au-dessus des étoiles */
+}
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.muted { color: var(--muted); }
+h1, h2, h3, h4 { margin: 0 0 8px; }
+
+/* Mobile : Ajustement du background */
+@media (max-width: 800px) {
+  body::before { background-position: 50% 35%; }
+}
 
 --- FICHIER : public\css\03-components.css ---
 /* Cartes */
@@ -249,6 +263,11 @@ button:active{ transform: translateY(1px) }
   }
 }
 
+.error {
+  color: var(--danger);
+  font-weight: bold;
+}
+
 
 --- FICHIER : public\css\04-phase.css ---
 /* Pastilles / KPI */
@@ -374,13 +393,48 @@ button:active{ transform: translateY(1px) }
 /* Mot affiché au-dessus de l’input */
 .hint-word{ font-size:34px; font-weight:900; letter-spacing:.3px; margin:4px 0 8px }
 
-/* Liste d’indices */
-#hints p{
-  padding:8px 10px; border-radius:10px;
-  color:var(--ink);
-  background: color-mix(in srgb, var(--card) 92%, black 8%);
-  border:1px solid var(--line);
+/* === Live hints for Impostor === */
+#crew-live-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
+
+.live-hint-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hint-appear 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.live-hint-name {
+  font-weight: 600;
+  color: var(--accent-2);
+  margin-right: 12px;
+}
+
+.live-hint-text {
+  font-style: italic;
+  color: #fff;
+  text-align: right;
+}
+
+@keyframes hint-appear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 
 --- FICHIER : public\css\06-vote.css ---
@@ -430,6 +484,54 @@ button:active{ transform: translateY(1px) }
   box-shadow: 0 0 0 2px rgba(255,59,59,.45) inset;
 }
 
+/* --- NOUVEAU STYLE DE VOTE : "CARTES" --- */
+#hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+}
+
+.vote-card {
+  padding: 1rem;
+  background: color-mix(in srgb, var(--card) 50%, rebeccapurple 20%);
+  border: 1px solid var(--line);
+  border-radius: .9rem;
+  font-weight: 600;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s ease;
+  flex: 0 1 240px;
+}
+
+.vote-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 50%, white 50%);
+}
+
+.vote-card.selected {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: pop-selected .2s ease-out;
+}
+
+@keyframes pop-selected {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
 --- FICHIER : public\css\07-modal-score.css ---
 /* Scoreboard */
@@ -2817,7 +2919,7 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
 </head>
 <body class="stars">
 
-  <div id="role-reveal-overlay" style="display: none;">
+  <div id="role-reveal-overlay">
     <div class="reveal-content">
       <h2 class="reveal-sup">TU ES...</h2>
       <h1 id="reveal-role-text">IMPOSTEUR</h1>
@@ -2897,7 +2999,7 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
         </div>
         <div class="phase-center">
           <span class="theme-chip">📌 Thème : <b id="theme-hint-name">?</b></span>
-          <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot : <b id="crew-word">?</b></span>
+          <span class="theme-chip" id="crew-word-chip" style="display:none">🧩 Mot secret : <b id="crew-word">?</b></span>
         </div>
         <div class="phase-right">
           <span class="kpi" id="timer-hints">00:45</span>
@@ -2916,12 +3018,16 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
       <div class="phase-bar">
         <span class="theme-chip">📌 Thème : <b id="theme-vote-name">?</b></span>
         <span class="kpi" id="timer-vote">00:40</span>
+        <span class="kpi" id="progress-vote">0/0</span>
       </div>
       <h3 class="section-title">Votez pour l'imposteur</h3>
       <div id="hints" style="margin:8px 0"></div>
     </div>
 
     <div class="card" id="screen-result" style="display:none">
+      <div class="phase-bar">
+        <span class="kpi" id="timer-reveal"></span>
+      </div>
       <div id="personal-banner" class="result-banner">Résultat</div>
       <div id="res-imp-name" style="text-align:center; font-weight:bold; margin-bottom:10px;"></div> 
       <p style="text-align:center">Mot commun : <strong id="res-common"></strong></p>
@@ -3296,6 +3402,7 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
     const roleText = $('reveal-role-text');
     if (!overlay || !roleText) { callback(); return; } 
 
+    overlay.style.display = ''; // Force le nettoyage du style inline pour laisser le CSS agir
     roleText.textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
     roleText.className = isImpostor ? 'impostor' : 'crew';
     overlay.classList.add('playing');
@@ -3320,7 +3427,20 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
   function sendHint() {
     if (locked || sending) return;
     const val = (ui.input()?.value || '').trim();
-    if (!val) { toast("Écris un indice 😉"); return; }
+    if (!val) {
+      const status = ui.status();
+      if (status) {
+        status.textContent = 'Écris un indice 😉';
+        status.classList.add('error');
+        setTimeout(() => {
+          if (status.textContent === 'Écris un indice 😉') {
+            status.textContent = '';
+            status.classList.remove('error');
+          }
+        }, 2200);
+      }
+      return;
+    }
     sending = true;
     ui.send().disabled = true;
     socket.emit('submitHint', { hint: val });
@@ -3331,6 +3451,11 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
       playRoleCinematic(isImpostor, () => {
         state.myIsImpostor = !!isImpostor;
         sending = false; locked = false;
+        const status = ui.status();
+        if (status) {
+          status.textContent = '';
+          status.classList.remove('error');
+        }
         show('screen-hint');
         resetPhaseProgress();
         applyRoleTheme(isImpostor);
@@ -3347,6 +3472,7 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
           tipEl.innerHTML = "🤫 <strong>CHUT !</strong> Tu n’as pas de mot.<br>Observe les indices et invente un mensonge !";
           ui.wordChip().style.display = 'none';
           ensureLiveUI();
+          if (liveList) liveList.innerHTML = ''; // Nettoie les anciens indices
           ui.input()?.insertAdjacentElement('beforebegin', liveBox);
           liveBox.style.display = 'block';
         } else {
@@ -3365,7 +3491,23 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
 
     socket.on('hintAck', () => {
       locked = true; sending = false;
-      ui.status().textContent = 'Indice envoyé ✅';
+      const status = ui.status();
+      if (status) {
+        status.textContent = 'Indice envoyé ✅';
+        status.classList.remove('error');
+      }
+    });
+
+    socket.on('hintRejected', ({ reason }) => {
+      sending = false;
+      const btn = ui.send();
+      if (btn) btn.disabled = false;
+      const status = ui.status();
+      if (status) {
+        status.textContent = reason || 'Indice rejeté.';
+        status.classList.add('error');
+      }
+      toast(reason || 'Indice rejeté.', 'danger');
     });
 
     socket.on('crewHintsLive', ({ hints }) => {
@@ -3374,9 +3516,44 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
       liveList.innerHTML = '';
       hints.forEach(h => {
         const li = document.createElement('li');
-        li.textContent = `${h.name} : "${h.hint}"`;
+        li.className = 'live-hint-item';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'live-hint-name';
+        nameSpan.textContent = h.name;
+
+        const hintSpan = document.createElement('span');
+        hintSpan.className = 'live-hint-text';
+        hintSpan.textContent = `"${h.hint}"`;
+
+        li.appendChild(nameSpan);
+        li.appendChild(hintSpan);
+
         liveList.appendChild(li);
       });
+    });
+
+    socket.on('crewHintAdded', (h) => {
+      if (!state.myIsImpostor) return;
+      ensureLiveUI();
+      const li = document.createElement('li');
+      li.className = 'live-hint-item';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'live-hint-name';
+      nameSpan.textContent = h.name;
+
+      const hintSpan = document.createElement('span');
+      hintSpan.className = 'live-hint-text';
+      hintSpan.textContent = `"${h.hint}"`;
+
+      li.appendChild(nameSpan);
+      li.appendChild(hintSpan);
+      
+      const delay = liveList.children.length * 100;
+      li.style.animationDelay = `${delay}ms`;
+
+      liveList.appendChild(li);
     });
 
     socket.on('timer', ({ phase, leftMs }) => {
@@ -3656,7 +3833,12 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
   function initSocket() {
     socket.on('roundResult', (res) => {
       show('screen-result');
-      $('res-domain').textContent = res.domain || '?';
+
+      // Reset "Next" button state
+      $('btn-next').disabled = false;
+      $('btn-next').textContent = 'Manche suivante';
+
+      // $('res-domain').textContent = res.domain || '?';
       $('res-common').textContent = res.common || '';
 
       const impName = res.impostorName || '(?)';
@@ -3691,6 +3873,63 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
       if (banner) {
         banner.textContent = win ? 'VICTOIRE !' : 'DÉFAITE...';
         banner.style.color = win ? 'var(--crew)' : 'var(--danger)';
+      }
+
+      // Display votes detail
+      const votesContainer = $('res-votes');
+      votesContainer.innerHTML = ''; // Clear previous votes
+
+      if (res.votesDetail && state.room && state.room.players) {
+        const title = document.createElement('h4');
+        title.textContent = 'Détail des votes';
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        votesContainer.appendChild(title);
+
+        const votesList = document.createElement('div');
+        votesList.style.display = 'flex';
+        votesList.style.flexDirection = 'column';
+        votesList.style.gap = '8px';
+        votesList.style.alignItems = 'center';
+
+        const playersById = new Map(state.room.players.map(p => [p.id, p.name]));
+
+        for (const [voterId, votedId] of Object.entries(res.votesDetail)) {
+          const voterName = playersById.get(voterId);
+          const votedName = playersById.get(votedId);
+
+          if (voterName && votedName) {
+            const voteElement = document.createElement('div');
+            voteElement.style.display = 'flex';
+            voteElement.style.alignItems = 'center';
+            voteElement.style.gap = '8px';
+            voteElement.style.padding = '4px 8px';
+            voteElement.style.background = 'rgba(255, 255, 255, 0.05)';
+            voteElement.style.borderRadius = '6px';
+
+            const voterSpan = document.createElement('span');
+            voterSpan.textContent = voterName;
+            voterSpan.style.fontWeight = 'bold';
+            
+            const arrowSpan = document.createElement('span');
+            arrowSpan.textContent = '→';
+
+            const votedSpan = document.createElement('span');
+            votedSpan.textContent = votedName;
+            
+            if (votedId === res.impostorId) {
+              votedSpan.style.color = 'var(--danger)';
+              votedSpan.style.fontWeight = 'bold';
+            }
+
+            voteElement.appendChild(voterSpan);
+            voteElement.appendChild(arrowSpan);
+            voteElement.appendChild(votedSpan);
+            
+            votesList.appendChild(voteElement);
+          }
+        }
+        votesContainer.appendChild(votesList);
       }
     });
 
@@ -3737,7 +3976,9 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
     box.style.display = '';   
     box.innerHTML = ''; // On efface la liste précédente
 
-    (hints || []).forEach(h => {
+    const shuffledHints = [...(hints || [])].sort(() => Math.random() - 0.5);
+
+    shuffledHints.forEach(h => {
       // Création de la CARTE (c'est un bouton géant)
       const card = document.createElement('button');
       card.type = 'button';
@@ -3876,6 +4117,16 @@ d.�j.=�!�-_9=�&/�$=��U:���Y��W���-|v	��
     // show() est ton utilitaire qui change d'écran
     window.HOL.show('screen-vote');
   }
+    });
+
+    socket.on('phaseProgress', ({ phase, submitted, total }) => {
+      if (phase === 'hints') {
+        const el = $('progress-hints');
+        if (el) el.textContent = `${submitted}/${total}`;
+      } else if (phase === 'voting') {
+        const el = $('progress-vote');
+        if (el) el.textContent = `${submitted}/${total}`;
+      }
     });
   }
 
@@ -4055,6 +4306,9 @@ body {
   animation: pop 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.3); 
 }
 
+.impostor { color: var(--danger); text-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
+.crew { color: var(--crew); text-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+
 /* 5. ÉLÉMENTS UI */
 .hero { display: flex; align-items: center; gap: 20px; margin-bottom: 10px; }
 .title-line { display: flex; align-items: center; gap: 10px; }
@@ -4120,7 +4374,7 @@ button:active { transform: scale(0.98); }
 --- FICHIER : public\sw.js ---
 // --- Service Worker : Hint or Lie -------------------------------------------
 // ⚠️ BUMPER LA VERSION À CHAQUE DEPLOIEMENT (déclenche la mise à jour PWA)
-const CACHE = 'hol-v36';
+const CACHE = 'hol-v38';
 
 // Liste des assets à précacher (shell). Ajoute ici ce qui doit marcher offline.
 const ASSETS = [
@@ -4506,6 +4760,13 @@ const impostorHint =
   (Array.isArray(r.hints) ? r.hints.find(h => h.playerId === impId)?.text : '') || '—';
 
 // Résultat de manche — version officielle
+const votesDetail = {};
+for (const id of r.active) {
+  const p = r.players.get(id);
+  if (p?.vote) {
+    votesDetail[id] = p.vote;
+  }
+}
 io.to(code).emit('roundResult', {
   round: r.round,
   impostorId: impId,
@@ -4516,6 +4777,7 @@ io.to(code).emit('roundResult', {
   commonDisplay: labelWordByDomain(r.words.common, r.words.domain),
   impostorDisplay: '—',
   votes: tally,
+  votesDetail: votesDetail,
   impostorCaught: caught,
   domain: r.words.domain,
 });
@@ -5047,7 +5309,6 @@ module.exports = function setupSockets(io, db){
       io.to(joined.code).emit('phaseProgress', { phase:'hints', submitted, total: r.active.size });
 
       controller.maybeStartVoting(joined.code);
-      broadcast(io, joined.code);
     });
 
     // ---- submitVote
@@ -5434,12 +5695,36 @@ function startPhaseTimer(io, code, seconds, phase, onExpire){
   const room = _rooms.get(code); if(!room) return;
   clearRoomTimer(room);
   const deadline = Date.now() + seconds*1000;
-  room.timer = { interval:null, deadline, phase };
-  room.timer.interval = setInterval(()=>{
+
+  const thisTimerInterval = setInterval(()=>{
+    const currentRoom = _rooms.get(code);
+    if (!currentRoom) {
+        clearInterval(thisTimerInterval);
+        return;
+    }
+
+    // If the room's current timer isn't this one, this one is stale and should just stop.
+    if (currentRoom.timer.interval !== thisTimerInterval) {
+        clearInterval(thisTimerInterval);
+        return;
+    }
+
     const leftMs = Math.max(0, deadline - Date.now());
     io.to(code).emit('timer', { phase, leftMs });
-    if (leftMs <= 0){ clearRoomTimer(room); onExpire?.(); }
+
+    if (leftMs <= 0){
+      // This timer is expiring. Clear it from the room state BEFORE calling onExpire.
+      // This prevents onExpire from clearing a *new* timer if it creates one.
+      clearInterval(thisTimerInterval);
+      currentRoom.timer = { interval:null, deadline:0, phase:null };
+
+      // Now call the original callback.
+      onExpire?.();
+    }
   }, 500);
+
+  // Store the new timer's identity in the room.
+  room.timer = { interval: thisTimerInterval, deadline, phase };
 }
 
 module.exports = { clearRoomTimer, startPhaseTimer };
