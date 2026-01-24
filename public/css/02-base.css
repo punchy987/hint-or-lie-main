@@ -97,7 +97,21 @@ body::before {
   z-index: 1; /* Le contenu passe au-dessus des étoiles */
 }
 
-.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row { 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  align-items: stretch;  /* Alignement par défaut: colonne stretched */ 
+  flex-direction: column;  /* Colonne par défaut */ 
+}
+
+/* Sur desktop (>600px), revenir à ligne avec flex-end pour les inputs/boutons */
+@media (min-width: 601px) {
+  .row { 
+    align-items: flex-end;
+    flex-direction: row;
+  }
+}
 .muted { color: var(--muted); }
 h1, h2, h3, h4 { margin: 0 0 8px; }
 
