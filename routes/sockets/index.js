@@ -264,7 +264,6 @@ module.exports = function setupSockets(io, db){
       io.to(joined.code).emit('phaseProgress', { phase:'hints', submitted, total: r.active.size });
 
       controller.maybeStartVoting(joined.code);
-      broadcast(io, joined.code);
     });
 
     // ---- submitVote
