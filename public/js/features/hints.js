@@ -121,6 +121,14 @@
       });
     });
 
+    socket.on('crewHintAdded', (h) => {
+      if (!state.myIsImpostor) return;
+      ensureLiveUI();
+      const li = document.createElement('li');
+      li.textContent = `${h.name} : "${h.hint}"`;
+      liveList.appendChild(li);
+    });
+
     socket.on('timer', ({ phase, leftMs }) => {
       if (phase !== 'hints' && phase !== 'prestart') resetTheme();
     });
