@@ -260,7 +260,8 @@ io.to(code).emit('roundResult', {
       r.state = 'reveal';
       r.readyNext = new Set();
       io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
-      broadcast(io, code);
+      
+      // ✅ Ne PAS broadcaster maintenant — attendre que roundResult soit traité
 
       // ✅ Timer automatique de 3 secondes pour retourner au lobby
       startPhaseTimer(io, code, 3, 'prestart', () => {
