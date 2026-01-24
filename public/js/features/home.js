@@ -147,6 +147,19 @@
 
         socket.on('roomUpdate', (snap) => {
             state.room = snap;
+            
+            // Si on était en attente de spectateur et qu'on revient au lobby → rejoindre la partie
+            if (snap.state === 'lobby') {
+                const modal = $('#modal');
+                if (modal && modal.style.display === 'flex') {
+                    const box = modal.querySelector('.box');
+                    if (box && box.textContent.includes('Partie en cours')) {
+                        modal.style.display = 'none';
+                        show('screen-lobby');
+                    }
+                }
+            }
+            
             if ($('round-num')) $('round-num').textContent = snap.round;
             const list = $('players');
             if (list) {
@@ -181,29 +194,23 @@
         });
 
         socket.on('spectatorMode', ({ message }) => {
-            const modal = $('#modal');
+            // ✅ Ne montrer la modal que si on n'est pas au lobby
+            if (state.room?.state === 'lobby') return;
+            
+            const modal = document.getElementById('modal');
             if (!modal) return;
             
             const box = modal.querySelector('.box');
             if(box) {
                 box.innerHTML = `
-                    <h2>Manche en cours...</h2>
-                    <p>${message || 'Vous rejoindrez la partie à la prochaine manche.'}</p>
+                    <h2>⏳ Partie en cours</h2>
+                    <p>${message || 'Veuillez patienter, vous rejoindrez la prochaine manche.'}</p>
                     <p style="margin-top:15px; font-size:0.8rem; opacity:0.7;">Vous pouvez suivre le déroulement en attendant.</p>
                 `;
             }
             
             modal.style.display = 'flex';
-        
-            const hideModal = () => {
-                if (modal.style.display === 'flex') {
-                    modal.style.display = 'none';
-                    modal.removeEventListener('click', hideModal);
-                }
-            };
-            
-            setTimeout(hideModal, 5000);
-            modal.addEventListener('click', hideModal);
+            // ✅ Message persiste jusqu'à la fin de la manche (pas de fermeture automatique)
         });
     }
 

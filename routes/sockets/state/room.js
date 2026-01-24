@@ -59,6 +59,7 @@ function snapshot(code) {
     name:  p.name,
     score: p.score,
     disconnected: !!p.disconnected,
+    spectator: !!p.spectator,
     ready: r.lobbyReady.has(id),
     active: r.active.has(id),
   }));

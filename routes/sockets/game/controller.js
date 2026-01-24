@@ -24,16 +24,16 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
       }
     }
     
-    // Intégration des spectateurs pour la nouvelle manche
+    // ✅ RÉINITIALISER TOUS les flags de spectateur au début du round
     for (const p of r.players.values()) {
-      p.spectator = false;
+      p.spectator = false;  // Tout le monde devient potentiellement actif
     }
 
     clearRoomTimer(r);
     r.lobbyReady = new Set();
     r.readyNext  = new Set();
 
-    // Fige les joueurs actifs pour TOUT le round (ceux qui ne sont pas déconnectés)
+    // Fige les joueurs actifs pour TOUT le round (ceux qui ne sont pas déconnectés, y compris les ex-spectateurs)
     r.active = new Set(Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected).map(([id]) => id));
 
     if (r.active.size < 3) {
@@ -250,34 +250,64 @@ io.to(code).emit('roundResult', {
   domain: r.words.domain,
 });
 
-    r.state = 'reveal';
-    r.readyNext = new Set();
-    io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
-    broadcast(io, code);
-
-    // Fin de partie (10 pts)
+    // ✅ VÉRIFICATION FIN DE PARTIE (10 pts)
     const activePlayers = Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected);
     const maxScore = Math.max(0, ...activePlayers.map(([_, p]) => p.score || 0));
+    const isGameOver = maxScore >= 10;
 
-    if (maxScore >= 10) {
+    if (!isGameOver) {
+      // === CONTINUATION : passer à reveal ===
+      r.state = 'reveal';
+      r.readyNext = new Set();
+      io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
+      broadcast(io, code);
+
+    } else {
+      // === FIN DE PARTIE : Gagnants finaux ===
       const winnersArr = activePlayers
         .filter(([_, p]) => (p.score || 0) === maxScore)
         .map(([id, p]) => ({ id, name: p.name, score: p.score || 0, deviceId: p.deviceId }));
 
-      r.state = 'gameOver'; // État final pour bloquer les interactions
-      io.to(code).emit('gameOver', { winners: winnersArr, round: r.round }); // Pas de autoReset
-
+      // ✅ Appliquer les pénalités de fin de partie
       if (typeof applyPenaltyIfNotWinner === 'function') {
         const winnerIds = new Set(winnersArr.map(w => w.id));
         for (const [id, p] of activePlayers) {
           if (!winnerIds.has(id) && p?.deviceId) {
-            applyPenaltyIfNotWinner({ deviceId: p.deviceId, pseudo: p.name }).catch(() => {});
+            applyPenaltyIfNotWinner({ deviceId: p.deviceId, pseudo: p.name })
+              .catch(() => {}); // Silencieux
           }
         }
       }
 
-      broadcast(io, code); // On notifie tout le monde du nouvel état 'gameOver'
-      return; // On arrête là, le reset sera manuel
+      // État final
+      r.state = 'gameOver';
+
+      // Signal gameOver avec contexte complet
+      io.to(code).emit('gameOver', {
+        winners: winnersArr,
+        round: r.round,
+        finalScores: Object.fromEntries(activePlayers.map(([id, p]) => [id, p.score || 0])),
+        winnersCount: winnersArr.length,
+        isGameOver: true,
+      });
+
+      // Reset pour la prochaine partie
+      for (const p of r.players.values()) {
+        p.score = 0;
+        p.hint = null;
+        p.vote = null;
+        p.isImpostor = false;
+        p.spectator = false;
+      }
+      r.round = 0;
+      r.state = 'lobby';
+      r.lobbyReady = new Set();
+      r.readyNext = new Set();
+      r.used = {};
+      r.impostor = null;
+
+      // Notify everyone
+      broadcast(io, code);
     }
   }
 

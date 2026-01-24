@@ -138,15 +138,24 @@ module.exports = function setupSockets(io, db){
         r.players.delete(oldId); // Supprime l'ancienne entrée
         if(r.active?.has(oldId)) {
           r.active.delete(oldId);
-          r.active.add(socket.id);
+          // ⚠️ NE PAS réintégrer immédiatement, le flag spectator sera restauré ci-dessous
         }
         // Restaure les données sur le nouveau socket.id
         pData.disconnected = false;
         pData.disconnectedSince = undefined;
+        // ✅ IMPORTANT : Ne pas réinitialiser spectator ici - maintenir son état précédent
         r.players.set(socket.id, pData);
         console.log(`[Socket] Joueur reconnecté: ${displayName} (nouveau ID: ${socket.id})`);
 
         io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
+
+        // ✅ NOUVEAU : Si c'était un spectateur ET qu'on est encore en partie → rester spectateur
+        if (r.state !== 'lobby' && pData.spectator) {
+          socket.emit('spectatorMode', { 
+            phase: r.state, 
+            message: 'Vous continuez à regarder la manche en cours.' 
+          });
+        }
 
       } else {
         // Vérification de l'unicité du pseudo pour les nouveaux joueurs
@@ -159,15 +168,19 @@ module.exports = function setupSockets(io, db){
 
         r.players.set(socket.id, {
           name: displayName, hint:null, vote:null, isImpostor:false, score:0,
-          deviceId: profile.deviceId
+          deviceId: profile.deviceId,
+          spectator: false  // ✅ Nouveaux joueurs ne sont PAS spectateurs au début
         });
       }
 
       // Rejoint en cours de manche → spectateur
       if (r.state !== 'lobby') {
         const p = r.players.get(socket.id);
-        p.spectator = true;
-        socket.emit('spectatorMode', { phase: r.state, message: 'Manche en cours...' });
+        if (p) p.spectator = true;  // ✅ Marquer TOUS les arrivants en cours de partie
+        socket.emit('spectatorMode', { 
+          phase: r.state, 
+          message: 'Manche en cours. Vous rejoindrez la prochaine manche.' 
+        });
 
         if (r.active && r.active.size) {
           if (r.state === 'hints') {
@@ -276,10 +289,11 @@ module.exports = function setupSockets(io, db){
     // ---- submitHint
     socket.on('submitHint', ({ hint })=>{
       const r = rooms.get(joined.code); if(!r || r.state!=='hints') return;
+      if (r.state === 'gameOver') return socket.emit('errorMsg', 'La partie est terminée');
       const p = r.players.get(socket.id); if(!p) return;
 
-      // Spectateur : pas d’action
-      if (!r.active?.has(socket.id)) return socket.emit('errorMsg', 'Tu participeras au prochain tour (spectateur)');
+      // ✅ DOUBLE vérification spectateur
+      if (p.spectator || !r.active?.has(socket.id)) return socket.emit('errorMsg', 'Tu participeras au prochain round (spectateur)');
       if (typeof p.hint === 'string') return;
 
       const raw = String(hint||'').trim().slice(0,40);
@@ -317,10 +331,11 @@ module.exports = function setupSockets(io, db){
     // ---- submitVote
     socket.on('submitVote', ({ hintId, targetId } = {}) => {
       const r = rooms.get(joined.code); if (!r || r.state !== 'voting') return;
+      if (r.state === 'gameOver') return socket.emit('errorMsg', 'La partie est terminée');
       const me = r.players.get(socket.id); if (!me) return;
 
-      // Spectateur
-      if (!r.active?.has(socket.id)) {
+      // ✅ DOUBLE vérification spectateur
+      if (me.spectator || !r.active?.has(socket.id)) {
         return socket.emit('errorMsg', 'Tu voteras à la prochaine manche (spectateur)');
       }
 
@@ -497,7 +512,7 @@ module.exports = function setupSockets(io, db){
             .map(([id, p]) => ({ id, name: p.name, score: p.score || 0 }));
           io.to(code).emit('gameOver', { winners: winnersArr, round: r.round, autoReset: true });
 
-          for (const p of r.players.values()) { p.score = 0; p.hint = null; p.vote = null; p.isImpostor = false; }
+          for (const p of r.players.values()) { p.score = 0; p.hint = null; p.vote = null; p.isImpostor = false; p.spectator = false; }
           r.round = 0; r.state = 'lobby'; r.lobbyReady = new Set(); r.readyNext = new Set(); r.used = {};
           clearRoomTimer(r);
         }

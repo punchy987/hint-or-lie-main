@@ -31,11 +31,11 @@
       // 1. LED de statut
       const led = HOL.el('span', '', { class: 'status-led' });
       if (p.disconnected) {
-        led.classList.add('offline');
+        led.classList.add('is-disconnected');
       } else if (p.spectator) {
-        led.classList.add('waiting');
+        led.classList.add('is-ready');  // Orange pour spectateur (en attente)
       } else {
-        led.classList.add('online');
+        led.classList.add('is-active');  // Vert pour joueur actif
       }
       li.appendChild(led);
 
