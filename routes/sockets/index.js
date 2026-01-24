@@ -75,19 +75,11 @@ module.exports = function setupSockets(io, db){
       } : { rp:0, rounds:0, wins:0, winsCrew:0, winsImpostor:0 });
     });
 
-// ---- createRoom (Version sécurisée avec Logs)
+// ---- createRoom
     socket.on('createRoom', ({ name, deviceId, pseudo } = {}) => {
       try {
-        console.log('[Socket] Tentative de création de salle par:', socket.id);
-        
         const displayName = String(name || pseudo || profile.lastPseudo || 'Joueur').slice(0, 16);
         
-        // On vérifie si createRoom est bien une fonction (évite le crash si l'import a échoué)
-        if (typeof createRoom !== 'function') {
-          console.error('[Error] La fonction createRoom est introuvable dans state/room.js');
-          return socket.emit('errorMsg', 'Erreur interne : module de salle introuvable.');
-        }
-
         const code = createRoom(socket.id, displayName);
         console.log('[Socket] Salle créée avec le code:', code);
 
@@ -101,14 +93,11 @@ module.exports = function setupSockets(io, db){
           r.players.get(socket.id).deviceId = profile.deviceId;
         }
 
-        // On envoie la confirmation au client
         socket.emit('roomCreated', { code });
-        console.log('[Socket] Événement roomCreated envoyé au client');
-        
         broadcast(io, code);
       } catch (err) {
-        console.error('[Critical Error] Erreur lors de createRoom:', err);
-        socket.emit('errorMsg', 'Le serveur a rencontré une erreur en créant la salle.');
+        console.error('[Error] Création de salle échouée:', err);
+        socket.emit('errorMsg', 'Erreur lors de la création de la salle.');
       }
     });
     // ---- joinRoom
