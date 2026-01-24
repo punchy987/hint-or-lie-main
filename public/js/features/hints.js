@@ -63,7 +63,20 @@
   function sendHint() {
     if (locked || sending) return;
     const val = (ui.input()?.value || '').trim();
-    if (!val) { toast("Écris un indice 😉"); return; }
+    if (!val) {
+      const status = ui.status();
+      if (status) {
+        status.textContent = 'Écris un indice 😉';
+        status.classList.add('error');
+        setTimeout(() => {
+          if (status.textContent === 'Écris un indice 😉') {
+            status.textContent = '';
+            status.classList.remove('error');
+          }
+        }, 2200);
+      }
+      return;
+    }
     sending = true;
     ui.send().disabled = true;
     socket.emit('submitHint', { hint: val });
