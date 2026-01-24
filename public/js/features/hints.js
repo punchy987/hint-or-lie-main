@@ -90,6 +90,7 @@
           tipEl.innerHTML = "🤫 <strong>CHUT !</strong> Tu n’as pas de mot.<br>Observe les indices et invente un mensonge !";
           ui.wordChip().style.display = 'none';
           ensureLiveUI();
+          if (liveList) liveList.innerHTML = ''; // Nettoie les anciens indices
           ui.input()?.insertAdjacentElement('beforebegin', liveBox);
           liveBox.style.display = 'block';
         } else {

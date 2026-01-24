@@ -29,7 +29,9 @@
     box.style.display = '';   
     box.innerHTML = ''; // On efface la liste précédente
 
-    (hints || []).forEach(h => {
+    const shuffledHints = [...(hints || [])].sort(() => Math.random() - 0.5);
+
+    shuffledHints.forEach(h => {
       // Création de la CARTE (c'est un bouton géant)
       const card = document.createElement('button');
       card.type = 'button';
