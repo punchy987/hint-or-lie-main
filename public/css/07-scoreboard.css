@@ -3,88 +3,90 @@
    ---------------------------------------------------------- */
 
 /* caché par défaut, affiché quand helpers.js lui met .scoreboard-inline */
-#scoreboard{ display:none; }
-#scoreboard *{ box-sizing: border-box; }
+#scoreboard { display: none; }
+#scoreboard * { box-sizing: border-box; }
 
-#scoreboard.scoreboard-inline{
-  display:block;
-  position:static;
-  width:100%;
-  max-width:680px;              /* optionnel : limite pour rester joli */
-  margin:12px auto 0;
-  background:linear-gradient(180deg,#1b1422,#14101b);
-  border:1px solid var(--line);
-  box-shadow:0 18px 50px rgba(0,0,0,.20), inset 0 0 0 1px #21162b;
-  border-radius:16px;
-  padding:10px 12px;
+#scoreboard.scoreboard-inline {
+  display: block;
+  position: static;
+  width: 100%;
+  max-width: 680px;
+  margin: 12px auto 0;
+  background: linear-gradient(180deg, #1b1422, #14101b);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .20), inset 0 0 0 1px #21162b;
+  border-radius: 16px;
+  padding: 10px 12px;
 }
 
-#scoreboard h4{
-  margin:0 0 6px 0;
-  font-size:15px;
-  letter-spacing:.2px;
-  color:#ffd9cc;
-  text-align:center;
+#scoreboard h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  letter-spacing: .2px;
+  color: #ffd9cc;
+  text-align: center;
 }
 
-/* ===== Liste compacte : NOM | POINTS ===== */
-#score-list{
-  list-style:none;
-  margin:0;
-  padding:0;
-  border-top:1px solid rgba(255,255,255,.08);
+/* ===== Liste compacte : AVATAR | NOM | POINTS ===== */
+#score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, .08);
 }
 
-#score-list li{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 48px; /* NOM | POINTS */
-  align-items:center;
-  gap:8px;
-  padding:8px 2px;
-  min-height:32px;
-  background:transparent;
-  border:0;
-  border-bottom:1px solid rgba(255,255,255,.08);
+#score-list li {
+  display: grid;
+  grid-template-columns: 32px 1fr 48px; /* AVATAR | NOM | POINTS */
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  min-height: 40px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
-#score-list li:last-child{ border-bottom:0; }
+#score-list li:last-child { border-bottom: 0; }
 
-/* NOM : prend tout l'espace restant, coupe proprement */
-#score-list li .name{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight:800;
-  color:var(--text);
-}
-
-/* POINTS : colonne compacte à droite */
-#score-list li .pts{
-  width:48px;
-  text-align:right;
-  font-weight:900;
-  color:#ffd0c4;
-  padding-left:0;
+/* FIX AVATAR : Taille forcée pour éviter les robots géants */
+#score-list li .score-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* On masque la colonne de rang (on passe à 2 colonnes) */
-#score-list li .rank{ display:none !important; }
-
-/* Mettre “moi” en valeur sans gonfler la hauteur */
-#score-list li.me{
-  border-left:3px solid var(--accent);
-  padding-left:6px;
-  box-shadow:none;
-  background:transparent;
+/* NOM : prend tout l'espace restant */
+#score-list li .name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  color: #ffffff;
 }
 
-/* Écrans très étroits : on resserre encore un peu */
-@media (max-width:360px){
-  #score-list li{
-    grid-template-columns:minmax(0,1fr) 40px; /* NOM | POINTS */
-    padding:6px 2px;
-    min-height:28px;
-    font-size:14px;
+/* POINTS : colonne à droite */
+#score-list li .pts {
+  width: 48px;
+  text-align: right;
+  font-weight: 900;
+  color: #ffd0c4;
+}
+
+/* Mise en valeur du joueur local */
+#score-list li.me {
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 3px solid #8b5cf6;
+  padding-left: 10px;
+}
+
+@media (max-width:360px) {
+  #score-list li {
+    grid-template-columns: 28px 1fr 40px;
+    padding: 6px 4px;
+    font-size: 14px;
   }
-  #score-list li .pts{ width:40px; }
+  #score-list li .score-avatar { width: 28px !important; height: 28px !important; }
 }
