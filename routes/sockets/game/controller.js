@@ -262,6 +262,20 @@ io.to(code).emit('roundResult', {
       io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
       broadcast(io, code);
 
+      // ✅ Timer automatique de 3 secondes pour retourner au lobby
+      startPhaseTimer(io, code, 3, 'prestart', () => {
+        const room = rooms.get(code);
+        if (!room) return;
+        room.state = 'lobby';
+        room.readyNext = new Set();
+        for (const p of room.players.values()) {
+          p.hint = null;
+          p.vote = null;
+          p.isImpostor = false;
+        }
+        broadcast(io, code);
+      });
+
     } else {
       // === FIN DE PARTIE : Gagnants finaux ===
       const winnersArr = activePlayers
