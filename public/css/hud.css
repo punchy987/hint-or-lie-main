@@ -1,25 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-
-:root {
-    --font-sans: 'Inter', sans-serif;
-    
-    --color-background: #0a0e14;
-    --color-accent-hud: #00f2ff;
-    --color-accent-glow: rgba(0, 242, 255, 0.5);
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #a0a8b3;
-    
-    --color-glass-bg: rgba(255, 255, 255, 0.05);
-    --color-glass-border: rgba(255, 255, 255, 0.1);
-    --color-glass-border-active: rgba(0, 242, 255, 0.3);
-
-    --panel-border-radius: 16px;
-    --input-border-radius: 8px;
-    --btn-border-radius: 8px;
-
-    --transition-fast: 0.2s ease;
-    --transition-medium: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
+@import url('/css/01-tokens.css');
 
 /* --- BASE & BODY --- */
 * {
@@ -33,10 +13,10 @@ html, body {
 }
 
 body {
-    font-family: var(--font-sans);
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--color-background) 70%);
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--bg) 70%);
     overflow: hidden; /* Empêche le scroll sur le body */
 }
 
@@ -50,28 +30,30 @@ body {
 
 /* --- SCREENS & PANELS --- */
 .screen {
-    width: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
     max-width: 480px;
-    margin: 0 auto;
-    animation: fadeIn 0.5s var(--transition-medium) forwards;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    left: 50%;
+    transform: translateX(-50%);
+    display: none; /* Caché par défaut */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
 }
 
 .panel {
-    background: var(--color-glass-bg);
-    border: 1px solid var(--color-glass-border);
-    border-radius: var(--panel-border-radius);
+    width: 100%;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--accent); /* Bordure cyan fine */
+    border-radius: var(--panel-radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
     padding: 2rem 1.5rem;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -166,7 +148,7 @@ input[type="text"]:focus {
     padding: 0.9rem;
     font-size: 1rem;
     font-weight: 700;
-    border-radius: var(--btn-border-radius);
+    border-radius: var(--btn-radius);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-transform: uppercase;

@@ -39,20 +39,25 @@
     }
 
     function initHomeActions() {
+        const btnJoin = $('btn-join');
+        if (btnJoin) {
+            btnJoin.onclick = () => {
+                const name = $('name-join')?.value.trim() || 'Joueur';
+                const code = ($('join-code')?.value.trim() || '').replace(/\D/g, '').slice(0, 4);
+                if (code.length !== 4) { toast('Code à 4 chiffres requis.'); return; }
+                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, name });
+                socket.emit('joinRoom', { code, pseudo: name, name, deviceId: getDeviceId() });
+            };
+        }
 
-        $('btn-join').onclick = () => {
-            const name = $('name-join')?.value.trim() || 'Joueur';
-            const code = ($('join-code')?.value.trim() || '').replace(/\D/g, '').slice(0, 4);
-            if (code.length !== 4) { toast('Code à 4 chiffres requis.'); return; }
-            socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, name });
-            socket.emit('joinRoom', { code, pseudo: name, name, deviceId: getDeviceId() });
-        };
-
-        $('btn-create').onclick = () => {
-            const name = $('name-create')?.value.trim() || 'Joueur';
-            socket.emit('hello', { deviceId: getDeviceId(), pseudo: name });
-            socket.emit('createRoom', { name: name, deviceId: getDeviceId() });
-        };
+        const btnCreate = $('btn-create');
+        if (btnCreate) {
+            btnCreate.onclick = () => {
+                const name = $('name-create')?.value.trim() || 'Joueur';
+                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name });
+                socket.emit('createRoom', { name: name, deviceId: getDeviceId() });
+            };
+        }
 
         $('btn-how')?.addEventListener('click', () => {
             const panel = $('how');
@@ -142,7 +147,8 @@
 
         const onRoomEntry = ({ code }) => {
             state.me.code = code;
-            $('lobby-code').textContent = code;
+            const lobbyCode = $('lobby-code');
+            if (lobbyCode) lobbyCode.textContent = code;
             show('screen-lobby');
             state.myLobbyReady = false;
             if ($('btn-ready')) $('btn-ready').textContent = 'Je suis prêt';

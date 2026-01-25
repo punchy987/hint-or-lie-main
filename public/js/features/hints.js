@@ -80,7 +80,7 @@
     }
     sending = true;
     const sendBtn = ui.send();
-    if (sendBtn) sendBtn.disabled = true;
+    if (sendBtn) { sendBtn.disabled = true; }
     socket.emit('submitHint', { hint: val });
   }
 
