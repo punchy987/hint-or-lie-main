@@ -1,53 +1,135 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hint or Lie · by Mits</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hint or Lie · by Mits</title>
 
-  <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
-  <script defer src="/socket.io/socket.io.js"></script>
+    <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
+    <script defer src="/socket.io/socket.io.js"></script>
 
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/css/01-tokens.css">
-  <link rel="stylesheet" href="/css/02-base.css">
-  <link rel="stylesheet" href="/css/03-components.css">
-  <link rel="stylesheet" href="/css/04-phase.css">
-  <link rel="stylesheet" href="/css/05-hints.css">
-  <link rel="stylesheet" href="/css/06-vote.css">
-  <link rel="stylesheet" href="/css/07-modal-score.css">
-  <link rel="stylesheet" href="/css/07-scoreboard.css">
-  <link rel="stylesheet" href="/css/08-lobby-header.css">
-  <link rel="stylesheet" href="/css/09-spectator.css">
-  <link rel="stylesheet" href="/css/10-scoreboard.css">
-  <link rel="stylesheet" href="/css/99-pwa-update.css">
-  <link rel="stylesheet" href="/css/98-responsive.css">
+    <link rel="manifest" href="/manifest.json">
+    
+    <link rel="stylesheet" href="/css/hud.css">
+    <link rel="stylesheet" href="/css/99-pwa-update.css">
+    <link rel="stylesheet" href="/css/98-responsive.css">
 
-  <meta name="theme-color" content="#0f0b14">
-  <link rel="icon" type="image/png" href="/icons/icon-32.png">
+    <meta name="theme-color" content="#0a0e14">
+    <link rel="icon" type="image/png" href="/icons/icon-32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 </head>
-<body class="stars">
+<body>
 
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  
-  <script defer src="/js/core/dom.js"></script>
-  <script defer src="/js/core/helpers.js"></script>
-  <script defer src="/js/core/state.js"></script>
-  <script defer src="/js/core/socket.js"></script>
+    <main id="game-container">
+        <!-- Écran d'accueil -->
+        <section id="screen-home" class="screen">
+            <div class="panel">
+                <h1 class="game-title">Hint <span>or</span> Lie</h1>
+                <div class="tabs">
+                    <button id="tab-create" role="tab" aria-selected="true">Créer une salle</button>
+                    <button id="tab-join" role="tab" aria-selected="false">Rejoindre</button>
+                </div>
 
-  <script defer src="/js/features/leaderboard.js"></script>
-  <script defer src="/js/features/home.js"></script>
-  <script defer src="/js/features/hints.js"></script>
-  <script defer src="/js/features/vote.js"></script>
-  <script defer src="/js/features/results.js"></script>
+                <!-- Pane: Créer une salle -->
+                <div id="pane-create" class="tab-pane active">
+                    <div class="avatar-picker">
+                        <img id="avatar-preview-img-create" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" alt="Avatar Preview">
+                    </div>
+                    <input type="text" id="name-create" placeholder="Entrez votre pseudo" maxlength="16">
+                    <button id="btn-create" class="btn btn-primary">Créer</button>
+                </div>
+
+                <!-- Pane: Rejoindre une salle -->
+                <div id="pane-join" class="tab-pane">
+                    <div class="avatar-picker">
+                        <img id="avatar-preview-img-join" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" alt="Avatar Preview">
+                    </div>
+                    <input type="text" id="name-join" placeholder="Entrez votre pseudo" maxlength="16">
+                    <input type="text" id="join-code" placeholder="Code (4 chiffres)" inputmode="numeric" maxlength="4">
+                    <button id="btn-join" class="btn btn-primary">Rejoindre</button>
+                </div>
+                 <div class="rules-container">
+                    <button id="btn-how" class="btn btn-secondary">Règles rapides</button>
+                    <div id="how" style="display: none;">
+                        <p><strong>But du jeu :</strong> L'imposteur doit se fondre parmi les équipiers.</p>
+                        <ul>
+                            <li><strong>Équipiers :</strong> Vous recevez un mot secret. Donnez un indice (un seul mot) pour le faire deviner aux autres.</li>
+                            <li><strong>Imposteur :</strong> Vous n'avez pas le mot. Soyez malin, écoutez les indices des autres et bluffez !</li>
+                            <li><strong>Vote :</strong> Tout le monde vote pour démasquer l'imposteur.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Écran Lobby/Salle d'attente -->
+        <section id="screen-lobby" class="screen" style="display: none;">
+            <header class="lobby-header">
+                <button id="btn-back-home" class="btn btn-secondary">&lt; Quitter</button>
+                <div class="lobby-code-container">
+                    <span>CODE</span>
+                    <strong id="lobby-code">1234</strong>
+                </div>
+                <div id="lobby-ready-pill">0/0 prêts</div>
+            </header>
+            
+            <h2>Joueurs connectés</h2>
+            <div id="players" class="player-grid">
+                <!-- Les cartes des joueurs seront injectées ici par le JS -->
+            </div>
+
+            <div class="lobby-actions">
+                <button id="btn-ready" class="btn btn-primary">Je suis prêt</button>
+                <div id="timer-lobby" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Autres écrans (vides pour l'instant, mais avec les IDs requis) -->
+        <section id="screen-hint" class="screen" style="display: none;"></section>
+        <section id="screen-vote" class="screen" style="display: none;"></section>
+        <section id="screen-result" class="screen" style="display: none;"></section>
+        
+        <!-- Toasts / Notifications -->
+        <div id="toast"></div>
+
+        <!-- IDs requis par guard.js mais non visibles/utilisés dans le lobby -->
+        <div style="display: none;">
+            <input id="hint-input">
+            <button id="btn-send-hint"></button>
+            <div id="hint-status"></div>
+            <div id="impostor-tip"></div>
+            <div id="hint-instruction"></div>
+            <div id="vote-buttons"></div>
+            <div id="hints"></div>
+            <div id="scoreboard"></div>
+            <ul id="score-list"></ul>
+            <div id="round-num"></div>
+            <div id="timer-hints"></div>
+            <div id="timer-vote"></div>
+            <div id="timer-reveal"></div>
+        </div>
+
+    </main>
+    
+    <div id="update-banner" style="display:none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script defer src="/js/core/dom.js"></script>
+    <script defer src="/js/core/helpers.js"></script>
+    <script defer src="/js/core/state.js"></script>
+    <script defer src="/js/core/socket.js"></script>
   
-  <script defer src="/js/pwa/update.js"></script>
-  <script defer src="/js/dev/guard.js"></script>
-  
-  <!-- Confetti library for celebration animations -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js" defer></script>
-  
-  <script defer src="/js/main.js"></script>
+    <script defer src="/js/features/leaderboard.js"></script>
+    <script defer src="/js/features/home.js"></script>
+    <script defer src="/js/features/hints.js"></script>
+    <script defer src="/js/features/vote.js"></script>
+    <script defer src="/js/features/results.js"></script>
+    
+    <script defer src="/js/pwa/update.js"></script>
+    <script defer src="/js/dev/guard.js"></script>
+    
+    <script defer src="/js/main.js"></script>
 
 </body>
 </html>

@@ -59,9 +59,6 @@
             const btn = $('btn-how');
             const visible = panel.style.display !== 'none';
 
-            btn.style.transform = "scale(0.92)";
-            setTimeout(() => btn.style.transform = "scale(1)", 100);
-
             if (visible) {
                 panel.style.display = 'none';
                 btn.textContent = 'Règles rapides';
@@ -90,7 +87,7 @@
                 
                 if (br) {
                     br.textContent = state.myLobbyReady ? 'Annuler prêt' : 'Je suis prêt';
-                    br.style.opacity = state.myLobbyReady ? '1' : '0.8';
+                    br.classList.toggle('ready', state.myLobbyReady);
                 }
                 
                 socket.emit('playerReadyLobby', { ready: state.myLobbyReady });
@@ -184,7 +181,7 @@
             if (btnReady) {
                 btnReady.textContent = 'Je suis prêt';
                 btnReady.disabled = false;
-                btnReady.style.opacity = '0.8';
+                btnReady.classList.remove('ready');
                 btnReady.title = '';
             }
             window.HOL.show('screen-home');

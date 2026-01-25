@@ -1,5 +1,0 @@
-tableau de score inexistant (à corriger) on avait dit seulement au salon.
-boutons "envoyer l'indice" et bouton "prêt" à revoir peut etre décalés pour les utilisateurs mobile -> revoir tous les boutons. corriger les tailles et alignements
-mise en attente des gens qui rejoignent pendant une manche peuvent voir le déroulement des manches (à voir pour les détails exactes) 
-
-
