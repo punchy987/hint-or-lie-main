@@ -280,24 +280,11 @@ io.to(code).emit('roundResult', {
       // === CONTINUATION : passer à reveal ===
       r.state = 'reveal';
       r.readyNext = new Set();
-      io.to(code).emit('readyProgress', { ready: 0, total: r.players.size });
+      io.to(code).emit('readyProgress', { ready: 0, total: activePlayers.length });
       
       // ✅ Broadcaster maintenant pour que le client sorte de l'écran de vote
       broadcast(io, code);
-
-      // ✅ Timer automatique de 3 secondes pour retourner au lobby
-      startPhaseTimer(io, code, 3, 'prestart', () => {
-        const room = rooms.get(code);
-        if (!room) return;
-        room.state = 'lobby';
-        room.readyNext = new Set();
-        for (const p of room.players.values()) {
-          p.hint = null;
-          p.vote = null;
-          p.isImpostor = false;
-        }
-        broadcast(io, code);
-      });
+      // On attend maintenant que les joueurs cliquent sur "Prêt" (géré par playerReadyNext dans index.js)
 
     } else {
       // === FIN DE PARTIE : Gagnants finaux ===

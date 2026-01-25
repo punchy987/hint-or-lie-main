@@ -363,8 +363,9 @@ module.exports = function setupSockets(io, db){
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'reveal') return;
       r.readyNext ||= new Set();
       r.readyNext.add(socket.id);
-      io.to(joined.code).emit('readyProgress', { ready: r.readyNext.size, total: r.players.size });
-      if (r.readyNext.size === r.players.size){
+      const activeCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
+      io.to(joined.code).emit('readyProgress', { ready: r.readyNext.size, total: activeCount });
+      if (r.readyNext.size >= activeCount && activeCount > 0){
         startPhaseTimer(io, joined.code, 3, 'prestart', ()=> controller.startRound(joined.code));
       }
     });
