@@ -120,9 +120,8 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
   function maybeStartVoting(code) {
     const r = rooms.get(code); if (!r) return;
     if (r.state !== 'hints') return;
-
     // Ne compte que les joueurs actifs et connectés
-    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
     const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
     const total = activeConnected.length;
 
@@ -167,7 +166,7 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
 
     p.vote = voteId; // On stocke l'ID de l'indice (sera converti dans finishVoting)
 
-    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
     const submitted = activeConnected.filter(id => r.players.get(id)?.vote).length;
     const total = activeConnected.length;
 
@@ -184,7 +183,7 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
 
     clearRoomTimer(r);
 
-    const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+    const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
     const impId = r.impostor;
 
     // === NEW: conversion éventuelle des votes "hintId" -> "playerId"
@@ -259,16 +258,16 @@ for (const id of activeConnected) {
 io.to(code).emit('roundResult', {
   round: r.round,
   impostorId: impId,
-  impostorName: r.players.get(impId)?.name,
-  common: r.words.common,
+  impostorName: r.players.get(impId)?.name || '?',
+  common: r.words?.common,
   impostor: null,                        // l’imposteur n’a pas de mot dans ta V2
   impostorHint,                          // ✅ NOUVEAU
-  commonDisplay: labelWordByDomain(r.words.common, r.words.domain),
+  commonDisplay: labelWordByDomain(r.words?.common, r.words?.domain),
   impostorDisplay: '—',
   votes: tally,
   votesDetail: votesDetail,
   impostorCaught: caught,
-  domain: r.words.domain,
+  domain: r.words?.domain,
 });
 
     // ✅ VÉRIFICATION FIN DE PARTIE (10 pts)

@@ -27,13 +27,8 @@
   pointer-events:none; z-index:0;  /* derrière */
 }
 
-/* Tous les enfants visibles de .phase-bar passent au-dessus de la progression */
-.phase-bar > *:not(.phase-progress){
-  position:relative;
-  z-index:2;
-}
-
 /* Alias spécifiques */
+/* Les enfants de .phase-bar (gauche, centre, droite) passent au-dessus du calque de progression (::after) */
 .phase-left,.phase-center,.phase-right{ position:relative; z-index:2; }
 .phase-left,.phase-center,.phase-right{ min-width:0 } /* accessibilité */
 
