@@ -160,44 +160,8 @@
         socket.on('roomJoined', onRoomEntry);
         socket.on('roomError', ({ message }) => toast(message || 'Erreur de salle.'));
 
-        socket.on('roomUpdate', (snap) => {
-            state.room = snap;
-            
-            // Si on était en attente de spectateur et qu'on revient au lobby → rejoindre la partie
-            if (snap.state === 'lobby') {
-                const modal = $('#modal');
-                if (modal && modal.style.display === 'flex') {
-                    const box = modal.querySelector('.box');
-                    if (box && box.textContent.includes('Partie en cours')) {
-                        modal.style.display = 'none';
-                        show('screen-lobby');
-                    }
-                }
-            }
-            
-            if ($('round-num')) $('round-num').textContent = snap.round;
-            const list = $('players');
-            if (list) {
-                list.innerHTML = '';
-                list.style.display = 'grid';
-                list.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
-                list.style.gap = '10px';
 
-                snap.players.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'player-card'; 
-                    card.style.cssText = 'background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;border:1px solid rgba(255,255,255,0.1);';
-                    
-                    const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.name || 'default')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-                    card.innerHTML = `
-                        <img src="${avatarUrl}" style="width:50px;height:50px;border-radius:50%;margin-bottom:6px;" />
-                        <div style="font-weight:bold;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${p.name}</div>
-                    `;
-                    list.appendChild(card);
-                });
-            }
-            if (window.HOL.updateScoreboard) window.HOL.updateScoreboard(snap.players);
-        });
+
 
         socket.on('lobbyReadyProgress', ({ ready, total }) => {
             if ($('lobby-ready-pill')) $('lobby-ready-pill').textContent = `${ready}/${total} prêts`;

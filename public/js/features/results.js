@@ -153,16 +153,7 @@
       }, 3500);
     });
 
-    socket.on('roomUpdate', (snap) => {
-      state.room = snap;
-      if (snap.state === 'lobby') {
-        const modal = $('modal');
-        if (modal && modal.style.display === 'flex') {
-          modal.style.display = 'none';
-          show('screen-home');
-        }
-      }
-    });
+
   }
 
   function showGameOverModal(winners, finalScores) {
