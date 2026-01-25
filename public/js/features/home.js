@@ -194,8 +194,6 @@
             if (btnReady) {
                 btnReady.textContent = 'Je suis prêt';
                 btnReady.disabled = false;
-                btnReady.classList.remove('ready');
-                btnReady.title = '';
             }
             window.HOL.show('screen-home');
         });

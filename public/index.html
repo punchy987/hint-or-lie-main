@@ -64,24 +64,15 @@
 
         <!-- Écran Lobby/Salle d'attente -->
         <section id="screen-lobby" class="screen" style="display: none;">
-            <header class="lobby-header">
-                <button id="btn-back-home" class="btn btn-secondary">&lt; Quitter</button>
-                <div class="lobby-code-container">
-                    <span>CODE</span>
-                    <strong id="lobby-code">1234</strong>
-                </div>
-                <div id="lobby-ready-pill">0/0 prêts</div>
-            </header>
+            <button id="btn-back-home" class="btn btn-secondary">&lt; Quitter</button>
+            <h1 id="lobby-code">0000</h1>
+            <div id="lobby-ready-pill">0/0 prêts</div>
             
             <h2>Joueurs connectés</h2>
-            <div id="players" class="player-grid">
-                <!-- Les cartes des joueurs seront injectées ici par le JS -->
-            </div>
+            <div id="players" class="player-grid"></div>
 
-            <div class="lobby-actions">
-                <button id="btn-ready" class="btn btn-primary"><span>Je suis prêt</span></button>
-                <div id="timer-lobby" style="display: none;"></div>
-            </div>
+            <button id="btn-ready" class="btn btn-primary">Je suis prêt</button>
+            <div id="timer-lobby" style="display: none;"></div>
         </section>
 
         <!-- Autres écrans (vides pour l'instant, mais avec les IDs requis) -->
