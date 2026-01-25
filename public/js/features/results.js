@@ -4,13 +4,13 @@
   function playResultCinematic({ win, text, isGameOver = false }) {
     const resultOverlay = $('result-reveal-overlay');
     const resultText = $('reveal-result-text');
-
-    resultText.textContent = text;
+    
+    if (resultText) resultText.textContent = text;
     if (isGameOver) {
-      resultText.style.fontSize = 'clamp(2rem, 10vw, 5rem)';
+      if (resultText) resultText.style.fontSize = 'clamp(2rem, 10vw, 5rem)';
     }
-    resultText.className = win ? 'victory' : 'defeat';
-    resultOverlay.classList.add('playing');
+    if (resultText) resultText.className = win ? 'victory' : 'defeat';
+    if (resultOverlay) resultOverlay.classList.add('playing');
 
     if (win && window.confetti) {
       const config = isGameOver
@@ -23,20 +23,23 @@
     }
 
     return new Promise(resolve => setTimeout(() => {
-      resultOverlay.classList.remove('playing');
+      if (resultOverlay) resultOverlay.classList.remove('playing');
       resolve();
     }, isGameOver ? 3500 : 2500));
   }
 
   function initUI() {
-    $('btn-next').onclick = () => {
-      $('btn-next').disabled = true;
-      $('btn-next').textContent = 'Prêt ✓';
+    const btnNext = $('btn-next');
+    if (btnNext) btnNext.onclick = () => {
+      btnNext.disabled = true;
+      btnNext.textContent = 'Prêt ✓';
       socket.emit('playerReadyNext');
     };
-    $('btn-modal-lobby').onclick = () => { 
+    const btnModalLobby = $('btn-modal-lobby');
+    if (btnModalLobby) btnModalLobby.onclick = () => { 
       show('screen-lobby'); 
-      $('modal').style.display = 'none'; 
+      const modal = $('modal');
+      if (modal) modal.style.display = 'none'; 
     };
   }
 
@@ -49,12 +52,14 @@
       
       show('screen-result');
 
-      $('btn-next').disabled = false;
-      $('btn-next').textContent = 'Manche suivante';
-      $('res-common').textContent = res.common || '';
+      const btnNext = $('btn-next');
+      if (btnNext) { btnNext.disabled = false; btnNext.textContent = 'Manche suivante'; }
+      const resCommon = $('res-common');
+      if (resCommon) resCommon.textContent = res.common || '';
 
       const impName = res.impostorName || '(?)';
       const impContainer = $('res-imp-name');
+      if (impContainer) {
       impContainer.innerHTML = '';
       impContainer.style.display = 'flex';
       impContainer.style.flexDirection = 'column';
@@ -77,11 +82,12 @@
 
       impContainer.appendChild(img);
       impContainer.appendChild(nameSpan);
+      }
 
       const votesContainer = $('res-votes');
-      votesContainer.innerHTML = '';
+      if (votesContainer) votesContainer.innerHTML = '';
 
-      if (res.votesDetail && state.room?.players) {
+      if (votesContainer && res.votesDetail && state.room?.players) {
         const title = document.createElement('h4');
         title.textContent = 'Détail des votes';
         title.style.textAlign = 'center';

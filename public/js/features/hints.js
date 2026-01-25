@@ -62,14 +62,15 @@
 
   function sendHint() {
     if (locked || sending) return;
-    const val = (ui.input()?.value || '').trim();
+    const inputEl = ui.input();
+    const val = (inputEl?.value || '').trim();
     if (!val) {
       const status = ui.status();
       if (status) {
         status.textContent = 'Écris un indice 😉';
         status.classList.add('error');
         setTimeout(() => {
-          if (status.textContent === 'Écris un indice 😉') {
+          if (status && status.textContent === 'Écris un indice 😉') {
             status.textContent = '';
             status.classList.remove('error');
           }
@@ -78,7 +79,8 @@
       return;
     }
     sending = true;
-    ui.send().disabled = true;
+    const sendBtn = ui.send();
+    if (sendBtn) sendBtn.disabled = true;
     socket.emit('submitHint', { hint: val });
   }
 
@@ -96,31 +98,31 @@
         resetPhaseProgress();
         applyRoleTheme(isImpostor);
 
-        if (ui.theme()) ui.theme().textContent = domain || '—';
-        if (ui.role()) {
-          ui.role().textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
-          ui.role().style.color = isImpostor ? 'var(--danger)' : 'var(--crew)';
+        const themeEl = ui.theme(); if (themeEl) themeEl.textContent = domain || '—';
+        const roleEl = ui.role();
+        if (roleEl) {
+          roleEl.textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
+          roleEl.style.color = isImpostor ? 'var(--danger)' : 'var(--crew)';
         }
 
         const tipEl = ui.tip();
-        if (isImpostor) {
+        if (tipEl && isImpostor) {
           tipEl.style.display = 'block';
           tipEl.innerHTML = "🤫 <strong>CHUT !</strong> Tu n’as pas de mot.<br>Observe les indices et invente un mensonge !";
-          ui.wordChip().style.display = 'none';
+          const wordChip = ui.wordChip(); if (wordChip) wordChip.style.display = 'none';
           ensureLiveUI();
           if (liveList) liveList.innerHTML = '';
-          ui.input()?.insertAdjacentElement('beforebegin', liveBox);
+          const inputEl = ui.input(); if (inputEl) inputEl.insertAdjacentElement('beforebegin', liveBox);
           liveBox.style.display = 'block';
-        } else {
+        } else if (tipEl) {
           tipEl.style.display = 'none';
-          ui.wordChip().style.display = 'block';
-          ui.wordChipText().textContent = wordDisplay || word || '—';
+          const wordChip = ui.wordChip(); if (wordChip) wordChip.style.display = 'block';
+          const wordChipText = ui.wordChipText(); if (wordChipText) wordChipText.textContent = wordDisplay || word || '—';
           if (liveBox) liveBox.style.display = 'none';
         }
 
-        ui.input().value = '';
-        ui.input().disabled = false;
-        ui.send().disabled = false;
+        const inputEl = ui.input(); if (inputEl) { inputEl.value = ''; inputEl.disabled = false; }
+        const sendBtn = ui.send(); if (sendBtn) sendBtn.disabled = false;
         setRound(round);
       });
     });
