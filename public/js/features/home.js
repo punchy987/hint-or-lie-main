@@ -85,6 +85,13 @@
             if (roomState === 'lobby') {
                 state.myLobbyReady = !state.myLobbyReady;
                 
+                // Instant local feedback
+                const myId = window.HOL.state.me.id;
+                const myCard = document.querySelector(`.player-card[data-player-id="${myId}"]`);
+                if (myCard) {
+                    myCard.classList.toggle('is-ready', state.myLobbyReady);
+                }
+
                 if (br) {
                     br.textContent = state.myLobbyReady ? 'Annuler prêt' : 'Je suis prêt';
                     br.classList.toggle('ready', state.myLobbyReady);
@@ -149,7 +156,13 @@
 
 
         socket.on('lobbyReadyProgress', ({ ready, total }) => {
-            if ($('lobby-ready-pill')) $('lobby-ready-pill').textContent = `${ready}/${total} prêts`;
+            const pill = $('lobby-ready-pill');
+            if (pill) {
+                pill.textContent = `${ready}/${total} prêts`;
+                const allReady = ready === total && total > 0;
+                pill.classList.toggle('pulse-slow', !allReady);
+                pill.classList.toggle('pulse-fast', allReady);
+            }
         });
 
         socket.on('lobbyCountdownStarted', ({ seconds }) => {

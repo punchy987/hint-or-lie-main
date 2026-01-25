@@ -1,4 +1,4 @@
-﻿(function () {
+﻿﻿(function () {
   const { $, fmt, state, socket, startPhaseAnim } = window.HOL;
 
   function updateUIFromState(snap) {
@@ -30,7 +30,12 @@
           list.innerHTML = '';
           snap.players.forEach(p => {
               const card = document.createElement('div');
-              card.className = 'player-card'; 
+              card.className = 'player-card';
+              card.dataset.playerId = p.id; // For local feedback
+
+              if (p.ready) {
+                  card.classList.add('is-ready');
+              }
               
               // Determine status
               let statusText = '';
@@ -66,7 +71,8 @@
         }
         const btnReady = $('btn-ready');
         if (btnReady) {
-          btnReady.textContent = 'Je suis pret';
+          const span = btnReady.querySelector('span');
+          if (span) span.textContent = 'Je suis prêt';
           btnReady.disabled = false;
         }
       }
@@ -131,11 +137,12 @@
       window.HOL.show('screen-lobby');
       const btnReady = $('btn-ready');
       if (btnReady) {
-        btnReady.textContent = 'Je suis pret';
+        const span = btnReady.querySelector('span');
+        if (span) span.textContent = 'Je suis prêt';
         btnReady.disabled = false;
       }
       state.myLobbyReady = false;
-      window.HOL.toast('Partie reinitalisee !', 1500);
+      window.HOL.toast('Partie réinitialisée !', 1500);
     });
   }
 
