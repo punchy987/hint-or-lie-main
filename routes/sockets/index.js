@@ -40,6 +40,29 @@ module.exports = function setupSockets(io, db){
   const { upsertRoundResult, getTop50, getMyStats, applyPenaltyIfNotWinner } = makePersistence(db);
   const controller = createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS });
 
+  /**
+   * Envoie un snapshot complet et CORRECT de l'état de la salle à tous les clients.
+   * Cette fonction remplace `broadcast()` qui est suspecté d'avoir un bug
+   * dans la sérialisation de la liste des joueurs (oubli de l'ID).
+   * @param {SocketIO.Server} io - L'instance du serveur Socket.IO.
+   * @param {string} code - Le code de la salle.
+   */
+  function sendCorrectRoomState(io, code) {
+    const r = rooms.get(code);
+    if (!r) return;
+
+    const roomState = {
+      code: code,
+      hostId: r.hostId,
+      state: r.state,
+      round: r.round || 0,
+      players: Array.from(r.players.entries()).map(([id, p]) => ({
+        id: id, name: p.name, score: p.score || 0, disconnected: !!p.disconnected,
+      })),
+    };
+    io.to(code).emit('roomState', roomState);
+  }
+
   io.on('connection',(socket)=>{
     let joined  = { code:null };
     let profile = { deviceId:null, lastPseudo:null };
@@ -98,7 +121,7 @@ module.exports = function setupSockets(io, db){
 
         console.log('[Socket] Émission de roomCreated avec code:', code);
         socket.emit('roomCreated', { code });
-        broadcast(io, code);
+        sendCorrectRoomState(io, code);
       } catch (err) {
         console.error('[Error] Création de salle échouée:', err);
         socket.emit('errorMsg', 'Erreur lors de la création de la salle.');
@@ -147,12 +170,13 @@ module.exports = function setupSockets(io, db){
           state: r.state,
           phase: r.state,
           round: r.round || 0,
-          players: Array.from(r.players.values()).map(p => ({ 
-            id: p.id, 
-            name: p.name, 
+          // ✅ FIX: Itérer sur `entries()` pour avoir l'ID (la clé) et le joueur (la valeur).
+          // `p.id` était `undefined`, ce qui empêchait l'affichage du joueur reconnecté.
+          players: Array.from(r.players.entries()).map(([id, p]) => ({
+            id: id,
+            name: p.name,
             score: p.score || 0,
-            isImpostor: p.isImpostor,
-            disconnected: p.disconnected
+            disconnected: !!p.disconnected
           })),
           scores: Object.fromEntries(
             Array.from(r.players.entries()).map(([id, p]) => [id, p.score || 0])
@@ -205,10 +229,12 @@ module.exports = function setupSockets(io, db){
       }
 
       socket.emit('roomJoined', { code });
-      broadcast(io, code);
+      sendCorrectRoomState(io, code);
 
       r.lobbyReady ||= new Set();
-      io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
+      // ✅ FIX: Le total doit refléter les joueurs connectés, pas la taille de `r.players` qui peut contenir des joueurs déconnectés.
+      const connectedCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
+      io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: connectedCount });
     });
 
     // ---- leaveRoom
@@ -266,7 +292,7 @@ module.exports = function setupSockets(io, db){
 
       socket.leave(code);
       joined.code = null;
-      broadcast(io, code);
+      sendCorrectRoomState(io, code);
       socket.emit('leftRoom');
     });
 
@@ -379,7 +405,7 @@ module.exports = function setupSockets(io, db){
       clearRoomTimer(r);
       io.to(joined.code).emit('lobbyCountdownCancelled');
       io.to(joined.code).emit('scoresReset');
-      broadcast(io, joined.code);
+      sendCorrectRoomState(io, joined.code);
     });
 
     // ---- disconnect
@@ -443,7 +469,7 @@ module.exports = function setupSockets(io, db){
 
         io.to(code).emit('lobbyCountdownCancelled');
         io.to(code).emit('errorMsg', 'Pas assez de joueurs actifs, retour au lobby');
-        broadcast(io, code);
+        sendCorrectRoomState(io, code);
         return;
       }
 
@@ -504,7 +530,7 @@ module.exports = function setupSockets(io, db){
         }
       }
 
-      broadcast(io, code);
+      sendCorrectRoomState(io, code);
     });
   });
 };
