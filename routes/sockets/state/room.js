@@ -77,7 +77,7 @@ function snapshot(code) {
  */
 function broadcast(io, code) {
   const s = snapshot(code);
-  if (s) io.to(code).emit('roomUpdate', s);
+  if (s) io.to(code).emit('roomState', s);
 }
 
 module.exports = { rooms, createRoom, snapshot, broadcast };

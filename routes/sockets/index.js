@@ -40,34 +40,9 @@ module.exports = function setupSockets(io, db){
   const { upsertRoundResult, getTop50, getMyStats, applyPenaltyIfNotWinner } = makePersistence(db);
   const controller = createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS });
 
-  /**
-   * Envoie un snapshot complet et CORRECT de l'état de la salle à tous les clients.
-   * Cette fonction remplace `broadcast()` qui est suspecté d'avoir un bug
-   * dans la sérialisation de la liste des joueurs (oubli de l'ID).
-   * @param {SocketIO.Server} io - L'instance du serveur Socket.IO.
-   * @param {string} code - Le code de la salle.
-   */
-  function sendCorrectRoomState(io, code) {
-    const r = rooms.get(code);
-    if (!r) return;
-
-    const roomState = {
-      code: code,
-      hostId: r.hostId,
-      state: r.state,
-      round: r.round || 0,
-      players: Array.from(r.players.entries()).map(([id, p]) => ({
-        id: id, name: p.name, score: p.score || 0, disconnected: !!p.disconnected,
-      })),
-    };
-    io.to(code).emit('roomState', roomState);
-  }
-
   io.on('connection',(socket)=>{
     let joined  = { code:null };
     let profile = { deviceId:null, lastPseudo:null };
-
-    if (socket.onAny) socket.onAny((ev, ...args) => console.debug('⟵', socket.id, ev, ...args));
 
     socket.on('hello', ({ deviceId, pseudo } = {})=>{
       if (deviceId) profile.deviceId   = String(deviceId).slice(0,64);
@@ -98,15 +73,11 @@ module.exports = function setupSockets(io, db){
       } : { rp:0, rounds:0, wins:0, winsCrew:0, winsImpostor:0 });
     });
 
-// ---- createRoom
     socket.on('createRoom', ({ name, deviceId, pseudo } = {}) => {
       try {
-        console.log('[Socket] createRoom reçu - name:', name, 'pseudo:', pseudo, 'deviceId:', deviceId);
         const displayName = String(name || pseudo || profile.lastPseudo || 'Joueur').slice(0, 16);
-        console.log('[Socket] displayName calculé:', displayName);
         
         const code = createRoom(socket.id, displayName);
-        console.log('[Socket] Salle créée avec le code:', code, 'pour socketId:', socket.id);
 
         socket.join(code);
         joined.code = code;
@@ -114,20 +85,16 @@ module.exports = function setupSockets(io, db){
         profile.deviceId = String(deviceId || profile.deviceId || '').slice(0, 64) || null;
 
         const r = rooms.get(code);
-        console.log('[Socket] Room trouvée?', r ? 'OUI' : 'NON');
         if (r && r.players.has(socket.id)) {
           r.players.get(socket.id).deviceId = profile.deviceId;
         }
 
-        console.log('[Socket] Émission de roomCreated avec code:', code);
         socket.emit('roomCreated', { code });
-        sendCorrectRoomState(io, code);
+        broadcast(io, code);
       } catch (err) {
-        console.error('[Error] Création de salle échouée:', err);
         socket.emit('errorMsg', 'Erreur lors de la création de la salle.');
       }
     });
-    // ---- joinRoom
     socket.on('joinRoom', ({ code, name, deviceId, pseudo } = {})=>{
       code = String(code || '').trim();
       if (!/^\d{4}$/.test(code)) return socket.emit('errorMsg','Code invalide (4 chiffres)');
@@ -140,7 +107,6 @@ module.exports = function setupSockets(io, db){
       profile.lastPseudo = displayName;
       profile.deviceId   = String(deviceId || profile.deviceId || '').slice(0,64) || null;
 
-      // Persistance: recherche d'un joueur déconnecté avec le même pseudo
       let disconnectedPlayerEntry = null;
       for (const [id, p] of r.players.entries()) {
         if (p.name === displayName && p.disconnected) {
@@ -151,27 +117,20 @@ module.exports = function setupSockets(io, db){
 
       if (disconnectedPlayerEntry) {
         const [oldId, pData] = disconnectedPlayerEntry;
-        r.players.delete(oldId); // Supprime l'ancienne entrée
+        r.players.delete(oldId); 
         if(r.active?.has(oldId)) {
           r.active.delete(oldId);
-          // ⚠️ NE PAS réintégrer immédiatement, le flag spectator sera restauré ci-dessous
         }
-        // Restaure les données sur le nouveau socket.id
         pData.disconnected = false;
         pData.disconnectedSince = undefined;
-        // ✅ IMPORTANT : Ne pas réinitialiser spectator ici - maintenir son état précédent
         r.players.set(socket.id, pData);
-        console.log(`[Socket] Joueur reconnecté: ${displayName} (nouveau ID: ${socket.id})`);
 
         io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
 
-        // ✅ NOUVEAU : Envoyer l'état du jeu au client reconnecté
         const gameState = {
           state: r.state,
           phase: r.state,
           round: r.round || 0,
-          // ✅ FIX: Itérer sur `entries()` pour avoir l'ID (la clé) et le joueur (la valeur).
-          // `p.id` était `undefined`, ce qui empêchait l'affichage du joueur reconnecté.
           players: Array.from(r.players.entries()).map(([id, p]) => ({
             id: id,
             name: p.name,
@@ -184,7 +143,6 @@ module.exports = function setupSockets(io, db){
         };
         socket.emit('gameStateSync', gameState);
 
-        // ✅ NOUVEAU : Si c'était un spectateur ET qu'on est encore en partie → rester spectateur
         if (r.state !== 'lobby' && pData.spectator) {
           socket.emit('spectatorMode', { 
             phase: r.state, 
@@ -193,7 +151,6 @@ module.exports = function setupSockets(io, db){
         }
 
       } else {
-        // Vérification de l'unicité du pseudo pour les nouveaux joueurs
         const isPseudoTaken = Array.from(r.players.values()).some(p => !p.disconnected && p.name === displayName);
         if (isPseudoTaken) {
           socket.leave(code);
@@ -204,14 +161,13 @@ module.exports = function setupSockets(io, db){
         r.players.set(socket.id, {
           name: displayName, hint:null, vote:null, isImpostor:false, score:0,
           deviceId: profile.deviceId,
-          spectator: false  // ✅ Nouveaux joueurs ne sont PAS spectateurs au début
+          spectator: false
         });
       }
 
-      // Rejoint en cours de manche → spectateur
       if (r.state !== 'lobby') {
         const p = r.players.get(socket.id);
-        if (p) p.spectator = true;  // ✅ Marquer TOUS les arrivants en cours de partie
+        if (p) p.spectator = true;
         socket.emit('spectatorMode', { 
           phase: r.state, 
           message: 'Manche en cours. Vous rejoindrez la prochaine manche.' 
@@ -229,15 +185,13 @@ module.exports = function setupSockets(io, db){
       }
 
       socket.emit('roomJoined', { code });
-      sendCorrectRoomState(io, code);
+      broadcast(io, code);
 
       r.lobbyReady ||= new Set();
-      // ✅ FIX: Le total doit refléter les joueurs connectés, pas la taille de `r.players` qui peut contenir des joueurs déconnectés.
       const connectedCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
       io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: connectedCount });
     });
 
-    // ---- leaveRoom
     socket.on('leaveRoom', ()=>{
       const code = joined.code; if(!code) return;
       const r = rooms.get(code); if(!r) return;
@@ -245,13 +199,11 @@ module.exports = function setupSockets(io, db){
       const me = r.players.get(socket.id);
       const name = me?.name || 'Un joueur';
 
-      // Suppression définitive du joueur
       r.players.delete(socket.id);
       if (r.active?.has(socket.id)) r.active.delete(socket.id);
       if (r.lobbyReady?.has(socket.id)) r.lobbyReady.delete(socket.id);
       if (r.readyNext?.has(socket.id)) r.readyNext.delete(socket.id);
 
-      // Si la salle est vide, supprimez-la
       if (r.players.size === 0) {
         rooms.delete(code);
         socket.leave(code);
@@ -259,13 +211,11 @@ module.exports = function setupSockets(io, db){
         return;
       }
 
-      // Gérer le compte à rebours du lobby si un joueur part
       if (r.timer?.phase === 'lobby') {
         clearRoomTimer(r);
         io.to(code).emit('lobbyCountdownCancelled');
       }
 
-      // Transférer l'hôte si nécessaire
       if (r.hostId === socket.id) {
         const first = r.players.keys().next().value;
         if (first) r.hostId = first;
@@ -273,7 +223,6 @@ module.exports = function setupSockets(io, db){
       
       io.to(code).emit('system', { text: `👋 ${name} a quitté la partie.` });
 
-      // Si on est en manche et que les actifs < 3 → retour lobby
       const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
       if ((r.state === 'hints' || r.state === 'voting') && activePlayers.length < 3) {
         clearRoomTimer(r);
@@ -292,20 +241,20 @@ module.exports = function setupSockets(io, db){
 
       socket.leave(code);
       joined.code = null;
-      sendCorrectRoomState(io, code);
+      broadcast(io, code);
       socket.emit('leftRoom');
     });
 
-    // ---- playerReadyLobby
     socket.on('playerReadyLobby', ({ ready })=>{
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'lobby') return;
 
       r.lobbyReady ||= new Set();
       if (ready) r.lobbyReady.add(socket.id); else r.lobbyReady.delete(socket.id);
 
-      io.to(joined.code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: r.players.size });
+      const connectedCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
+      io.to(joined.code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: connectedCount });
 
-      if (r.lobbyReady.size === r.players.size && r.players.size >= 3){
+      if (r.lobbyReady.size === connectedCount && connectedCount >= 3){
         clearRoomTimer(r);
         startPhaseTimer(io, joined.code, LOBBY_READY_SECONDS, 'lobby', ()=> controller.startRound(joined.code));
         io.to(joined.code).emit('lobbyCountdownStarted', { seconds: LOBBY_READY_SECONDS });
@@ -315,7 +264,6 @@ module.exports = function setupSockets(io, db){
       }
     });
 
-    // ---- startRound (host only)
     socket.on('startRound', ()=>{
       const r = rooms.get(joined.code); if(!r) return;
       if (r.hostId !== socket.id) return socket.emit('errorMsg',"Seul l'hôte peut démarrer");
@@ -323,13 +271,11 @@ module.exports = function setupSockets(io, db){
       socket.emit('actionAck', { action:'startRound', status:'ok' });
     });
 
-    // ---- submitHint
     socket.on('submitHint', ({ hint })=>{
       const r = rooms.get(joined.code); if(!r || r.state!=='hints') return;
       if (r.state === 'gameOver') return socket.emit('errorMsg', 'La partie est terminée');
       const p = r.players.get(socket.id); if(!p) return;
 
-      // ✅ DOUBLE vérification spectateur
       if (p.spectator || !r.active?.has(socket.id)) return socket.emit('errorMsg', 'Tu participeras au prochain round (spectateur)');
       if (typeof p.hint === 'string') return;
 
@@ -365,13 +311,11 @@ module.exports = function setupSockets(io, db){
       controller.maybeStartVoting(joined.code);
     });
 
-    // ---- submitVote
     socket.on('submitVote', ({ hintId, targetId } = {}) => {
       const r = rooms.get(joined.code); if (!r || r.state !== 'voting') return;
       if (r.state === 'gameOver') return socket.emit('errorMsg', 'La partie est terminée');
       const me = r.players.get(socket.id); if (!me) return;
 
-      // ✅ DOUBLE vérification spectateur
       if (me.spectator || !r.active?.has(socket.id)) {
         return socket.emit('errorMsg', 'Tu voteras à la prochaine manche (spectateur)');
       }
@@ -379,12 +323,10 @@ module.exports = function setupSockets(io, db){
       const voteVal = hintId || targetId;
       if (!voteVal) return;
 
-      // ✅ Utilisation du contrôleur pour centraliser la logique (vote + fin anticipée)
       controller.handleVote(joined.code, socket.id, voteVal);
       socket.emit('voteAck');
     });
 
-    // ---- playerReadyNext (reveal -> manche suivante)
     socket.on('playerReadyNext', ()=>{
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'reveal') return;
       r.readyNext ||= new Set();
@@ -396,7 +338,6 @@ module.exports = function setupSockets(io, db){
       }
     });
 
-    // ---- resetScores (host only)
     socket.on('resetScores', ()=>{
       const r = rooms.get(joined.code); if(!r) return;
       if (r.hostId !== socket.id) return socket.emit('errorMsg',"Seul l'hôte peut réinitialiser");
@@ -405,16 +346,15 @@ module.exports = function setupSockets(io, db){
       clearRoomTimer(r);
       io.to(joined.code).emit('lobbyCountdownCancelled');
       io.to(joined.code).emit('scoresReset');
-      sendCorrectRoomState(io, joined.code);
+      broadcast(io, joined.code);
     });
 
-    // ---- disconnect
     socket.on('disconnect', () => {
       const code = joined.code; if (!code) return;
       const r = rooms.get(code); if (!r) return;
 
       const me = r.players.get(socket.id);
-      if (!me) return; // Joueur déjà supprimé ou jamais vraiment ajouté
+      if (!me) return;
 
       me.disconnected = true;
       me.disconnectedSince = r.round;
@@ -422,17 +362,12 @@ module.exports = function setupSockets(io, db){
       const wasHost = (r.hostId === socket.id);
       const wasImpostor = !!me.isImpostor;
 
-      // Ne pas supprimer le joueur, juste le marquer.
-      // Le nettoyage se fera au début des manches.
-
-      // si plus personne D'ACTIF → supprimer la room
       const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
       if (activePlayers.length === 0) {
         rooms.delete(code);
         return;
       }
 
-      // transfert d’hôte si besoin
       if (wasHost) {
         const firstActive = Array.from(r.players.entries()).find(([id, p]) => !p.disconnected);
         if (firstActive) {
@@ -440,10 +375,8 @@ module.exports = function setupSockets(io, db){
         }
       }
 
-      // message système
       io.to(code).emit('system', { text: `👋 ${name} a quitté la partie` });
 
-      // Mettre à jour le nombre total de joueurs (uniquement les actifs)
       const totalPlayers = activePlayers.length;
       if (r.lobbyReady) {
         io.to(code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: totalPlayers });
@@ -453,7 +386,6 @@ module.exports = function setupSockets(io, db){
       }
 
 
-      // si on est en manche et que les actifs < 3 → retour lobby immédiat
       const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
       if ((r.state === 'hints' || r.state === 'voting') && activeInGame.length < 3) {
         clearRoomTimer(r);
@@ -469,11 +401,10 @@ module.exports = function setupSockets(io, db){
 
         io.to(code).emit('lobbyCountdownCancelled');
         io.to(code).emit('errorMsg', 'Pas assez de joueurs actifs, retour au lobby');
-        sendCorrectRoomState(io, code);
+        broadcast(io, code);
         return;
       }
 
-      // réconcilier la phase en cours (compteurs avec r.active)
       if (r.state === 'hints') {
         const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
         const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
@@ -491,7 +422,6 @@ module.exports = function setupSockets(io, db){
       }
 
       if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
-        // ... la logique de victoire des équipiers reste la même
         clearRoomTimer(r);
         for (const id of r.active || []) {
           const p = r.players.get(id);
@@ -530,7 +460,7 @@ module.exports = function setupSockets(io, db){
         }
       }
 
-      sendCorrectRoomState(io, code);
+      broadcast(io, code);
     });
   });
 };

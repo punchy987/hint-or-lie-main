@@ -4,7 +4,6 @@
     function updateAvatarPreview(name) {
         const seed = (name || '').trim() || 'Joueur';
         const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-        // Mettre à jour les deux images
         const imgs = document.querySelectorAll('[id^="avatar-preview-img"]');
         imgs.forEach(img => {
             img.src = url;
@@ -51,18 +50,15 @@
 
         $('btn-create').onclick = () => {
             const name = $('name-create')?.value.trim() || 'Joueur';
-            console.log('[Home] Création de salle avec le pseudo:', name);
             socket.emit('hello', { deviceId: getDeviceId(), pseudo: name });
             socket.emit('createRoom', { name: name, deviceId: getDeviceId() });
         };
 
-        // GESTION DES REGLES AVEC GAME JUICE
         $('btn-how')?.addEventListener('click', () => {
             const panel = $('how');
             const btn = $('btn-how');
             const visible = panel.style.display !== 'none';
 
-            // Effet de jus : rebond au clic
             btn.style.transform = "scale(0.92)";
             setTimeout(() => btn.style.transform = "scale(1)", 100);
 
@@ -72,7 +68,6 @@
             } else {
                 panel.style.display = 'block';
                 btn.textContent = 'Masquer les règles';
-                // Scroll fluide pour mobile
                 panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
@@ -81,7 +76,6 @@
             const roomState = window.HOL?.state?.room?.state;
             const br = $('btn-ready');
 
-            // Cas 1 : Phase reveal (après une manche)
             if (roomState === 'reveal') {
                 socket.emit('playerReadyNext');
                 if (br) {
@@ -91,7 +85,6 @@
                 return;
             }
 
-            // Cas 2 : Phase lobby (avant manche ou après gameOver)
             if (roomState === 'lobby') {
                 state.myLobbyReady = !state.myLobbyReady;
                 
@@ -104,7 +97,6 @@
                 return;
             }
 
-            // Cas 3 : En manche (hints/voting) → désactivé
             if (br) {
                 br.disabled = true;
                 br.title = 'Manche en cours...';
@@ -125,10 +117,6 @@
 
     function initSocketRoom() {
         socket.on('system', ({ text }) => toast(text));
-        socket.on('host-changed', ({ hostId }) => {
-            const hb = $('host-badge');
-            if (hb) hb.style.display = (window.HOL.state.me.id === hostId) ? 'inline-block' : 'none';
-        });
         
         socket.on('connect', () => {
             socket.emit('getLeaderboard');
@@ -158,7 +146,7 @@
 
         socket.on('roomCreated', onRoomEntry);
         socket.on('roomJoined', onRoomEntry);
-        socket.on('roomError', ({ message }) => toast(message || 'Erreur de salle.'));
+        socket.on('errorMsg', (message) => toast(message || 'Erreur de salle.'));
 
 
 
@@ -173,7 +161,6 @@
         });
 
         socket.on('spectatorMode', ({ message }) => {
-            // ✅ Ne montrer la modal que si on n'est pas au lobby
             if (state.room?.state === 'lobby') return;
             
             const modal = document.getElementById('modal');
@@ -189,10 +176,8 @@
             }
             
             modal.style.display = 'flex';
-            // ✅ Message persiste jusqu'à la fin de la manche (pas de fermeture automatique)
         });
 
-        // ✅ NOUVEAU : Réinitialiser les boutons à la sortie
         socket.on('leftRoom', () => {
             state.myLobbyReady = false;
             const btnReady = $('btn-ready');

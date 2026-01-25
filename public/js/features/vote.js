@@ -84,29 +84,14 @@
   }
 
   function initSocket() {
-    // Format nouveau: { hints:[{id,text}], domain, round }
-    socket.on('hintsList', (payload) => {
-      const raw = Array.isArray(payload) ? payload : (payload?.hints || []);
-      const hints = raw.map(h => ({
-        id: h.id,
-        // supporte h.text (nouveau) et h.hint (ancien)
-        text: (typeof h.text === 'string') ? h.text : (h.hint || '')
-      }));
-      const domain = Array.isArray(payload) ? null : (payload?.domain ?? null);
-      const round  = Array.isArray(payload) ? null : (payload?.round  ?? null);
-      handleHintsForVote(hints, domain, round);
-    });
-
-    // Compat ancien event si jamais
-    socket.on('allHints', ({ hints, domain, round }) => {
+    socket.on('hintsList', (hints) => {
       const mapped = (hints || []).map(h => ({
         id: h.id,
         text: (typeof h.text === 'string') ? h.text : (h.hint || '')
       }));
-      handleHintsForVote(mapped, domain, round);
+      handleHintsForVote(mapped, null, null);
     });
 
-    // Mise à jour serveur du compteur
     socket.on('phaseProgress', ({ phase, submitted, total }) => {
       if (phase === 'voting') {
         const elv = $('progress-vote'); if (elv) elv.textContent = `${submitted}/${total}`;
@@ -114,10 +99,8 @@
     });
 
     socket.on('voteAck', () => {
-      // Vote bien reçu
     });
 
-    // Fermeture par le timer — on verrouille les cartes
     socket.on('timer', ({ phase, leftMs }) => {
       if (phase === 'voting' && leftMs <= 0) {
         votingClosed = true;

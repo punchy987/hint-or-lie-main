@@ -10,8 +10,8 @@
     const required = [
       'screen-home','screen-lobby','screen-hint','screen-vote','screen-result',
       'btn-create','btn-join','name-create','name-join','join-code',
-      'hint-input','btn-send-hint','hint-status','impostor-tip','hint-instruction',
-      'vote-buttons','hints',
+      'hint-input','btn-send-hint','hint-status','impostor-tip',
+      'hints',
       'scoreboard','score-list',
       'lobby-ready-pill','round-num','timer-hints','timer-vote','timer-reveal'
     ];

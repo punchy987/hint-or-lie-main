@@ -38,7 +38,7 @@
     const roleText = $('reveal-role-text');
     if (!overlay || !roleText) { callback(); return; } 
 
-    overlay.style.display = ''; // Force le nettoyage du style inline pour laisser le CSS agir
+    overlay.style.display = '';
     roleText.textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
     roleText.className = isImpostor ? 'impostor' : 'crew';
     overlay.classList.add('playing');
@@ -108,7 +108,7 @@
           tipEl.innerHTML = "🤫 <strong>CHUT !</strong> Tu n’as pas de mot.<br>Observe les indices et invente un mensonge !";
           ui.wordChip().style.display = 'none';
           ensureLiveUI();
-          if (liveList) liveList.innerHTML = ''; // Nettoie les anciens indices
+          if (liveList) liveList.innerHTML = '';
           ui.input()?.insertAdjacentElement('beforebegin', liveBox);
           liveBox.style.display = 'block';
         } else {

@@ -1,6 +1,33 @@
 (function () {
   const { $, show, socket, state } = window.HOL;
 
+  function playResultCinematic({ win, text, isGameOver = false }) {
+    const resultOverlay = $('result-reveal-overlay');
+    const resultText = $('reveal-result-text');
+
+    resultText.textContent = text;
+    if (isGameOver) {
+      resultText.style.fontSize = 'clamp(2rem, 10vw, 5rem)';
+    }
+    resultText.className = win ? 'victory' : 'defeat';
+    resultOverlay.classList.add('playing');
+
+    if (win && window.confetti) {
+      const config = isGameOver
+        ? { particleCount: 200, spread: 90, origin: { y: 0.6 }, gravity: 0.8 }
+        : { particleCount: 100, spread: 70, origin: { y: 0.6 } };
+      confetti(config);
+      if (isGameOver) {
+        setTimeout(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }), 500);
+      }
+    }
+
+    return new Promise(resolve => setTimeout(() => {
+      resultOverlay.classList.remove('playing');
+      resolve();
+    }, isGameOver ? 3500 : 2500));
+  }
+
   function initUI() {
     $('btn-next').onclick = () => {
       $('btn-next').disabled = true;
@@ -14,146 +41,109 @@
   }
 
   function initSocket() {
-    // ========== MANCHE NORMALE ==========
-    socket.on('roundResult', (res) => {
-      if (res.isGameOver) return; // Déléguée à gameOver
+    socket.on('roundResult', async (res) => {
+      if (res.isGameOver) return;
 
-      const resultOverlay = $('result-reveal-overlay');
-      const resultText = $('reveal-result-text');
       const win = state.myIsImpostor ? !res.impostorCaught : res.impostorCaught;
+      await playResultCinematic({ win, text: win ? 'VICTOIRE !' : 'DÉFAITE...' });
+      
+      show('screen-result');
 
-      // Cinématique victoire/défaite
-      resultText.textContent = win ? 'VICTOIRE !' : 'DÉFAITE...';
-      resultText.className = win ? 'victory' : 'defeat';
-      resultOverlay.classList.add('playing');
+      $('btn-next').disabled = false;
+      $('btn-next').textContent = 'Manche suivante';
+      $('res-common').textContent = res.common || '';
 
-      // Confetti si victoire
-      if (win && window.confetti) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      const impName = res.impostorName || '(?)';
+      const impContainer = $('res-imp-name');
+      impContainer.innerHTML = '';
+      impContainer.style.display = 'flex';
+      impContainer.style.flexDirection = 'column';
+      impContainer.style.alignItems = 'center';
+      impContainer.style.gap = '10px';
+
+      const img = document.createElement('img');
+      img.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(impName)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+      img.style.width = '120px';
+      img.style.height = '120px';
+      img.style.borderRadius = '50%';
+      img.style.border = `4px solid ${res.impostorCaught ? 'var(--crew)' : 'var(--danger)'}`;
+      img.style.boxShadow = `0 0 20px rgba(${res.impostorCaught ? '59, 130, 246' : '239, 68, 68'}, 0.4)`;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = impName;
+      nameSpan.style.fontSize = '1.8rem';
+      nameSpan.style.fontWeight = '900';
+      nameSpan.style.color = res.impostorCaught ? 'var(--crew)' : 'var(--danger)';
+
+      impContainer.appendChild(img);
+      impContainer.appendChild(nameSpan);
+
+      const votesContainer = $('res-votes');
+      votesContainer.innerHTML = '';
+
+      if (res.votesDetail && state.room?.players) {
+        const title = document.createElement('h4');
+        title.textContent = 'Détail des votes';
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        votesContainer.appendChild(title);
+
+        const votesList = document.createElement('div');
+        votesList.style.display = 'flex';
+        votesList.style.flexDirection = 'column';
+        votesList.style.gap = '8px';
+        votesList.style.alignItems = 'center';
+
+        const playersById = new Map(state.room.players.map(p => [p.id, p.name]));
+        const voteEntries = Object.entries(res.votesDetail);
+
+        voteEntries.forEach(([voterId, votedId], index) => {
+          setTimeout(() => {
+            const voterName = playersById.get(voterId);
+            const votedName = playersById.get(votedId);
+
+            if (voterName && votedName) {
+              const voteElement = document.createElement('div');
+              voteElement.style.display = 'flex';
+              voteElement.style.alignItems = 'center';
+              voteElement.style.gap = '8px';
+              voteElement.style.padding = '4px 8px';
+              voteElement.style.background = 'rgba(255, 255, 255, 0.05)';
+              voteElement.style.borderRadius = '6px';
+              voteElement.style.width = 'fit-content';
+
+              const voterSpan = document.createElement('span');
+              voterSpan.textContent = voterName;
+              voterSpan.style.fontWeight = '700';
+
+              const arrow = document.createElement('span');
+              arrow.textContent = '→';
+              arrow.style.color = 'var(--muted)';
+
+              const votedSpan = document.createElement('span');
+              votedSpan.textContent = votedName;
+              votedSpan.style.fontWeight = '700';
+              votedSpan.style.color = votedId === res.impostorId ? 'var(--danger)' : 'var(--crew)';
+
+              voteElement.appendChild(voterSpan);
+              voteElement.appendChild(arrow);
+              voteElement.appendChild(votedSpan);
+              votesList.appendChild(voteElement);
+            }
+          }, index * 400);
+        });
+
+        votesContainer.appendChild(votesList);
       }
-
-      setTimeout(() => {
-        resultOverlay.classList.remove('playing');
-        show('screen-result');
-
-        $('btn-next').disabled = false;
-        $('btn-next').textContent = 'Manche suivante';
-        $('res-common').textContent = res.common || '';
-
-        const impName = res.impostorName || '(?)';
-        const impContainer = $('res-imp-name');
-        impContainer.innerHTML = '';
-        impContainer.style.display = 'flex';
-        impContainer.style.flexDirection = 'column';
-        impContainer.style.alignItems = 'center';
-        impContainer.style.gap = '10px';
-
-        const img = document.createElement('img');
-        img.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(impName)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-        img.style.width = '120px';
-        img.style.height = '120px';
-        img.style.borderRadius = '50%';
-        img.style.border = `4px solid ${res.impostorCaught ? 'var(--crew)' : 'var(--danger)'}`;
-        img.style.boxShadow = `0 0 20px rgba(${res.impostorCaught ? '59, 130, 246' : '239, 68, 68'}, 0.4)`;
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = impName;
-        nameSpan.style.fontSize = '1.8rem';
-        nameSpan.style.fontWeight = '900';
-        nameSpan.style.color = res.impostorCaught ? 'var(--crew)' : 'var(--danger)';
-
-        impContainer.appendChild(img);
-        impContainer.appendChild(nameSpan);
-
-        // Détail des votes (staggered)
-        const votesContainer = $('res-votes');
-        votesContainer.innerHTML = '';
-
-        if (res.votesDetail && state.room?.players) {
-          const title = document.createElement('h4');
-          title.textContent = 'Détail des votes';
-          title.style.textAlign = 'center';
-          title.style.marginBottom = '10px';
-          votesContainer.appendChild(title);
-
-          const votesList = document.createElement('div');
-          votesList.style.display = 'flex';
-          votesList.style.flexDirection = 'column';
-          votesList.style.gap = '8px';
-          votesList.style.alignItems = 'center';
-
-          const playersById = new Map(state.room.players.map(p => [p.id, p.name]));
-          const voteEntries = Object.entries(res.votesDetail);
-
-          voteEntries.forEach(([voterId, votedId], index) => {
-            setTimeout(() => {
-              const voterName = playersById.get(voterId);
-              const votedName = playersById.get(votedId);
-
-              if (voterName && votedName) {
-                const voteElement = document.createElement('div');
-                voteElement.style.display = 'flex';
-                voteElement.style.alignItems = 'center';
-                voteElement.style.gap = '8px';
-                voteElement.style.padding = '4px 8px';
-                voteElement.style.background = 'rgba(255, 255, 255, 0.05)';
-                voteElement.style.borderRadius = '6px';
-                voteElement.style.width = 'fit-content';
-
-                const voterSpan = document.createElement('span');
-                voterSpan.textContent = voterName;
-                voterSpan.style.fontWeight = '700';
-
-                const arrow = document.createElement('span');
-                arrow.textContent = '→';
-                arrow.style.color = 'var(--muted)';
-
-                const votedSpan = document.createElement('span');
-                votedSpan.textContent = votedName;
-                votedSpan.style.fontWeight = '700';
-                votedSpan.style.color = votedId === res.impostorId ? 'var(--danger)' : 'var(--crew)';
-
-                voteElement.appendChild(voterSpan);
-                voteElement.appendChild(arrow);
-                voteElement.appendChild(votedSpan);
-                votesList.appendChild(voteElement);
-              }
-            }, index * 400);
-          });
-
-          votesContainer.appendChild(votesList);
-        }
-      }, 2500);
     });
 
-    // ========== FIN DE PARTIE (10 PTS) ==========
-    socket.on('gameOver', ({ winners, finalScores, winnersCount }) => {
-      // ✅ Cinématique finale spectaculaire
-      const resultOverlay = $('result-reveal-overlay');
-      const resultText = $('reveal-result-text');
-
+    socket.on('gameOver', async ({ winners, finalScores, winnersCount }) => {
       const playerWon = winners.some(w => w.id === state.me.id);
-
-      resultText.textContent = winnersCount > 1 ? '🏆 ÉGALITÉ !' : '🏆 PARTIE TERMINÉE !';
-      resultText.style.fontSize = 'clamp(2rem, 10vw, 5rem)';
-      resultText.className = playerWon ? 'victory' : 'defeat';
-      resultOverlay.classList.add('playing');
-
-      // Confetti spectaculaire
-      if (playerWon && window.confetti) {
-        confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, gravity: 0.8 });
-        setTimeout(() => {
-          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        }, 500);
-      }
-
-      setTimeout(() => {
-        resultOverlay.classList.remove('playing');
-        showGameOverModal(winners, finalScores);
-      }, 3500);
+      const text = winnersCount > 1 ? '🏆 ÉGALITÉ !' : '🏆 PARTIE TERMINÉE !';
+      
+      await playResultCinematic({ win: playerWon, text, isGameOver: true });
+      showGameOverModal(winners, finalScores);
     });
-
-
   }
 
   function showGameOverModal(winners, finalScores) {
@@ -164,7 +154,6 @@
     const box = modal.querySelector('.box');
     if (!box) return;
 
-    // Titre
     const title = document.createElement('h2');
     title.style.cssText = `
       font-size: 2.5rem;
@@ -178,7 +167,6 @@
     `;
     title.textContent = '🏆 PARTIE TERMINÉE !';
 
-    // Gagnant(s)
     const winnersSection = document.createElement('div');
     winnersSection.style.cssText = `
       background: rgba(74, 222, 128, 0.1);
@@ -214,7 +202,6 @@
       winnersSection.appendChild(winnerDiv);
     });
 
-    // Scoreboard final
     const scoreboardSection = document.createElement('div');
     scoreboardSection.style.cssText = `
       border: 1px solid var(--line);
@@ -251,7 +238,6 @@
       });
     }
 
-    // Boutons action
     const actionsDiv = document.createElement('div');
     actionsDiv.style.cssText = `
       display: flex;
@@ -276,7 +262,6 @@
     btnHome.onclick = () => {
       modal.style.display = 'none';
       socket.emit('leaveRoom');
-      // ✅ Attendre le signal leftRoom pour changer d'écran
     };
     btnHome.onmouseover = () => btnHome.style.opacity = '0.9';
     btnHome.onmouseout = () => btnHome.style.opacity = '1';
@@ -288,7 +273,6 @@
     const isHost = window.HOL?.state?.room?.hostId === window.HOL?.state?.me?.id;
 
     if (isHost) {
-      // ✅ Hôte peut recommencer
       btnRestart.style.cssText = `
         flex: 1;
         padding: 12px;
@@ -303,12 +287,10 @@
       btnRestart.onclick = () => {
         modal.style.display = 'none';
         socket.emit('resetScores');
-        // ✅ Attendre le signal scoresReset pour transition
       };
       btnRestart.onmouseover = () => btnRestart.style.opacity = '0.9';
       btnRestart.onmouseout = () => btnRestart.style.opacity = '1';
     } else {
-      // ✅ Non-hôte : désactivé
       btnRestart.textContent = '🔄 Seul l\'hôte peut recommencer';
       btnRestart.disabled = true;
       btnRestart.style.cssText = `
@@ -326,7 +308,6 @@
     actionsDiv.appendChild(btnHome);
     actionsDiv.appendChild(btnRestart);
 
-    // Assemble la modale
     box.innerHTML = '';
     box.appendChild(title);
     box.appendChild(winnersSection);
