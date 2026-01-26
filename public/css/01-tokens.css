@@ -1,0 +1,30 @@
+:root {
+    /* Tokens de base extraits de hud.css */
+    --font-sans: 'Inter', sans-serif;
+    
+    --color-background: #0a0e14;
+    --color-accent-hud: #00f2ff;
+    --color-accent-glow: rgba(0, 242, 255, 0.5);
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a0a8b3;
+    
+    --color-glass-bg: rgba(255, 255, 255, 0.05);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
+    --color-glass-border-active: rgba(0, 242, 255, 0.3);
+
+    --panel-border-radius: 16px;
+    --input-border-radius: 8px;
+    --btn-border-radius: 8px;
+
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Tokens additionnels pour les composants spécifiques */
+    --color-cyan: #00f2ff;
+    --color-cyan-glow: rgba(0, 242, 255, 0.4);
+    --color-bg-matte: #0f1218;
+    --color-glass: rgba(255, 255, 255, 0.05);
+    --danger: #ff3b3b;
+    --crew: #3b82f6;
+    --muted: #64748b;
+}

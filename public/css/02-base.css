@@ -1,0 +1,29 @@
+/* Reset CSS */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--color-background) 70%);
+    overflow: hidden; /* Empêche le scroll sur le body */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+#game-container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}

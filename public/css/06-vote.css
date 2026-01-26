@@ -1,0 +1,35 @@
+.vote-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.vote-card {
+    background: var(--color-glass);
+    border: 1px solid var(--color-glass-border);
+    backdrop-filter: blur(15px);
+    padding: 1.2rem;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s ease;
+    text-align: center;
+    font-family: var(--font-sans);
+}
+
+.vote-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.vote-card.selected {
+    border-color: var(--color-cyan);
+    background: rgba(0, 242, 255, 0.1);
+    box-shadow: 0 0 20px var(--color-cyan-glow);
+}
+
+.vote-card strong {
+    font-size: 1.1rem;
+    display: block;
+}
