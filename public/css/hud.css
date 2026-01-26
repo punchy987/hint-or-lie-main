@@ -7,6 +7,7 @@
 @import './03-components.css';
 @import './04-phase.css';
 @import './08-home.css';
+@import './08-lobby-header.css';
 
 /* Scope the HUD to a root class to limit style bleed.
    Add `class="hud-root"` to <body> or top container to opt-in. */
@@ -72,4 +73,204 @@
 
 /* Accessibility: reduce motion respects tokens */
 @media (prefers-reduced-motion: reduce) { .hud-card, .glass-panel { transition: none !important; } }
+
+/* ===== LOBBY SCREEN STYLES ===== */
+#screen-lobby {
+    padding: 1.5rem 1rem;
+}
+
+#screen-lobby h2 {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+/* Grille des joueurs — CSS Grid responsive */
+#players, .player-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+/* Cartes de joueurs — Glass panels avec halos */
+.player-card {
+    background: var(--glass-bg);
+    border: var(--border-thin) solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    transition: all var(--transition-smooth);
+    min-height: 150px;
+}
+
+/* Halo de couleur par défaut */
+.player-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, 
+        rgba(0,242,255,0.15), 
+        rgba(168,85,247,0.15));
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--transition-smooth);
+}
+
+.player-card:hover::before {
+    opacity: 0.6;
+}
+
+/* Avatar des joueurs — massif (80px min) */
+.player-card img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,242,255,0.08) 0%, transparent 70%);
+    box-shadow: 0 0 30px rgba(0,242,255,0.15),
+                0 0 50px rgba(0,242,255,0.08);
+    transition: transform var(--transition-smooth);
+}
+
+.player-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Nom du joueur */
+.player-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+/* Badge PRÊT — bordure cyan lumineuse */
+.player-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(0,242,255,0.12);
+    border: var(--border-thin) solid rgba(0,242,255,0.3);
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(0,242,255,0.2);
+}
+
+/* Carte de joueur prêt — bordure lumineuse cyan */
+.player-card:has(.player-status) {
+    border-color: rgba(0,242,255,0.4);
+    box-shadow: 0 0 20px rgba(0,242,255,0.2),
+                0 4px 16px rgba(0,242,255,0.15);
+}
+
+.player-card:has(.player-status)::before {
+    opacity: 0.8;
+}
+
+/* Zone d'action du lobby */
+.lobby-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Bouton "Je suis prêt" — imposant comme bouton accueil */
+#btn-ready {
+    width: 100%;
+    max-width: 450px;
+    min-height: 56px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, rgba(0,242,255,0.2), rgba(0,242,255,0.1));
+    border: 2px solid rgba(0,242,255,0.3);
+    border-radius: 999px;
+    color: var(--text);
+    box-shadow: 0 8px 30px -10px rgba(0,242,255,0.4),
+                0 0 40px rgba(0,242,255,0.15);
+    transition: all var(--transition-smooth);
+}
+
+#btn-ready:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px -10px rgba(0,242,255,0.5),
+                0 0 50px rgba(0,242,255,0.2);
+    border-color: rgba(0,242,255,0.5);
+}
+
+#btn-ready:active {
+    transform: translateY(0);
+}
+
+#btn-ready:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive PC — 3-4 colonnes */
+@media (min-width: 768px) {
+    #players, .player-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    #players, .player-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Responsive mobile — optimisé pour lecture */
+@media (max-width: 640px) {
+    #screen-lobby {
+        padding: 1rem 0.75rem;
+    }
+    
+    #screen-lobby h2 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    #players, .player-grid {
+        gap: 0.75rem;
+    }
+    
+    .player-card {
+        padding: 1rem;
+        min-height: 140px;
+    }
+    
+    .player-card img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .player-name {
+        font-size: 0.95rem;
+    }
+    
+    #btn-ready {
+        font-size: 1rem;
+        min-height: 52px;
+    }
+}
 

@@ -1,0 +1,135 @@
+/* 08-lobby-header.css — En-tête et header du lobby */
+@import './01-tokens.css';
+
+/* ===== HEADER LOBBY ===== */
+.lobby-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    background: var(--glass-bg);
+    border: var(--border-thin) solid var(--glass-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+/* Logo HL réutilisé (identité visuelle) */
+.lobby-header::before {
+    content: 'HL';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(0,242,255,0.15), rgba(168,85,247,0.15));
+    border: 2px solid rgba(0,242,255,0.25);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--accent-cyan);
+    letter-spacing: -1px;
+    box-shadow: 0 4px 16px -4px rgba(0,242,255,0.3);
+}
+
+/* Bouton Quitter — discret mais élégant */
+#btn-back-home {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.04);
+    border: var(--border-thin) solid rgba(255,255,255,0.08);
+    color: var(--muted);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-height: 36px;
+    transition: all var(--transition-fast);
+}
+
+#btn-back-home:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--text);
+}
+
+/* Code de salle — massif, style affichage digital haute technologie */
+.lobby-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.lobby-code-container span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+#lobby-code {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 20px rgba(0,242,255,0.4),
+                 0 0 40px rgba(0,242,255,0.2);
+    font-family: 'Inter', monospace;
+    background: linear-gradient(180deg, var(--accent-cyan) 0%, rgba(0,242,255,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Indicateur prêt (pill) — compteur système */
+#lobby-ready-pill {
+    padding: 0.6rem 1.5rem;
+    background: rgba(0,242,255,0.08);
+    border: var(--border-thin) solid rgba(0,242,255,0.2);
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-align: center;
+    box-shadow: 0 4px 16px -6px rgba(0,242,255,0.25);
+    letter-spacing: 0.5px;
+}
+
+/* Responsive mobile */
+@media (max-width: 640px) {
+    .lobby-header {
+        padding: 1.25rem 0.75rem;
+    }
+    
+    .lobby-header::before {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+        top: 0.75rem;
+        left: 0.75rem;
+    }
+    
+    #btn-back-home {
+        top: 0.75rem;
+        right: 0.75rem;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .lobby-code-container {
+        margin-top: 1.5rem;
+    }
+    
+    #lobby-code {
+        font-size: 3rem;
+        letter-spacing: 6px;
+    }
+}
