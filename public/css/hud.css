@@ -13,10 +13,10 @@ html, body {
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--bg) 70%);
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--color-background) 70%);
     overflow: hidden; /* Empêche le scroll sur le body */
 }
 
@@ -30,30 +30,28 @@ body {
 
 /* --- SCREENS & PANELS --- */
 .screen {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
     max-width: 480px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none; /* Caché par défaut */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
+    margin: 0 auto;
+    animation: fadeIn 0.5s var(--transition-medium) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .panel {
-    width: 100%;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-top: 1px solid var(--accent); /* Bordure cyan fine */
-    border-radius: var(--panel-radius);
-    box-shadow: var(--shadow);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
+    background: var(--color-glass-bg);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--panel-border-radius);
     padding: 2rem 1.5rem;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -148,7 +146,7 @@ input[type="text"]:focus {
     padding: 0.9rem;
     font-size: 1rem;
     font-weight: 700;
-    border-radius: var(--btn-radius);
+    border-radius: var(--btn-border-radius);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-transform: uppercase;
@@ -216,15 +214,9 @@ input[type="text"]:focus {
     display: none; /* Initially hidden */
     flex-direction: column;
     gap: 1.5rem;
+    height: 100%;
     width: 100%;
-    max-width: 480px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--color-glass-border);
-    border-radius: var(--panel-border-radius);
-    padding: 2rem;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
 }
 
 .lobby-header {
@@ -241,35 +233,6 @@ input[type="text"]:focus {
 .lobby-header .btn-secondary {
     padding: 0.5rem 0.8rem;
     font-size: 0.9rem;
-}
-
-#lobby-code {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--color-accent-hud);
-    letter-spacing: 2px;
-    margin: 1rem 0;
-}
-
-#lobby-ready-pill {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.3);
-    color: var(--color-text-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin: 0 auto 1rem;
-    width: fit-content;
-}
-
-#timer-lobby {
-    color: var(--color-accent-hud);
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-align: center;
-    margin-top: 1rem;
 }
 
 .lobby-code-container {
@@ -328,9 +291,8 @@ input[type="text"]:focus {
 }
 
 .player-card:hover {
-    transform: translateY(-4px); /* Effet de profondeur */
+    transform: scale(1.05);
     border-color: var(--color-glass-border-active);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Effet de lumière */
 }
 
 .player-card img {
@@ -363,78 +325,6 @@ input[type="text"]:focus {
     font-weight: 700;
     text-align: center;
 }
-
-/* --- LOBBY JUICE --- */
-@keyframes cardAppear {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.player-card {
-    animation: cardAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.player-card.is-ready {
-    border-color: var(--color-accent-hud);
-    box-shadow: 0 0 15px var(--color-accent-glow);
-}
-
-@keyframes slowPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-    50% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-}
-
-@keyframes fastCyanPulse {
-    0%, 100% {
-        transform: scale(1);
-        background-color: var(--color-accent-hud);
-        color: var(--color-background);
-        box-shadow: 0 0 15px var(--color-accent-glow);
-    }
-    50% {
-        transform: scale(1.1);
-        background-color: var(--color-accent-hud);
-        color: var(--color-background);
-        box-shadow: 0 0 25px var(--color-accent-glow);
-    }
-}
-
-#lobby-ready-pill.pulse-slow {
-    animation: slowPulse 2s infinite;
-}
-
-#lobby-ready-pill.pulse-fast {
-    animation: fastCyanPulse 1s infinite;
-}
-
-/* --- Animation pour le statut "Prêt" --- */
-.player-card.is-ready .player-status {
-    animation: statusPulse 1.5s infinite;
-}
-
-@keyframes statusPulse {
-    0%, 100% {
-        opacity: 0.7;
-        text-shadow: 0 0 4px var(--color-accent-glow);
-    }
-    50% {
-        opacity: 1;
-        text-shadow: 0 0 10px var(--color-accent-glow);
-    }
-}
-
 
 /* --- TOAST --- */
 #toast {

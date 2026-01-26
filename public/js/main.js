@@ -34,8 +34,8 @@
               
               // Determine status
               let statusText = '';
-              if (p.disconnected) statusText = 'Déconnecté';
-              else if (p.ready) statusText = 'Prêt ✓';
+              if (p.disconnected) statusText = 'Dconnect';
+              else if (p.ready) statusText = 'Prt ?';
 
               const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.name || 'default')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
               card.innerHTML = `
@@ -66,7 +66,7 @@
         }
         const btnReady = $('btn-ready');
         if (btnReady) {
-          btnReady.textContent = 'Je suis prêt';
+          btnReady.textContent = 'Je suis pret';
           btnReady.disabled = false;
         }
       }
@@ -131,11 +131,11 @@
       window.HOL.show('screen-lobby');
       const btnReady = $('btn-ready');
       if (btnReady) {
-        btnReady.textContent = 'Je suis prêt';
+        btnReady.textContent = 'Je suis pret';
         btnReady.disabled = false;
       }
       state.myLobbyReady = false;
-      window.HOL.toast('Partie réinitialisée !', 1500);
+      window.HOL.toast('Partie reinitalisee !', 1500);
     });
   }
 
