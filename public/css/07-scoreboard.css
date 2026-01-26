@@ -1,6 +1,9 @@
 .scoreboard-panel {
     margin-top: 1rem;
     padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .scoreboard-panel h3 {
@@ -15,24 +18,84 @@
     list-style: none;
     padding-left: 0;
     margin: 0;
+    max-height: 198px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    gap: 0;
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+#score-list::-webkit-scrollbar {
+    display: none;
 }
 
 #score-list li {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 8px;
-    padding: 8px 6px;
+    height: 44px;
+    padding: 0 6px;
+    margin: 0;
     border-bottom: 1px solid rgba(255,255,255,0.02);
     background: rgba(255,255,255,0.01);
 }
 
-.status-led { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 6px rgba(0,0,0,0.4) inset; }
-.status-led.is-active { background: #10b981; box-shadow: 0 0 10px #10b981; }
-.status-led.is-ready { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
-.status-led.is-disconnected { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+/* Disposition interne avec grid pour alignement précis */
+#score-list li > * {
+    flex-shrink: 0;
+}
 
-.pts { font-weight: 900; color: var(--accent-cyan); }
+#score-list li .status-led {
+    width: 8px;
+}
+
+#score-list li .score-avatar {
+    width: 32px;
+}
+
+#score-list li .name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#score-list li .pts {
+    width: 50px;
+}
+
+.status-led { 
+    width: 8px; 
+    height: 8px; 
+    border-radius: 50%; 
+    background: #333; 
+}
+
+/* Statuts LED */
+.status-led.status-online,
+.status-led.is-active { 
+    background: #00ff88; 
+    box-shadow: 0 0 8px #00ff88; 
+}
+
+.status-led.status-lobby,
+.status-led.is-ready { 
+    background: #ff5277; 
+    box-shadow: 0 0 8px #ff5277; 
+}
+
+.status-led.status-offline,
+.status-led.is-disconnected { 
+    background: #333; 
+}
+
+.pts { 
+    font-weight: 900; 
+    color: #00f2ff; 
+    text-align: right;
+}
 
 /* Floating scoreboard - mobile optimized */
 #scoreboard {
@@ -43,9 +106,9 @@
   max-width: 280px;
   max-height: 60vh; 
   overflow: auto;
-  backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.04); 
+  backdrop-filter: blur(8px); 
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.05); 
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px; 
   padding: 1rem; 

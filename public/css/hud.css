@@ -314,6 +314,14 @@
     padding-top: 2rem;
 }
 
+#screen-hint {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding-top: 1.5rem;
+}
+
 #screen-hint .panel,
 #screen-vote .panel,
 #screen-result .panel {
