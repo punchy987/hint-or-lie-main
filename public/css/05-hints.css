@@ -43,3 +43,35 @@
     font-size: 0.9rem;
     min-height: 1.2rem;
 }
+
+/* Crew live box: terminal-like reception */
+#crew-live-box {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    background: rgba(0,0,0,0.38);
+    border: 1px solid rgba(0,242,255,0.12);
+    color: var(--text);
+    padding: 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px -12px rgba(0,242,255,0.18);
+    max-height: 160px; overflow: auto; font-size: 0.92rem;
+}
+
+#crew-live-box strong { color: var(--accent-cyan); display:block; margin-bottom:6px; font-weight:800; }
+#crew-live-box .live-hint-item { display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.02); }
+#crew-live-box .live-hint-name { color: var(--muted); font-weight:700; width:80px; font-size:0.85rem; }
+/* Terminal-style hint text: monospace + cyan for emphasis */
+#crew-live-box .live-hint-text { color: var(--accent-cyan); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; font-weight:600; }
+
+/* Ensure the generated list itself uses monospace for consistent terminal look */
+#crew-live-list { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; }
+
+/* crew-word-chip subtle pulse when active */
+#crew-word-chip { display:inline-block; transition: transform var(--transition-smooth), box-shadow var(--transition-fast); }
+.theme-impostor #crew-word-chip { transform: scale(1); }
+#crew-word-chip.pulse, .theme-crew #crew-word-chip { animation: chip-pulse 2400ms ease-in-out infinite; }
+
+@keyframes chip-pulse {
+    0% { transform: translateY(0) scale(1); box-shadow: none; }
+    50% { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px -12px rgba(0,242,255,0.14); }
+    100% { transform: translateY(0) scale(1); box-shadow: none; }
+}

@@ -1,355 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-@import url('/css/01-tokens.css');
+/* hud.css — Assembly + layout tweaks for Minimalist HUD (Matte & Glass)
+   This file provides lightweight layout helpers and compatibility overrides.
+   It intentionally keeps things minimal and avoids legacy visual noise.
+*/
+@import './01-tokens.css';
+@import './02-base.css';
+@import './03-components.css';
+@import './04-phase.css';
 
-/* --- BASE & BODY --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html, body {
-    height: 100%;
-}
-
-body {
-    font-family: var(--font-sans);
-    background-color: var(--color-background);
-    color: var(--color-text-primary);
-    background-image: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, var(--color-background) 70%);
-    overflow: hidden; /* Empêche le scroll sur le body */
+/* Scope the HUD to a root class to limit style bleed.
+   Add `class="hud-root"` to <body> or top container to opt-in. */
+.hud-root, body.hud-root {
+  --hud-enabled: 1;
 }
 
-#game-container {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
+/* Layout: main HUD container */
+.hud-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-/* --- SCREENS & PANELS --- */
-.screen {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    animation: fadeIn 0.5s var(--transition-medium) forwards;
-    opacity: 0;
-    transform: translateY(20px);
+.hud-top { z-index: 1200; }
+.hud-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.hud-bottom { z-index: 1000; padding: 0.75rem; display:flex; gap:0.75rem; justify-content:center; }
+
+/* Provide lightweight mapping for older class names to new tokens */
+.panel { background: var(--glass-bg); border: var(--border-thin) solid var(--glass-border); border-radius: var(--radius); padding: 1rem; backdrop-filter: blur(var(--blur)); }
+.panel--compact { padding: 0.6rem; border-radius: var(--radius-sm); }
+
+/* Centered HUD card */
+.hud-card { width: 100%; max-width: 720px; margin: 0 auto; }
+
+/* Tiny responsive tweaks */
+@media (max-width: 640px) {
+  .hud-main { padding: 0.6rem; }
+  .phase-bar { height: 40px; }
 }
 
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* Ensure minimal visual noise — avoid overriding useful HUD glows.
+  Removed global box-shadow reset to allow component glows/LEDs to render.
+*/
 
-.panel {
-    background: var(--color-glass-bg);
-    border: 1px solid var(--color-glass-border);
-    border-radius: var(--panel-border-radius);
-    padding: 2rem 1.5rem;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
+/* Lightweight toast (uses accent cyan for emphasis) */
+.hud-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); border: var(--border-thin) solid var(--glass-border); color: var(--text); padding: 0.6rem 1rem; border-radius: 999px; backdrop-filter: blur(var(--blur)); z-index:1300; }
 
-.game-title {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
+/* Accessibility: reduce motion respects tokens */
+@media (prefers-reduced-motion: reduce) { .hud-card, .glass-panel { transition: none !important; } }
 
-.game-title span {
-    color: var(--color-accent-hud);
-}
-
-/* --- TABS --- */
-.tabs {
-    display: flex;
-    background: rgba(0,0,0,0.2);
-    border-radius: var(--input-border-radius);
-    padding: 4px;
-}
-
-.tabs button {
-    flex: 1;
-    padding: 0.75rem 0.5rem;
-    background: transparent;
-    border: none;
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.tabs button[aria-selected="true"] {
-    background: var(--color-accent-hud);
-    color: var(--color-background);
-    box-shadow: 0 0 15px var(--color-accent-glow);
-}
-
-.tab-pane {
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.tab-pane.active {
-    display: flex;
-}
-
-/* --- FORMS & BUTTONS --- */
-
-.avatar-picker {
-    text-align: center;
-}
-
-.avatar-picker img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid var(--color-glass-border);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-input[type="text"] {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid var(--color-glass-border);
-    color: var(--color-text-primary);
-    padding: 0.9rem;
-    border-radius: var(--input-border-radius);
-    font-size: 1rem;
-    text-align: center;
-    transition: all var(--transition-fast);
-}
-
-input[type="text"]::placeholder {
-    color: var(--color-text-secondary);
-    opacity: 0.8;
-}
-
-input[type="text"]:focus {
-    outline: none;
-    border-color: var(--color-glass-border-active);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-}
-
-.btn {
-    border: none;
-    padding: 0.9rem;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: var(--btn-border-radius);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    text-transform: uppercase;
-}
-
-.btn:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(145deg, var(--color-accent-hud), #00c8d7);
-    color: var(--color-background);
-    box-shadow: 0 4px 20px -5px var(--color-accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
-    border: 1px solid var(--color-accent-hud);
-    text-shadow: 0 -1px 0 rgba(0,0,0,0.2);
-    padding: 1rem;
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-}
-
-.btn-primary.ready,
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 25px -5px var(--color-accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
-}
-
-.btn-primary:active {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 2px 10px -5px var(--color-accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
-}
-
-.btn-secondary {
-    background: transparent;
-    border: 1px solid var(--color-glass-border);
-    color: var(--color-text-secondary);
-}
-
-.btn-secondary:hover {
-    background: var(--color-glass-bg);
-    color: var(--color-text-primary);
-    border-color: var(--color-glass-border-active);
-}
-
-.rules-container {
-    text-align: center;
-    border-top: 1px solid var(--color-glass-border);
-    padding-top: 1.5rem;
-    margin-top: 1rem;
-}
-#how {
-    text-align: left;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-}
-#how ul {
-    list-style-position: inside;
-    margin-top: 0.5rem;
-}
-
-
-/* --- LOBBY --- */
-#screen-lobby {
-    display: none; /* Initially hidden */
-    flex-direction: column;
-    gap: 1.5rem;
-    height: 100%;
-    width: 100%;
-    max-width: 600px;
-}
-
-.lobby-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background: var(--color-glass-bg);
-    padding: 0.75rem 1rem;
-    border-radius: var(--panel-border-radius);
-    border: 1px solid var(--color-glass-border);
-    backdrop-filter: blur(15px);
-}
-.lobby-header .btn-secondary {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
-}
-
-.lobby-code-container {
-    text-align: center;
-}
-
-.lobby-code-container span {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    display: block;
-}
-
-#lobby-code {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--color-accent-hud);
-    letter-spacing: 2px;
-}
-
-#lobby-ready-pill {
-    background: rgba(0,0,0,0.3);
-    color: var(--color-text-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-
-#screen-lobby h2 {
-    text-align: center;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--color-text-secondary);
-}
-
-.player-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
-    flex-grow: 1;
-    overflow-y: auto; /* Scroll if many players */
-    padding: 0.5rem;
-}
-
-.player-card {
-    background: var(--color-glass-bg);
-    border: 1px solid var(--color-glass-border);
-    border-radius: var(--input-border-radius);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    text-align: center;
-    transition: all var(--transition-fast);
-}
-
-.player-card:hover {
-    transform: scale(1.05);
-    border-color: var(--color-glass-border-active);
-}
-
-.player-card img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-}
-
-.player-card .player-name {
-    font-weight: 700;
-    font-size: 1rem;
-    word-break: break-all;
-}
-.player-card .player-status {
-    font-size: 0.8rem;
-    color: var(--color-accent-hud);
-}
-
-.lobby-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    margin-top: auto; /* Pushes to the bottom */
-}
-
-#timer-lobby {
-    color: var(--color-accent-hud);
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-align: center;
-}
-
-/* --- TOAST --- */
-#toast {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--color-accent-hud);
-  color: var(--color-background);
-  padding: 1rem 1.5rem;
-  border-radius: var(--btn-border-radius);
-  font-weight: 700;
-  z-index: 1000;
-  box-shadow: 0 0 20px var(--color-accent-glow);
-  animation: toastIn 0.3s ease;
-}
-
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}

@@ -6,7 +6,6 @@ const CACHE = 'hol-v38';
 const ASSETS = [
   '/',                // shell de nav
   '/index.html',
-  '/style.css',
 
   // Images/icônes/manifest
   '/images/background-hero.svg?v=1', // <-- tu charges cette URL dans le CSS

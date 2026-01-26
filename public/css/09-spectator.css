@@ -1,0 +1,42 @@
+/* 09-spectator.css — Spectator modal and cinematic overlays */
+@import './01-tokens.css';
+
+/* Spectator waiting modal: immersive, centered, dramatic */
+#spectator-waiting.modal-overlay {
+	display: flex; align-items: center; justify-content: center;
+}
+
+#spectator-waiting .panel {
+	width: min(760px, 92%);
+	padding: 2rem;
+	border-radius: 16px;
+	background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.26));
+	border: 1px solid rgba(255,255,255,0.04);
+	box-shadow: 0 40px 120px -60px rgba(0,0,0,0.8);
+	text-align: center; color: var(--text);
+}
+
+#spectator-waiting h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+#spectator-waiting p { color: var(--muted); margin-bottom: 1rem; }
+
+/* Cinematic overlays (role reveal, result reveal) */
+.cinematic-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index:1500; pointer-events:none; }
+.cinematic-overlay .impostor { color: #ff605c; font-size: 4rem; letter-spacing: 3px; }
+.cinematic-overlay .crew { color: var(--accent-cyan); font-size: 3.2rem; }
+
+/* Playing animation: high-tech scan + pulse */
+.cinematic-overlay.playing { background: radial-gradient(circle at 50% 40%, rgba(0,242,255,0.06), transparent 20%), rgba(0,0,0,0.45); pointer-events:auto; }
+.cinematic-overlay.playing #reveal-role-text { animation: role-scan 2600ms ease-in-out both; }
+
+@keyframes role-scan {
+	0% { transform: scale(0.95) translateY(6px); opacity: 0; filter: blur(6px); }
+	40% { transform: scale(1.02) translateY(-4px); opacity: 1; filter: blur(0); }
+	100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Modal-overlay playing for immersive HUD reveal */
+.modal-overlay.playing { animation: overlay-fade 700ms ease both; }
+@keyframes overlay-fade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) { .cinematic-overlay.playing, .modal-overlay.playing { animation: none; } }

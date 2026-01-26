@@ -17,36 +17,31 @@
 
 #score-list li {
     display: grid;
-    grid-template-columns: 10px 32px 1fr auto;
+    grid-template-columns: 10px 40px 1fr auto;
     align-items: center;
     gap: 12px;
-    padding: 8px;
-    border-bottom: 1px solid var(--color-glass-border);
+    padding: 8px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
 }
 
-.status-led {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
+.status-led { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 6px rgba(0,0,0,0.4) inset; }
+.status-led.is-active { background: #10b981; box-shadow: 0 0 10px #10b981; }
+.status-led.is-ready { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+.status-led.is-disconnected { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+
+.pts { font-weight: 900; color: var(--accent-cyan); }
+
+/* Floating scoreboard */
+#scoreboard {
+  position: fixed; right: 18px; top: 18px; width: 260px; max-height: 70vh; overflow:auto;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px; padding: 0.75rem; z-index: 1400; box-shadow: 0 12px 40px -28px rgba(0,0,0,0.6);
 }
 
-.status-led.is-active { background: #10b981; box-shadow: 0 0 8px #10b981; }
-.status-led.is-disconnected { background: var(--danger); }
+/* small avatar in list */
+.score-avatar { width: 36px; height: 36px; }
 
-.pts {
-    font-weight: 900;
-    color: var(--color-cyan);
-}
+.scoreboard-panel h3 { margin: 0 0 8px 0; }
 
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
+.scoreboard-panel li.me { background: linear-gradient(90deg, rgba(0,242,255,0.03), transparent); }
