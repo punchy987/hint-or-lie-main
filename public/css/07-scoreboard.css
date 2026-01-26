@@ -10,10 +10,8 @@
     transform: translateX(-50%) translateY(calc(100% - 50px));
     width: 95%;
     max-width: 500px;
-    background: rgba(19, 24, 35, 0.9) !important;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(0, 242, 255, 0.2);
+    background: rgba(27, 36, 48, 0.9) !important;
+    border: 1px solid rgba(232, 197, 71, 0.2);
     border-bottom: none;
     border-radius: 20px 20px 0 0;
     z-index: 1000;
@@ -33,7 +31,7 @@
     display: block;
     width: 40px;
     height: 4px;
-    background: rgba(0, 242, 255, 0.5);
+    background: rgba(232, 197, 71, 0.5);
     border-radius: 2px;
     margin: 12px auto;
 }
@@ -42,7 +40,7 @@
 .scoreboard-panel h3 {
     font-size: 0.75rem;
     text-align: center;
-    color: #00f2ff;
+    color: var(--primary);
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 10px;
@@ -54,6 +52,7 @@
     list-style: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    margin-bottom: 20px !important;
     max-height: 250px;
     overflow-y: auto;
     scrollbar-width: none;
@@ -77,7 +76,7 @@
 }
 
 .player-row:hover {
-    background: rgba(0, 242, 255, 0.05);
+    background: rgba(232, 197, 71, 0.05);
 }
 
 /* Avatar verrouillé */
@@ -86,7 +85,7 @@
     height: 32px !important;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(0, 242, 255, 0.3);
+    border: 1px solid rgba(232, 197, 71, 0.3);
     flex-shrink: 0;
     display: block;
 }
@@ -104,7 +103,7 @@
 /* Score du joueur */
 .player-score {
     font-family: monospace;
-    color: #00f2ff;
+    color: var(--primary);
     font-weight: bold;
     text-align: right;
     font-size: 0.9rem;
@@ -122,13 +121,11 @@
 .status-led.status-online,
 .status-led.is-active {
     background: #00ff88;
-    box-shadow: 0 0 8px #00ff88;
 }
 
 .status-led.status-lobby,
 .status-led.is-ready {
     background: #ff5277;
-    box-shadow: 0 0 8px #ff5277;
 }
 
 .status-led.status-offline,
@@ -156,7 +153,7 @@
 
 /* Highlight du joueur local */
 .player-row.me {
-    background: linear-gradient(90deg, rgba(0,242,255,0.08), transparent);
+    background: linear-gradient(90deg, rgba(232,197,71,0.08), transparent);
 }
 
 /* Version desktop */

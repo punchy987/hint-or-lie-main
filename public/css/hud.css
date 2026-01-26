@@ -47,7 +47,7 @@
 /* Centered HUD card */
 .hud-card { width: 100%; max-width: 500px; margin: 0 auto; }
 
-/* Screen containers */
+/* Screen containers — Floating Light */
 .screen {
     width: 100%;
     max-width: 100%;
@@ -55,10 +55,14 @@
     flex-direction: column;
     align-items: center;
     padding: 1rem;
+    border: none;
+    box-shadow: none;
 }
 
 .screen .panel {
     width: 100%;
+    border: none;
+    box-shadow: none;
 }
 
 /* Tiny responsive tweaks */
@@ -72,7 +76,7 @@
 */
 
 /* Lightweight toast (uses accent cyan for emphasis) */
-.hud-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); border: var(--border-thin) solid var(--glass-border); color: var(--text); padding: 0.6rem 1rem; border-radius: 999px; backdrop-filter: blur(var(--blur)); z-index:1300; }
+.hud-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: transparent; border: none; color: var(--text); padding: 0.6rem 1rem; border-radius: 999px; backdrop-filter: none; z-index:1300; }
 
 /* Toast désactivé par défaut */
 #toast {
@@ -111,9 +115,9 @@
     padding: 10px 20px;
     margin: 0 auto 1.5rem;
     background: var(--mat-gray-800);
-    backdrop-filter: blur(var(--blur));
-    -webkit-backdrop-filter: blur(var(--blur));
-    border: var(--border-thin) solid var(--glass-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
     border-radius: var(--radius-sm);
     font-size: 1rem;
     font-weight: 800;
@@ -131,14 +135,14 @@
     width: 100%;
 }
 
-/* Cartes de joueurs — Glass panels avec halos */
+/* Cartes de joueurs — Floating Matte (sans fond) */
 .player-card {
-    background: var(--glass-bg);
-    border: var(--border-thin) solid var(--glass-border);
+    background: transparent;
+    border: none;
     border-radius: var(--radius);
     padding: 1.25rem;
-    backdrop-filter: blur(var(--blur));
-    -webkit-backdrop-filter: blur(var(--blur));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -148,22 +152,13 @@
     min-height: 150px;
 }
 
-/* Halo de couleur par défaut */
+/* Halo de couleur désactivé pour Floating Matte */
 .player-card::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: var(--radius);
-    background: linear-gradient(135deg, 
-        rgba(0,242,255,0.15), 
-        rgba(168,85,247,0.15));
-    opacity: 0;
-    z-index: -1;
-    transition: opacity var(--transition-smooth);
+    display: none;
 }
 
 .player-card:hover::before {
-    opacity: 0.6;
+    display: none;
 }
 
 /* Avatar des joueurs — massif (80px min) */
@@ -171,9 +166,8 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,242,255,0.08) 0%, transparent 70%);
-    box-shadow: 0 0 30px rgba(0,242,255,0.15),
-                0 0 50px rgba(0,242,255,0.08);
+    background: transparent;
+    box-shadow: none;
     transition: transform var(--transition-smooth);
 }
 
@@ -190,29 +184,28 @@
     letter-spacing: 0.3px;
 }
 
-/* Badge PRÊT — bordure cyan lumineuse */
+/* Badge PRÊT — style Matte */
 .player-status {
     font-size: 0.75rem;
     font-weight: 700;
     padding: 0.4rem 0.8rem;
     border-radius: 999px;
-    background: rgba(0,242,255,0.12);
-    border: var(--border-thin) solid rgba(0,242,255,0.3);
-    color: var(--accent-cyan);
+    background: transparent;
+    border: none;
+    color: var(--color-primary);
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 0 15px rgba(0,242,255,0.2);
+    box-shadow: none;
 }
 
-/* Carte de joueur prêt — bordure lumineuse cyan */
+/* Carte de joueur prêt */
 .player-card:has(.player-status) {
-    border-color: rgba(0,242,255,0.4);
-    box-shadow: 0 0 20px rgba(0,242,255,0.2),
-                0 4px 16px rgba(0,242,255,0.15);
+    border: none;
+    box-shadow: none;
 }
 
 .player-card:has(.player-status)::before {
-    opacity: 0.8;
+    display: none;
 }
 
 /* Zone d'action du lobby */
@@ -224,32 +217,33 @@
     width: 100%;
 }
 
-/* Bouton "Je suis prêt" — imposant comme bouton accueil */
+/* Bouton "Je suis prêt" — imposant Matte Arcade */
 #btn-ready {
     width: 100%;
     max-width: 450px;
     min-height: 56px;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, rgba(0,242,255,0.2), rgba(0,242,255,0.1));
-    border: 2px solid rgba(0,242,255,0.3);
-    border-radius: 999px;
-    color: var(--text);
-    box-shadow: 0 8px 30px -10px rgba(0,242,255,0.4),
-                0 0 40px rgba(0,242,255,0.15);
-    transition: all var(--transition-smooth);
+    margin-top: 40px;
+    background: var(--color-primary);
+    color: #000000;
+    border: none;
+    border-radius: 16px;
+    box-shadow: inset 0 2px 3px var(--relief-light), inset 0 -3px 4px var(--relief-dark), 0 4px 6px rgba(0,0,0,0.2);
+    transition: all 0.2s ease-out;
 }
 
 #btn-ready:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px -10px rgba(0,242,255,0.5),
-                0 0 50px rgba(0,242,255,0.2);
-    border-color: rgba(0,242,255,0.5);
+    box-shadow: inset 0 2px 3px var(--relief-light), inset 0 -3px 4px var(--relief-dark), 0 6px 10px rgba(0,0,0,0.25);
 }
 
 #btn-ready:active {
-    transform: translateY(0);
+    transform: translateY(2px);
+    box-shadow: inset 0 3px 5px rgba(0,0,0,0.4);
 }
 
 #btn-ready:disabled {

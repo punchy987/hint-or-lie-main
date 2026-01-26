@@ -37,6 +37,14 @@
       card.className = 'vote-card'; // La classe CSS qu'on a ajoutée tout à l'heure
       card.dataset.id = h.id;
 
+      // Badge auteur (nom du joueur)
+      if (h.playerName) {
+        const authorBadge = document.createElement('span');
+        authorBadge.className = 'author-badge';
+        authorBadge.textContent = h.playerName;
+        card.appendChild(authorBadge);
+      }
+
       // Le texte de l'indice
       const fullText = (h.text ?? h.hint ?? '').toString().trim();
       const strong = document.createElement('strong');
@@ -87,7 +95,8 @@
     socket.on('hintsList', (hints) => {
       const mapped = (hints || []).map(h => ({
         id: h.id,
-        text: (typeof h.text === 'string') ? h.text : (h.hint || '')
+        text: (typeof h.text === 'string') ? h.text : (h.hint || ''),
+        playerName: h.playerName || h.name || ''
       }));
       handleHintsForVote(mapped, null, null);
     });

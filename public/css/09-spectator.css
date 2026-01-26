@@ -58,7 +58,6 @@
 	border-radius: 16px;
 	background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.26));
 	border: 1px solid rgba(255,255,255,0.04);
-	box-shadow: 0 40px 120px -60px rgba(0,0,0,0.8);
 	text-align: center;
 	color: var(--text);
 }
@@ -79,12 +78,13 @@
 	visibility: hidden;
 }
 .cinematic-overlay .impostor { color: #ff605c; font-size: 4rem; letter-spacing: 3px; }
-.cinematic-overlay .crew { color: var(--accent-cyan); font-size: 3.2rem; }
+.cinematic-overlay .crew { color: var(--primary); font-size: 3.2rem; }
 
 /* When playing: overlay becomes visible with flex layout */
 .cinematic-overlay.playing {
 	display: flex;
-	background: radial-gradient(circle at 50% 40%, rgba(0,242,255,0.06), transparent 20%), rgba(0,0,0,0.45);
+	background-color: rgba(18, 24, 32, 0.98);
+	backdrop-filter: blur(10px);
 	pointer-events: auto;
 	z-index: 1500;
 	opacity: 1;
@@ -94,8 +94,8 @@
 .cinematic-overlay.playing #reveal-role-text { animation: role-scan 2600ms ease-in-out both; }
 
 @keyframes role-scan {
-	0% { transform: scale(0.95) translateY(6px); opacity: 0; filter: blur(6px); }
-	40% { transform: scale(1.02) translateY(-4px); opacity: 1; filter: blur(0); }
+	0% { transform: scale(0.95) translateY(6px); opacity: 0; }
+	40% { transform: scale(1.02) translateY(-4px); opacity: 1; }
 	100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
@@ -105,3 +105,50 @@
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) { .cinematic-overlay.playing, .modal-overlay.playing { animation: none; } }
+
+/* ===== BANNIÈRES VICTOIRE/DÉFAITE (Smooth Arcade) ===== */
+#victory-banner,
+#defeat-banner {
+	font-family: 'Outfit', sans-serif;
+	font-size: 4rem;
+	font-weight: 800;
+	text-align: center;
+	padding: 2rem 3rem;
+	border-radius: 20px;
+	letter-spacing: 3px;
+	text-transform: uppercase;
+	opacity: 0;
+	transform: translateY(-50px) scale(0.8);
+	transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#victory-banner:not(.hidden) {
+	background: linear-gradient(135deg, rgba(232,197,71,0.95), rgba(240,208,96,0.95));
+	color: var(--bg-dark);
+	border: 3px solid var(--primary);
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	animation: victory-pulse 1.5s ease-in-out infinite;
+}
+
+#defeat-banner:not(.hidden) {
+	background: linear-gradient(135deg, rgba(255,50,80,0.95), rgba(255,96,92,0.95));
+	color: #ffffff;
+	border: 3px solid #ff5277;
+	opacity: 1;
+	transform: translateY(0) scale(1);
+}
+
+@keyframes victory-pulse {
+	0%, 100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-5px) scale(1.02);
+	}
+}
+
+/* Classe hidden pour masquer les bannières */
+.hidden {
+	display: none !important;
+}

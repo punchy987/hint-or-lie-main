@@ -1,20 +1,25 @@
 /* 02-base.css — Reset and global layout for Minimalist HUD */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=swap');
 @import url('./01-tokens.css');
 
 /* Reset */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0;
+  font-family: 'Lexend', sans-serif !important;
+}
 html, body { height: 100%; width: 100%; }
 img, picture, video, canvas, svg { display: block; max-width: 100%; }
 button, input, textarea, select { font: inherit; }
 
 /* Base */
 html, body {
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,242,255,0.03), transparent 8%),
-                            linear-gradient(180deg, var(--bg-dark) 0%, #020305 100%);
-    color: var(--text);
-    font-family: var(--font-sans);
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Lexend', sans-serif;
     font-size: 16px;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     position: relative;
@@ -29,11 +34,31 @@ body::before {
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 1px 1px, rgba(0,242,255,0.06) 1px, transparent 0);
+        radial-gradient(circle at 1px 1px, rgba(232,197,71,0.06) 1px, transparent 0);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: -1;
     opacity: 0.4;
+}
+
+/* Effet CRT scanlines très léger (Smooth Arcade) */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.03) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0,0,0,0.03) 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 1;
 }
 
 body {

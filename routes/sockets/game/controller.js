@@ -227,6 +227,10 @@ for (const id of activeConnected) {
     votesDetail[id] = p.vote;
   }
 }
+const activePlayers = Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected);
+    const maxScore = Math.max(0, ...activePlayers.map(([_, p]) => p.score || 0));
+    const isGameOver = maxScore >= 10;
+
 io.to(code).emit('roundResult', {
   round: r.round,
   impostorId: impId,
@@ -240,11 +244,8 @@ io.to(code).emit('roundResult', {
   votesDetail: votesDetail,
   impostorCaught: caught,
   domain: r.words?.domain,
+  isGameOver: isGameOver,
 });
-
-    const activePlayers = Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected);
-    const maxScore = Math.max(0, ...activePlayers.map(([_, p]) => p.score || 0));
-    const isGameOver = maxScore >= 10;
 
     if (!isGameOver) {
       r.state = 'reveal';

@@ -3,29 +3,33 @@
 
   function playResultCinematic({ win, text, isGameOver = false }) {
     const resultOverlay = $('result-reveal-overlay');
-    const resultText = $('reveal-result-text');
+    const victoryBanner = $('victory-banner');
+    const defeatBanner = $('defeat-banner');
     
-    if (resultText) resultText.textContent = text;
-    if (isGameOver) {
-      if (resultText) resultText.style.fontSize = 'clamp(2rem, 10vw, 5rem)';
+    // Masquer les bannières au départ
+    if (victoryBanner) victoryBanner.classList.add('hidden');
+    if (defeatBanner) defeatBanner.classList.add('hidden');
+    if (resultOverlay) {
+      resultOverlay.style.display = '';
+      resultOverlay.classList.add('playing');
     }
-    if (resultText) resultText.className = win ? 'victory' : 'defeat';
-    if (resultOverlay) resultOverlay.classList.add('playing');
 
-    if (win && window.confetti) {
-      const config = isGameOver
-        ? { particleCount: 200, spread: 90, origin: { y: 0.6 }, gravity: 0.8 }
-        : { particleCount: 100, spread: 70, origin: { y: 0.6 } };
-      confetti(config);
-      if (isGameOver) {
-        setTimeout(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }), 500);
+    // Afficher la bannière appropriée avec un délai
+    setTimeout(() => {
+      if (win && victoryBanner) {
+        victoryBanner.classList.remove('hidden');
+      } else if (!win && defeatBanner) {
+        defeatBanner.classList.remove('hidden');
       }
-    }
+    }, 800);
 
     return new Promise(resolve => setTimeout(() => {
       if (resultOverlay) resultOverlay.classList.remove('playing');
+      // Masquer les bannières à la fin
+      if (victoryBanner) victoryBanner.classList.add('hidden');
+      if (defeatBanner) defeatBanner.classList.add('hidden');
       resolve();
-    }, isGameOver ? 3500 : 2500));
+    }, isGameOver ? 3500 : 3000));
   }
 
   function initUI() {
@@ -51,6 +55,9 @@
       await playResultCinematic({ win, text: win ? 'VICTOIRE !' : 'DÉFAITE...' });
       
       show('screen-result');
+
+      // Suspense de 3 secondes avant d'afficher les détails
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       const btnNext = $('btn-next');
       if (btnNext) { btnNext.disabled = false; btnNext.textContent = 'Manche suivante'; }
@@ -89,7 +96,11 @@
 
       if (votesContainer && res.votesDetail && state.room?.players) {
         const title = document.createElement('h4');
-        title.textContent = 'Détail des votes';
+        title.textContent = 'DÉTAIL DES VOTES';
+        title.style.fontFamily = "'Lexend', sans-serif";
+        title.style.fontWeight = '800';
+        title.style.textTransform = 'uppercase';
+        title.style.letterSpacing = '1px';
         title.style.textAlign = 'center';
         title.style.marginBottom = '10px';
         votesContainer.appendChild(title);
@@ -110,25 +121,25 @@
 
             if (voterName && votedName) {
               const voteElement = document.createElement('div');
-              voteElement.style.display = 'flex';
-              voteElement.style.alignItems = 'center';
-              voteElement.style.gap = '8px';
-              voteElement.style.padding = '4px 8px';
-              voteElement.style.background = 'rgba(255, 255, 255, 0.05)';
-              voteElement.style.borderRadius = '6px';
+              voteElement.className = 'arcade-bar';
               voteElement.style.width = 'fit-content';
 
               const voterSpan = document.createElement('span');
               voterSpan.textContent = voterName;
-              voterSpan.style.fontWeight = '700';
+              voterSpan.style.fontFamily = "'Lexend', sans-serif";
+              voterSpan.style.fontWeight = '800';
+              voterSpan.style.opacity = '1';
 
               const arrow = document.createElement('span');
               arrow.textContent = '→';
               arrow.style.color = 'var(--muted)';
+              arrow.style.fontWeight = '600';
 
               const votedSpan = document.createElement('span');
               votedSpan.textContent = votedName;
-              votedSpan.style.fontWeight = '700';
+              votedSpan.style.fontFamily = "'Lexend', sans-serif";
+              votedSpan.style.fontWeight = '800';
+              votedSpan.style.opacity = '1';
               votedSpan.style.color = votedId === res.impostorId ? 'var(--danger)' : 'var(--crew)';
 
               voteElement.appendChild(voterSpan);
@@ -162,63 +173,87 @@
 
     const title = document.createElement('h2');
     title.style.cssText = `
-      font-size: 2.5rem;
+      font-family: 'Lexend', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
       text-align: center;
-      background: linear-gradient(45deg, var(--accent), #ff3b3b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 20px;
-      animation: pulse-glow 1.5s ease-in-out infinite;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 30px;
+      margin-top: 0;
     `;
     title.textContent = '🏆 PARTIE TERMINÉE !';
 
     const winnersSection = document.createElement('div');
     winnersSection.style.cssText = `
-      background: rgba(74, 222, 128, 0.1);
-      border: 2px solid rgba(74, 222, 128, 0.3);
+      background: rgba(232, 197, 71, 0.15);
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
       text-align: center;
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.15), inset 0 -3px 4px rgba(0,0,0,0.3);
     `;
 
     const winnersTitle = document.createElement('h3');
-    winnersTitle.textContent = winners.length > 1 ? 'Gagnants 🎉' : 'Gagnant 🎉';
-    winnersTitle.style.cssText = 'margin-top: 0; color: var(--accent-3);';
+    winnersTitle.textContent = winners.length > 1 ? 'GAGNANTS 🎉' : 'GAGNANT 🎉';
+    winnersTitle.style.cssText = `
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: var(--color-primary);
+    `;
     winnersSection.appendChild(winnersTitle);
 
     winners.forEach((w, i) => {
       const winnerDiv = document.createElement('div');
+      winnerDiv.className = 'arcade-bar';
       winnerDiv.style.cssText = `
-        padding: 8px;
-        margin: 8px 0;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
+        padding: 14px 20px;
+        margin: 12px 0;
+        background: rgba(232, 197, 71, 0.15);
+        border-radius: 12px;
+        font-family: 'Lexend', sans-serif;
         font-weight: 800;
-        font-size: 1.3rem;
+        font-size: 1.2rem;
+        box-shadow: inset 0 2px 3px rgba(255,255,255,0.15), inset 0 -3px 4px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2);
         animation: slideInRight ${0.5 + i * 0.2}s ease-out;
       `;
       winnerDiv.innerHTML = `
         <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(w.name)}" 
              style="width: 48px; height: 48px; border-radius: 50%; margin-right: 12px; vertical-align: middle;">
-        <span>${w.name}</span>
-        <span style="color: var(--accent-3); margin-left: 12px;">+${w.score}pts</span>
+        <span style="font-family: 'Lexend', sans-serif; font-weight: 800;">${w.name}</span>
+        <span style="font-family: 'Lexend', sans-serif; color: var(--color-primary); margin-left: 12px; font-weight: 800;">+${w.score}pts</span>
       `;
       winnersSection.appendChild(winnerDiv);
     });
 
     const scoreboardSection = document.createElement('div');
     scoreboardSection.style.cssText = `
-      border: 1px solid var(--line);
+      background: var(--relief-bg);
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.15), inset 0 -3px 4px rgba(0,0,0,0.3);
     `;
 
     const scoreboardTitle = document.createElement('h4');
-    scoreboardTitle.textContent = 'Classement Final';
-    scoreboardTitle.style.cssText = 'text-align: center; margin-top: 0; color: var(--muted);';
+    scoreboardTitle.textContent = 'CLASSEMENT FINAL';
+    scoreboardTitle.style.cssText = `
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    `;
     scoreboardSection.appendChild(scoreboardTitle);
 
     if (state.room?.players) {
@@ -232,13 +267,15 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 10px 12px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          font-family: 'Lexend', sans-serif;
+          font-size: 1.1rem;
           animation: fadeIn ${0.3 + i * 0.1}s ease-out;
         `;
         scoreDiv.innerHTML = `
-          <span>${medal} ${p.name}</span>
-          <span style="font-weight: 800; color: var(--accent);">${finalScores[p.id] || 0}pts</span>
+          <span style="font-family: 'Lexend', sans-serif; font-weight: 600;">${medal} ${p.name}</span>
+          <span style="font-family: 'Lexend', sans-serif; font-weight: 800; color: var(--color-primary);">${finalScores[p.id] || 0}pts</span>
         `;
         scoreboardSection.appendChild(scoreDiv);
       });
@@ -247,67 +284,84 @@
     const actionsDiv = document.createElement('div');
     actionsDiv.style.cssText = `
       display: flex;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 16px;
+      margin-top: 24px;
     `;
 
     const btnHome = document.createElement('button');
-    btnHome.textContent = '🏠 Accueil';
+    btnHome.textContent = '🏠 ACCUEIL';
     btnHome.type = 'button';
+    btnHome.className = 'btn';
     btnHome.style.cssText = `
       flex: 1;
-      padding: 12px;
-      background: var(--primary);
-      color: white;
+      padding: 16px;
+      background: var(--relief-bg);
+      color: var(--text-main);
       border: none;
-      border-radius: 8px;
+      border-radius: 16px;
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.2rem;
       font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: transform 0.2s ease-out;
+      box-shadow: inset 0 2px 3px rgba(255,255,255,0.15), inset 0 -3px 4px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2);
     `;
     btnHome.onclick = () => {
       modal.style.display = 'none';
       socket.emit('leaveRoom');
     };
-    btnHome.onmouseover = () => btnHome.style.opacity = '0.9';
-    btnHome.onmouseout = () => btnHome.style.opacity = '1';
+    btnHome.onmouseover = () => btnHome.style.transform = 'translateY(-2px)';
+    btnHome.onmouseout = () => btnHome.style.transform = 'translateY(0)';
 
     const btnRestart = document.createElement('button');
-    btnRestart.textContent = '🔄 Recommencer';
+    btnRestart.textContent = '🔄 RECOMMENCER';
     btnRestart.type = 'button';
+    btnRestart.className = 'btn';
 
     const isHost = window.HOL?.state?.room?.hostId === window.HOL?.state?.me?.id;
 
     if (isHost) {
       btnRestart.style.cssText = `
         flex: 1;
-        padding: 12px;
-        background: var(--accent);
-        color: #4d0d17;
+        padding: 16px;
+        background: var(--color-primary);
+        color: var(--bg-main);
         border: none;
-        border-radius: 8px;
+        border-radius: 16px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 1.2rem;
         font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         cursor: pointer;
-        transition: 0.2s;
+        transition: transform 0.2s ease-out;
+        box-shadow: inset 0 2px 3px rgba(255,255,255,0.15), inset 0 -3px 4px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2);
       `;
       btnRestart.onclick = () => {
         modal.style.display = 'none';
         socket.emit('resetScores');
       };
-      btnRestart.onmouseover = () => btnRestart.style.opacity = '0.9';
-      btnRestart.onmouseout = () => btnRestart.style.opacity = '1';
+      btnRestart.onmouseover = () => btnRestart.style.transform = 'translateY(-2px)';
+      btnRestart.onmouseout = () => btnRestart.style.transform = 'translateY(0)';
     } else {
-      btnRestart.textContent = '🔄 Seul l\'hôte peut recommencer';
+      btnRestart.textContent = '🔄 SEUL L\'HÔTE PEUT RECOMMENCER';
       btnRestart.disabled = true;
       btnRestart.style.cssText = `
         flex: 1;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--muted);
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(241, 242, 246, 0.4);
         border: none;
-        border-radius: 8px;
-        font-weight: 800;
+        border-radius: 16px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         cursor: not-allowed;
+        box-shadow: inset 0 2px 3px rgba(0,0,0,0.3);
       `;
     }
 

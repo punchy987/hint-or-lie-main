@@ -1,26 +1,35 @@
 :root {
-    /* Core colors */
-    --bg-dark: #0a0e14;
-    --accent-cyan: #00f2ff;
-    --glass-bg: rgba(255,255,255,0.05);
-    --glass-border: rgba(255,255,255,0.08);
+    /* Core colors — Matte Grey Arcade */
+    --bg-main: #2F3542;
+    --bg-dark: #2F3542;
+    --primary: #E8C547;
+    --color-primary: #E8C547;
+    --accent-cyan: #E8C547; /* Alias pour compatibilité */
+    --glass-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(241,242,246,0.1);
+
+    /* Team colors */
+    --color-crew: #48BB78;
+    --color-impostor: #F56565;
 
     /* Matte gray palette */
-    --mat-gray-900: #0f1720;
-    --mat-gray-800: #131823;
-    --mat-gray-700: #1f2933;
-    --mat-gray-500: #6b7280;
+    --mat-gray-900: #2F3542;
+    --mat-gray-800: #3B4252;
+    --mat-gray-700: #4C566A;
+    --mat-gray-500: #A0AEC0;
+    --panel-bg: transparent;
 
     /* Text tones */
-    --text: rgba(255,255,255,0.92);
-    --muted: rgba(255,255,255,0.60);
+    --text: #F1F2F6;
+    --text-main: #F1F2F6;
+    --muted: rgba(241,242,246,0.60);
 
     /* Glass effect */
     --blur: 15px;
     --glass-bg-strong: rgba(255,255,255,0.07);
 
     /* Geometry */
-    --radius-sm: 8px;
+    --radius-sm: 12px;
     --radius: 12px;
     --border-thin: 1px;
 
@@ -28,9 +37,24 @@
     --transition-fast: 180ms cubic-bezier(.2,.9,.3,1);
     --transition-smooth: 300ms cubic-bezier(.2,.9,.3,1);
 
+    /* Physical Relief (Soft Shadows) */
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 12px rgba(0, 0, 0, 0.4);
+    --shadow-active: 0 2px 3px rgba(0, 0, 0, 0.5);
+
+    /* Embossed Relief (Tactile 3D) */
+    --relief-light: rgba(255, 255, 255, 0.15);
+    --relief-dark: rgba(0, 0, 0, 0.3);
+    --relief-bg: #3a4150;
+
+    /* Typography Scale */
+    --font-size-base: 1.1rem;
+    --font-size-title: 2.2rem;
+    --font-size-label: 0.9rem;
+
     /* Semantic tokens (for compatibility) */
-    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    --color-accent-hud: var(--accent-cyan);
+    --font-sans: 'Outfit', sans-serif;
+    --color-accent-hud: var(--primary);
     --color-glass-bg: var(--glass-bg);
     --color-glass-border: var(--glass-border);
 }
