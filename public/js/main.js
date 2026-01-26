@@ -147,6 +147,12 @@
     window.HOL.features.leaderboard.init();
     initTimersFromServer();
     document.body.setAttribute('data-screen', 'screen-home');
+    
+    // Logique d'ouverture du Bottom Sheet
+    const sheet = document.querySelector('.scoreboard-panel');
+    if (sheet) {
+      sheet.onclick = () => sheet.classList.toggle('is-open');
+    }
   }
 
   if (document.readyState !== 'loading') init();

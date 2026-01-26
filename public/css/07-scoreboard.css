@@ -1,146 +1,167 @@
+/* =========================================
+   SCOREBOARD BOTTOM SHEET (HUD)
+   ========================================= */
+
+/* Le conteneur principal qui coulisse */
 .scoreboard-panel {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    position: fixed !important;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(100% - 50px));
+    width: 95%;
+    max-width: 500px;
+    background: rgba(19, 24, 35, 0.9) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 0 20px 0 !important;
+    cursor: pointer;
 }
 
+/* État Ouvert (Ajouté par JS) */
+.scoreboard-panel.is-open {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* La poignée pour coulisser */
+.scoreboard-panel::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(0, 242, 255, 0.5);
+    border-radius: 2px;
+    margin: 12px auto;
+}
+
+/* Titre du panneau */
 .scoreboard-panel h3 {
     font-size: 0.75rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
     text-align: center;
+    color: #00f2ff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    margin-top: 0;
 }
 
-#score-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-    max-height: 198px;
+/* Liste interne avec scroll */
+#score-list, #players {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: 250px;
     overflow-y: auto;
     scrollbar-width: none;
-    gap: 0;
-    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
-#score-list::-webkit-scrollbar {
+#score-list::-webkit-scrollbar,
+#players::-webkit-scrollbar {
     display: none;
 }
 
-#score-list li {
-    display: flex;
+/* Grille Invisible (5 colonnes) */
+.player-row {
+    display: grid !important;
+    grid-template-columns: 15px 32px 1fr 65px 35px !important;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     height: 44px;
-    padding: 0 6px;
+    padding: 0 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     margin: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.02);
-    background: rgba(255,255,255,0.01);
 }
 
-/* Disposition interne avec grid pour alignement précis */
-#score-list li > * {
+.player-row:hover {
+    background: rgba(0, 242, 255, 0.05);
+}
+
+/* Avatar verrouillé */
+.player-avatar-small {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 242, 255, 0.3);
     flex-shrink: 0;
+    display: block;
 }
 
-#score-list li .status-led {
-    width: 8px;
-}
-
-#score-list li .score-avatar {
-    width: 32px;
-}
-
-#score-list li .name {
-    flex: 1;
-    min-width: 0;
+/* Nom du joueur */
+.player-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text);
+}
+
+/* Score du joueur */
+.player-score {
+    font-family: monospace;
+    color: #00f2ff;
+    font-weight: bold;
+    text-align: right;
+    font-size: 0.9rem;
     white-space: nowrap;
 }
 
-#score-list li .pts {
-    width: 50px;
+/* LED de statut */
+.status-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
 }
 
-.status-led { 
-    width: 8px; 
-    height: 8px; 
-    border-radius: 50%; 
-    background: #333; 
-}
-
-/* Statuts LED */
 .status-led.status-online,
-.status-led.is-active { 
-    background: #00ff88; 
-    box-shadow: 0 0 8px #00ff88; 
+.status-led.is-active {
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
 }
 
 .status-led.status-lobby,
-.status-led.is-ready { 
-    background: #ff5277; 
-    box-shadow: 0 0 8px #ff5277; 
+.status-led.is-ready {
+    background: #ff5277;
+    box-shadow: 0 0 8px #ff5277;
 }
 
 .status-led.status-offline,
-.status-led.is-disconnected { 
-    background: #333; 
+.status-led.is-disconnected {
+    background: #333;
 }
 
-.pts { 
-    font-weight: 900; 
-    color: #00f2ff; 
-    text-align: right;
+/* Emoji de statut */
+.status-icon {
+    font-size: 1.1rem;
+    text-align: center;
+    line-height: 1;
 }
 
-/* Floating scoreboard - mobile optimized */
-#scoreboard {
-  position: fixed; 
-  right: 10px; 
-  top: 60px; 
-  width: 90%;
-  max-width: 280px;
-  max-height: 60vh; 
-  overflow: auto;
-  backdrop-filter: blur(8px); 
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(255,255,255,0.05); 
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px; 
-  padding: 1rem; 
-  z-index: -1;
-  pointer-events: none;
-  box-shadow: 0 12px 40px -28px rgba(0,0,0,0.8);
+/* Animation Emoji */
+@keyframes statusPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
 }
 
-/* Scoreboard visible (activé par JS) */
-#scoreboard:not([style*="display: none"]) {
-  z-index: 1400;
-  pointer-events: auto;
+.status-icon-waiting {
+    animation: statusPulse 1.5s infinite;
 }
 
+/* Highlight du joueur local */
+.player-row.me {
+    background: linear-gradient(90deg, rgba(0,242,255,0.08), transparent);
+}
+
+/* Version desktop */
 @media (min-width: 641px) {
-  #scoreboard {
-    right: 18px;
-    top: 18px;
-    width: 280px;
-  }
+    .scoreboard-panel {
+        max-width: 600px;
+    }
 }
-
-/* Avatar in list - larger for mobile */
-.score-avatar { width: 32px; height: 32px; border-radius: 50%; }
-
-.scoreboard-panel h3 { margin: 0 0 8px 0; }
-
-/* Nom des joueurs dans le scoreboard - réduit pour l'écran HINT */
-.scoreboard-panel .player-name,
-#score-list .player-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.scoreboard-panel li.me { background: linear-gradient(90deg, rgba(0,242,255,0.03), transparent); }

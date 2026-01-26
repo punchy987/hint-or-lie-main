@@ -33,6 +33,48 @@ Format : Mobile-First (Largeur 95%, cibles tactiles 48px+)
    Grid responsive : 2 colonnes mobile  3-4 colonnes desktop
 
 ================================================================================
+ SCOREBOARD HUD  BOTTOM SHEET COULISSANT
+================================================================================
+
+ ARCHITECTURE TECHNIQUE :
+   Position fixée : bottom: 0, centered, transform-based sliding
+   État fermé : translateY(calc(100% - 50px)) — seul le handle est visible
+   État ouvert : translateY(0) — panel entièrement déployé
+   Toggle au clic : classList.toggle('is-open') dans main.js
+   Transition fluide : 0.4s cubic-bezier(0.4, 0, 0.2, 1)
+
+ GRILLE INVISIBLE (Structure Verrouillée) :
+   grid-template-columns: 15px 32px 1fr 65px 35px !important
+   LED (15px) | Avatar (32px) | Nom (1fr) | Score (65px) | Emoji (35px)
+   Chaque player-row utilise strictement cette grille
+
+ RÈGLE D'OR DES AVATARS :
+   Taille fixe obligatoire : 32px × 32px (width & height !important)
+   object-fit: cover pour cadrer l'image dans le cercle
+   border-radius: 50% pour l'effet circulaire
+   NE JAMAIS PERMETTRE aux avatars de déborder de leur cellule
+
+ STATUS LEDs (Colonnes 1 - 15px) :
+   .status-online : #00ff88 (joueur actif)
+   .status-lobby : #ff5277 (spectateur/lobby)
+   .status-offline : #333 (déconnecté)
+   Animation pulse : statusPulse keyframe (opacity 1→0.4→1 over 1.5s)
+
+ GAME JUICE (Emojis de statut) :
+   Lobby : ⏳ (waiting)
+   Hint Phase : 💭 (thinking)
+   Vote Phase : 🗳️ (voting)
+   Animation : .status-icon-waiting avec statusPulse pour les états d'attente
+   Position fixe dans cellule 35px, centrés
+
+ RÉFÉRENCES CRITIQUES :
+   ID principal : #score-list (conteneur des lignes)
+   Classe de ligne : .player-row (chaque joueur)
+   Fichier CSS : public/css/07-scoreboard.css (171 lignes)
+   Fichier JS : public/js/features/leaderboard.js (logique emoji + LED)
+   Toggle handler : public/js/main.js init() fonction
+
+================================================================================
  STRUCTURE DES ÉCRANS  RÉFÉRENCE VALIDÉE [2026-01-25]
 ================================================================================
 
@@ -55,12 +97,13 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  3. ÉCRAN HINT (screen-hint)
     Phase Bar en haut (4px, progression cyan)
-    Header : Round tag + Thème + Timer pill
+    Header : Round tag + Label "THÈME DE LA MANCHE" (.label-secondary) + Timer pill
     Container Rôle : "ÉQUIPIER" (cyan) ou "IMPOSTEUR" (rouge)
-    Word Card : Badge du mot secret (2.8rem, effet de lueur pulsante)
-    Terminal Imposteur : Bloc monospace avec indices live (si imposteur)
-    Input indice : 56px, large, monospace-friendly
-    Bouton "Envoyer" + Status + Progress
+    Word Card : Badge du mot secret (clamp(1.6rem, 7vw, 2.5rem), padding: 1.5rem 1rem)
+    Terminal Imposteur : max-height 140px, font 0.85rem monospace (si imposteur)
+    Input indice : 52px height, large, monospace-friendly
+    Bouton "Envoyer" : 52px height (aligné avec input, gap 8px)
+    Proportions optimisées mobile-first : fit sans scroll sur écrans 360px+
 
  4. ÉCRAN VOTE (screen-vote)
     Phase Bar + Header (Thème + Timer + Progress)
@@ -82,6 +125,7 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  Fichier mis à jour : MASTER_CONTEXT_HINT_OR_LIE.txt
  Date de synchronisation : 25 janvier 2026
+ Dernière mise à jour Bottom Sheet : 25 janvier 2026
  Source de vérité complète et validée
 
  Fichiers intégrés dans cette référence :

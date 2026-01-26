@@ -311,15 +311,11 @@
 
 /* Écrans de jeu communs */
 #screen-hint, #screen-vote, #screen-result {
-    padding-top: 2rem;
+    padding-top: 1rem;
 }
 
 #screen-hint {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 1rem;
-    padding-top: 1.5rem;
+    height: 100%;
 }
 
 #screen-hint .panel,
