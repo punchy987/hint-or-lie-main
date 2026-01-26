@@ -6,8 +6,11 @@
 @import './02-base.css';
 @import './03-components.css';
 @import './04-phase.css';
+@import './05-hints.css';
+@import './06-vote.css';
 @import './08-home.css';
 @import './08-lobby-header.css';
+@import './09-spectator.css';
 
 /* Scope the HUD to a root class to limit style bleed.
    Add `class="hud-root"` to <body> or top container to opt-in. */
@@ -71,6 +74,17 @@
 /* Lightweight toast (uses accent cyan for emphasis) */
 .hud-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); border: var(--border-thin) solid var(--glass-border); color: var(--text); padding: 0.6rem 1rem; border-radius: 999px; backdrop-filter: blur(var(--blur)); z-index:1300; }
 
+/* Toast désactivé par défaut */
+#toast {
+  display: none;
+  pointer-events: none;
+}
+
+#toast:not(:empty) {
+  display: block;
+  pointer-events: auto;
+}
+
 /* Accessibility: reduce motion respects tokens */
 @media (prefers-reduced-motion: reduce) { .hud-card, .glass-panel { transition: none !important; } }
 
@@ -87,6 +101,25 @@
     color: var(--muted);
     text-transform: uppercase;
     margin-bottom: 1.5rem;
+}
+
+/* Lobby ready pill — Indicateur de joueurs prêts */
+#lobby-ready-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    margin: 0 auto 1.5rem;
+    background: var(--mat-gray-800);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: var(--border-thin) solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px -8px rgba(0,242,255,0.2);
 }
 
 /* Grille des joueurs — CSS Grid responsive */
@@ -274,3 +307,41 @@
     }
 }
 
+/* ===== GAME SCREENS STYLES ===== */
+
+/* Écrans de jeu communs */
+#screen-hint, #screen-vote, #screen-result {
+    padding-top: 2rem;
+}
+
+#screen-hint .panel,
+#screen-vote .panel,
+#screen-result .panel {
+    padding: 1.5rem;
+}
+
+/* Status & Progress messages */
+.status-msg, #hint-status {
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.progress-text, #progress-hints {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* Responsive pour écrans de jeu */
+@media (max-width: 640px) {
+    #screen-hint, #screen-vote, #screen-result {
+        padding-top: 1.5rem;
+    }
+    
+    #screen-hint .panel,
+    #screen-vote .panel,
+    #screen-result .panel {
+        padding: 1.25rem;
+    }
+}

@@ -1,9 +1,55 @@
 /* 09-spectator.css — Spectator modal and cinematic overlays */
 @import './01-tokens.css';
 
+/* Base modal overlay: hidden by default, JS controls visibility */
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	display: none;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+}
+
+/* IDs spécifiques : masqués par défaut pour éviter tout blocage */
+#role-reveal-overlay,
+#result-reveal-overlay,
+#spectator-waiting,
+#modal {
+	display: none;
+	pointer-events: none;
+	z-index: -1;
+	opacity: 0;
+	visibility: hidden;
+}
+
+/* Modal overlay visible (classe ajoutée par JS) */
+.modal-overlay.active,
+.modal-overlay.playing {
+	display: flex;
+	pointer-events: auto;
+	z-index: 1400;
+	opacity: 1;
+	visibility: visible;
+}
+
+/* Activation explicite avec classes pour chaque overlay */
+#role-reveal-overlay.playing,
+#result-reveal-overlay.playing,
+#spectator-waiting.active,
+#modal.active {
+	display: flex;
+	pointer-events: auto;
+	z-index: 1400;
+	opacity: 1;
+	visibility: visible;
+}
+
 /* Spectator waiting modal: immersive, centered, dramatic */
 #spectator-waiting.modal-overlay {
-	display: flex; align-items: center; justify-content: center;
+	align-items: center;
+	justify-content: center;
 }
 
 #spectator-waiting .panel {
@@ -13,19 +59,38 @@
 	background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.26));
 	border: 1px solid rgba(255,255,255,0.04);
 	box-shadow: 0 40px 120px -60px rgba(0,0,0,0.8);
-	text-align: center; color: var(--text);
+	text-align: center;
+	color: var(--text);
 }
 
 #spectator-waiting h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
 #spectator-waiting p { color: var(--muted); margin-bottom: 1rem; }
 
-/* Cinematic overlays (role reveal, result reveal) */
-.cinematic-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index:1500; pointer-events:none; }
+/* Cinematic overlays (role reveal, result reveal): hidden by default, JS controls visibility */
+.cinematic-overlay {
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: -1;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+}
 .cinematic-overlay .impostor { color: #ff605c; font-size: 4rem; letter-spacing: 3px; }
 .cinematic-overlay .crew { color: var(--accent-cyan); font-size: 3.2rem; }
 
-/* Playing animation: high-tech scan + pulse */
-.cinematic-overlay.playing { background: radial-gradient(circle at 50% 40%, rgba(0,242,255,0.06), transparent 20%), rgba(0,0,0,0.45); pointer-events:auto; }
+/* When playing: overlay becomes visible with flex layout */
+.cinematic-overlay.playing {
+	display: flex;
+	background: radial-gradient(circle at 50% 40%, rgba(0,242,255,0.06), transparent 20%), rgba(0,0,0,0.45);
+	pointer-events: auto;
+	z-index: 1500;
+	opacity: 1;
+	visibility: visible;
+}
+
 .cinematic-overlay.playing #reveal-role-text { animation: role-scan 2600ms ease-in-out both; }
 
 @keyframes role-scan {

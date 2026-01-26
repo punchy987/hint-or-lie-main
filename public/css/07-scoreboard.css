@@ -1,6 +1,6 @@
 .scoreboard-panel {
     margin-top: 2rem;
-    padding: 1rem !important;
+    padding: 1rem;
 }
 
 .scoreboard-panel h3 {
@@ -49,8 +49,15 @@
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px; 
   padding: 1rem; 
-  z-index: 1400; 
+  z-index: -1;
+  pointer-events: none;
   box-shadow: 0 12px 40px -28px rgba(0,0,0,0.8);
+}
+
+/* Scoreboard visible (activé par JS) */
+#scoreboard:not([style*="display: none"]) {
+  z-index: 1400;
+  pointer-events: auto;
 }
 
 @media (min-width: 641px) {

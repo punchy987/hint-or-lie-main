@@ -42,6 +42,16 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Sécurité : garantir que tous les overlays sont désactivés par défaut */
+.modal-overlay:not(.active):not(.playing),
+.cinematic-overlay:not(.playing) {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
 /* Container helpers used by HUD */
 #game-container {
     height: 100%;

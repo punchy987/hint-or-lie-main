@@ -1,78 +1,233 @@
-.word-card {
-    background: var(--color-bg-matte);
-    border: 1px solid var(--color-glass-border);
-    padding: 1.5rem;
-    border-radius: 12px;
+/* ==================== */
+/* ÉCRAN DES INDICES — Minimalist HUD */
+/* ==================== */
+
+/* Hiérarchie : Rôle en haut (ÉQUIPIER/IMPOSTEUR) */
+#my-role-container {
     text-align: center;
-    margin: 1rem 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
 }
 
-.word-card span {
+#my-role {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 800;
+    font-size: 1.15rem;
+    margin-left: 8px;
+    letter-spacing: 1px;
+}
+
+/* Thème Équipier : Cyan */
+.theme-crew #my-role {
+    background: linear-gradient(135deg, rgba(0,242,255,0.12), rgba(0,242,255,0.06));
+    color: var(--accent-cyan);
+    border: var(--border-thin) solid rgba(0,242,255,0.3);
+    box-shadow: 0 8px 24px -12px rgba(0,242,255,0.35);
+    text-shadow: 0 0 10px rgba(0,242,255,0.3);
+}
+
+/* Thème Imposteur : Rouge */
+.theme-impostor #my-role {
+    background: linear-gradient(135deg, rgba(255,50,80,0.12), rgba(255,50,80,0.06));
+    color: #ff5277;
+    border: var(--border-thin) solid rgba(255,50,80,0.3);
+    box-shadow: 0 8px 24px -12px rgba(255,50,80,0.35);
+    text-shadow: 0 0 10px rgba(255,50,80,0.3);
+}
+
+/* Zone Centrale : Badge du mot secret avec effet de lueur pulsante */
+.word-card, #crew-word-chip {
+    background: var(--mat-gray-800);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: var(--border-thin) solid var(--glass-border);
+    padding: 2.5rem 1.5rem;
+    border-radius: var(--radius);
+    text-align: center;
+    margin: 1.5rem 0;
+    box-shadow: 0 12px 40px -20px rgba(0,242,255,0.08);
+}
+
+.word-card span, #crew-word-chip span {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.word-card strong, #crew-word-chip strong {
+    font-size: 2.8rem;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 25px rgba(0,242,255,0.5), 0 0 45px rgba(0,242,255,0.25);
+    font-weight: 800;
+    display: block;
+    letter-spacing: 1px;
+}
+
+/* Input : Zone de saisie large et lisible */
+#hint-input {
+    background: var(--mat-gray-900);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: var(--border-thin) solid var(--glass-border);
+    color: var(--text);
+    padding: 1rem 1.25rem;
+    min-height: 56px;
+    font-size: 1.15rem;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    transition: all var(--transition-smooth);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+#hint-input::placeholder {
+    color: var(--muted);
+    opacity: 0.7;
+}
+
+#hint-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0,242,255,0.08), 0 8px 24px -12px rgba(0,242,255,0.25);
+    outline: none;
+    background: var(--mat-gray-800);
+}
+
+
+
+#hint-status {
+    text-align: center;
+    font-size: 0.95rem;
+    min-height: 1.5rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 0.75rem;
+}
+
+/* Terminal Imposteur : Bloc 'hacking' au centre */
+#crew-live-box {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: var(--border-thin) solid rgba(0,242,255,0.15);
+    color: var(--text);
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px -16px rgba(0,242,255,0.25);
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.95rem;
+    margin: 1.5rem 0;
+}
+
+#crew-live-box strong {
+    color: var(--accent-cyan);
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 800;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.word-card strong {
-    font-size: 2rem;
-    color: var(--color-cyan);
-    text-shadow: 0 0 15px var(--color-cyan-glow);
+#crew-live-box .live-hint-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: var(--border-thin) solid rgba(255,255,255,0.03);
 }
 
-#hint-input {
-    background: #05070a;
-    border: 1px solid var(--color-glass-border);
-    color: white;
-    padding: 1rem;
-    min-height: 48px;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    width: 100%;
-    transition: 0.3s ease;
+#crew-live-box .live-hint-item:last-child {
+    border-bottom: none;
 }
 
-#hint-input:focus {
-    border-color: var(--color-cyan);
-    box-shadow: 0 0 15px var(--color-cyan-glow);
-    outline: none;
-}
-
-#hint-status {
-    text-align: center;
+#crew-live-box .live-hint-name {
+    color: var(--muted);
+    font-weight: 700;
+    width: 90px;
     font-size: 0.9rem;
-    min-height: 1.2rem;
+    flex-shrink: 0;
 }
 
-/* Crew live box: terminal-like reception */
-#crew-live-box {
+/* Terminal-style hint text: monospace + cyan pour emphase */
+#crew-live-box .live-hint-text {
+    color: var(--accent-cyan);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
-    background: rgba(0,0,0,0.38);
-    border: 1px solid rgba(0,242,255,0.12);
-    color: var(--text);
-    padding: 0.8rem;
-    border-radius: 8px;
-    box-shadow: 0 6px 18px -12px rgba(0,242,255,0.18);
-    max-height: 160px; overflow: auto; font-size: 0.92rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-shadow: 0 0 10px rgba(0,242,255,0.3);
 }
 
-#crew-live-box strong { color: var(--accent-cyan); display:block; margin-bottom:6px; font-weight:800; }
-#crew-live-box .live-hint-item { display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.02); }
-#crew-live-box .live-hint-name { color: var(--muted); font-weight:700; width:80px; font-size:0.85rem; }
-/* Terminal-style hint text: monospace + cyan for emphasis */
-#crew-live-box .live-hint-text { color: var(--accent-cyan); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; font-weight:600; }
+/* Liste générée avec style monospace terminal */
+#crew-live-list {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+}
 
-/* Ensure the generated list itself uses monospace for consistent terminal look */
-#crew-live-list { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; }
+/* Animation de pulsation pour crew-word-chip */
+#crew-word-chip {
+    display: inline-block;
+    transition: transform var(--transition-smooth), box-shadow var(--transition-fast);
+}
 
-/* crew-word-chip subtle pulse when active */
-#crew-word-chip { display:inline-block; transition: transform var(--transition-smooth), box-shadow var(--transition-fast); }
-.theme-impostor #crew-word-chip { transform: scale(1); }
-#crew-word-chip.pulse, .theme-crew #crew-word-chip { animation: chip-pulse 2400ms ease-in-out infinite; }
+.theme-impostor #crew-word-chip {
+    transform: scale(1);
+}
+
+#crew-word-chip.pulse, .theme-crew #crew-word-chip {
+    animation: chip-pulse 2400ms ease-in-out infinite;
+}
 
 @keyframes chip-pulse {
-    0% { transform: translateY(0) scale(1); box-shadow: none; }
-    50% { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 24px -12px rgba(0,242,255,0.14); }
-    100% { transform: translateY(0) scale(1); box-shadow: none; }
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 12px 40px -20px rgba(0,242,255,0.08);
+    }
+    50% {
+        transform: translateY(-3px) scale(1.015);
+        box-shadow: 0 16px 48px -16px rgba(0,242,255,0.2);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 12px 40px -20px rgba(0,242,255,0.08);
+    }
+}
+
+/* Tip pour imposteur */
+#impostor-tip {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 1rem;
+    background: rgba(255,50,80,0.05);
+    border-left: 3px solid #ff5277;
+    border-radius: var(--radius-sm);
+    margin: 1rem 0;
+}
+
+/* Input group pour mobile */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 1.5rem 0;
+}
+
+/* Progress text */
+#progress-hints {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 1rem;
 }
