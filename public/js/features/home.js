@@ -4,7 +4,7 @@
     function updateAvatarPreview(name) {
         const seed = (name || '').trim() || 'Joueur';
         const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-        const imgs = document.querySelectorAll('[id^="avatar-preview-img"]');
+        const imgs = document.querySelectorAll('[id^="avatar-preview-img"], #hero-avatar-img');
         imgs.forEach(img => {
             img.src = url;
         });
@@ -72,6 +72,11 @@
                 btn.textContent = 'Masquer les règles';
                 panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
+        });
+
+        $('btn-refresh-leaderboard')?.addEventListener('click', () => {
+            socket.emit('getLeaderboard');
+            toast('Classement actualisé 📊');
         });
 
         $('btn-ready')?.addEventListener('click', () => {

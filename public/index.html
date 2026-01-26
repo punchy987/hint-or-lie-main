@@ -42,39 +42,64 @@
 
         <!-- Écran d'accueil -->
         <section id="screen-home" class="screen">
-            <div class="panel">
-                <h1 class="game-title">Hint <span>or</span> Lie</h1>
-                <div class="tabs">
-                    <button id="tab-create" role="tab" aria-selected="true">Créer une salle</button>
-                    <button id="tab-join" role="tab" aria-selected="false">Rejoindre</button>
-                </div>
-
-                <div id="pane-create" class="tab-pane active">
-                    <div class="avatar-picker">
-                        <img id="avatar-preview-img-create" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" alt="Avatar Preview">
+            <div class="panel home-panel">
+                <!-- Header avec logo et titre -->
+                <div class="home-header">
+                    <div class="logo-square">HL</div>
+                    <div class="title-group">
+                        <h1 class="game-title">Hint <span>or</span> Lie</h1>
+                        <p class="subtitle">by Mits</p>
+                        <p class="tagline">Chaque indice compte...</p>
                     </div>
-                    <input type="text" id="name-create" placeholder="Entrez votre pseudo" maxlength="16">
-                    <button id="btn-create" class="btn btn-primary">Créer</button>
                 </div>
 
-                <div id="pane-join" class="tab-pane">
-                    <div class="avatar-picker">
-                        <img id="avatar-preview-img-join" src="https://api.dicebear.com/7.x/bottts/svg?seed=Joueur&backgroundColor=b6e3f4,c0aede,d1d4f9" alt="Avatar Preview">
+                <!-- Avatar Central Hero -->
+                <div id="hero-avatar-container">
+                    <div class="hero-avatar-wrapper">
+                        <img id="hero-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=HintOrLie&backgroundColor=b6e3f4,c0aede,d1d4f9" alt="Avatar Robot">
                     </div>
-                    <input type="text" id="name-join" placeholder="Entrez votre pseudo" maxlength="16">
-                    <input type="text" id="join-code" placeholder="Code (4 chiffres)" inputmode="numeric" maxlength="4">
-                    <button id="btn-join" class="btn btn-primary">Rejoindre</button>
                 </div>
 
-                 <div class="rules-container">
-                    <button id="btn-how" class="btn btn-secondary">Règles rapides</button>
-                    <div id="how" style="display: none;">
-                        <p><strong>But du jeu :</strong> L'imposteur doit se fondre parmi les équipiers.</p>
-                        <ul>
-                            <li><strong>Équipiers :</strong> Vous recevez un mot secret. Donnez un indice (un seul mot) pour le faire deviner aux autres.</li>
-                            <li><strong>Imposteur :</strong> Vous n'avez pas le mot. Soyez malin, écoutez les indices des autres et bluffez !</li>
-                            <li><strong>Vote :</strong> Tout le monde vote pour démasquer l'imposteur.</li>
-                        </ul>
+                <!-- Système d'onglets intégrés -->
+                <div class="tabs-integrated">
+                    <button id="tab-join" role="tab" aria-selected="true" class="tab-btn">Rejoindre</button>
+                    <button id="tab-create" role="tab" aria-selected="false" class="tab-btn">Créer</button>
+                </div>
+
+                <!-- Pane Rejoindre -->
+                <div id="pane-join" class="tab-pane active">
+                    <div class="form-compact">
+                        <input type="text" id="name-join" class="input" placeholder="Entrez votre pseudo" maxlength="16">
+                        <input type="text" id="join-code" class="input" placeholder="Code (4 chiffres)" inputmode="numeric" maxlength="4">
+                    </div>
+                    <button id="btn-join" class="btn btn-action btn-cyan">Rejoindre</button>
+                </div>
+
+                <!-- Pane Créer -->
+                <div id="pane-create" class="tab-pane">
+                    <div class="form-compact">
+                        <input type="text" id="name-create" class="input" placeholder="Entrez votre pseudo" maxlength="16">
+                    </div>
+                    <button id="btn-create" class="btn btn-action btn-violet">Créer</button>
+                </div>
+
+                <!-- Footer du Panel -->
+                <div class="home-footer">
+                    <div class="rules-container">
+                        <button id="btn-how" class="btn-link">Règles rapides</button>
+                        <div id="how" style="display: none;">
+                            <p><strong>But du jeu :</strong> L'imposteur doit se fondre parmi les équipiers.</p>
+                            <ul>
+                                <li><strong>Équipiers :</strong> Vous recevez un mot secret. Donnez un indice (un seul mot) pour le faire deviner aux autres.</li>
+                                <li><strong>Imposteur :</strong> Vous n'avez pas le mot. Soyez malin, écoutez les indices des autres et bluffez !</li>
+                                <li><strong>Vote :</strong> Tout le monde vote pour démasquer l'imposteur.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="leaderboard-preview">
+                        <h4>Classement — Top 10</h4>
+                        <button id="btn-refresh-leaderboard" class="btn btn-secondary btn-small">Actualiser</button>
                     </div>
                 </div>
             </div>

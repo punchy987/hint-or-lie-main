@@ -6,6 +6,7 @@
 @import './02-base.css';
 @import './03-components.css';
 @import './04-phase.css';
+@import './08-home.css';
 
 /* Scope the HUD to a root class to limit style bleed.
    Add `class="hud-root"` to <body> or top container to opt-in. */
