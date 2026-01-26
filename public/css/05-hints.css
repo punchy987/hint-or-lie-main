@@ -9,7 +9,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 16px;
     color: var(--muted);
 }
 
@@ -47,10 +47,10 @@
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
     border: var(--border-thin) solid var(--glass-border);
-    padding: 2.5rem 1.5rem;
+    padding: 24px 16px;
     border-radius: var(--radius);
     text-align: center;
-    margin: 1.5rem 0;
+    margin: 1rem 0;
     box-shadow: 0 12px 40px -20px rgba(0,242,255,0.08);
 }
 
@@ -65,7 +65,7 @@
 }
 
 .word-card strong, #crew-word-chip strong {
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     color: var(--accent-cyan);
     text-shadow: 0 0 25px rgba(0,242,255,0.5), 0 0 45px rgba(0,242,255,0.25);
     font-weight: 800;
@@ -80,9 +80,10 @@
     -webkit-backdrop-filter: blur(var(--blur));
     border: var(--border-thin) solid var(--glass-border);
     color: var(--text);
-    padding: 1rem 1.25rem;
-    min-height: 56px;
-    font-size: 1.15rem;
+    padding: 0.75rem 1rem;
+    height: 52px;
+    min-height: 52px;
+    font-size: 1.05rem;
     border-radius: var(--radius-sm);
     width: 100%;
     transition: all var(--transition-smooth);
@@ -121,13 +122,13 @@
     -webkit-backdrop-filter: blur(var(--blur));
     border: var(--border-thin) solid rgba(0,242,255,0.15);
     color: var(--text);
-    padding: 1.25rem;
+    padding: 1rem;
     border-radius: var(--radius);
     box-shadow: 0 8px 32px -16px rgba(0,242,255,0.25);
-    max-height: 200px;
+    max-height: 120px;
     overflow-y: auto;
-    font-size: 0.95rem;
-    margin: 1.5rem 0;
+    font-size: 0.85rem;
+    margin: 1rem 0;
 }
 
 #crew-live-box strong {
@@ -219,8 +220,8 @@
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin: 1.5rem 0;
+    gap: 8px;
+    margin: 1rem 0;
 }
 
 /* Progress text */

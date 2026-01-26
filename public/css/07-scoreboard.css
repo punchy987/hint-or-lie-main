@@ -1,13 +1,13 @@
 .scoreboard-panel {
-    margin-top: 2rem;
-    padding: 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
 }
 
 .scoreboard-panel h3 {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     color: var(--muted);
     text-transform: uppercase;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-align: center;
 }
 
@@ -21,8 +21,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px 10px;
+    gap: 8px;
+    padding: 8px 6px;
     border-bottom: 1px solid rgba(255,255,255,0.02);
     background: rgba(255,255,255,0.01);
 }
@@ -69,8 +69,15 @@
 }
 
 /* Avatar in list - larger for mobile */
-.score-avatar { width: 45px; height: 45px; border-radius: 50%; }
+.score-avatar { width: 32px; height: 32px; border-radius: 50%; }
 
 .scoreboard-panel h3 { margin: 0 0 8px 0; }
+
+/* Nom des joueurs dans le scoreboard - réduit pour l'écran HINT */
+.scoreboard-panel .player-name,
+#score-list .player-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
 
 .scoreboard-panel li.me { background: linear-gradient(90deg, rgba(0,242,255,0.03), transparent); }
