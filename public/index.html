@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="/css/hud.css">
     <link rel="stylesheet" href="/css/99-pwa-update.css">
     <link rel="stylesheet" href="/css/98-responsive.css">
+    <link rel="stylesheet" href="/css/01-tokens.css">
+    <link rel="stylesheet" href="/css/04-phase.css">
+    <link rel="stylesheet" href="/css/05-hints.css">
+    <link rel="stylesheet" href="/css/06-vote.css">
+    <link rel="stylesheet" href="/css/07-modal-score.css">
 
     <meta name="theme-color" content="#0a0e14">
     <link rel="icon" type="image/png" href="/icons/icon-32.png">
@@ -84,29 +89,81 @@
             </div>
         </section>
 
-        <!-- Autres écrans (vides pour l'instant, mais avec les IDs requis) -->
-        <section id="screen-hint" class="screen" style="display: none;"></section>
-        <section id="screen-vote" class="screen" style="display: none;"></section>
-        <section id="screen-result" class="screen" style="display: none;"></section>
+        <!-- Écran Phase Indices -->
+        <section id="screen-hint" class="screen" style="display: none;">
+            <div class="phase-bar"><div class="phase-progress"><div class="bar"></div></div></div>
+            <div class="panel">
+                <header class="screen-header">
+                    <span class="round-tag">Round <span class="round-live">1</span></span>
+                    <h2 id="theme-hint-name" class="theme-title">Thème</h2>
+                </header>
+                
+                <div id="my-role-container">Rôle : <span id="my-role">...</span></div>
+
+                <div id="crew-word-chip" class="word-card">
+                    <span>Ton mot secret</span>
+                    <strong id="crew-word">...</strong>
+                </div>
+
+                <div id="impostor-tip" class="tip" style="display: none;"></div>
+
+                <div class="input-group">
+                    <input type="text" id="hint-input" placeholder="Ton indice (1 mot)..." maxlength="20">
+                    <button id="btn-send-hint" class="btn btn-primary">Envoyer</button>
+                </div>
+                <div id="hint-status"></div>
+            </div>
+
+            <div id="role-reveal-overlay" class="cinematic-overlay" style="display: none;">
+                <div id="reveal-role-text"></div>
+            </div>
+        </section>
+
+        <!-- Écran Phase Vote -->
+        <section id="screen-vote" class="screen" style="display: none;">
+            <div class="phase-bar"><div class="phase-progress"><div class="bar"></div></div></div>
+            <div class="panel">
+                <header class="screen-header">
+                    <h2 id="theme-vote-name" class="theme-title">Vote</h2>
+                    <div id="progress-vote" class="pill">0/0</div>
+                </header>
+                <p class="instruction">Qui est l'imposteur ?</p>
+                <div id="hints" class="vote-grid"></div>
+            </div>
+        </section>
+
+        <!-- Écran Résultats de manche -->
+        <section id="screen-result" class="screen" style="display: none;">
+            <div class="panel">
+                <h2 class="theme-title">Résultat</h2>
+                <div class="result-box">
+                    <div class="result-item">Le mot était : <strong id="res-common">...</strong></div>
+                    <div id="res-imp-name" class="impostor-reveal"></div>
+                </div>
+                <div id="res-votes" class="votes-detail"></div>
+                <button id="btn-next" class="btn btn-primary">Manche suivante</button>
+            </div>
+
+            <div id="result-reveal-overlay" class="cinematic-overlay" style="display: none;">
+                <div id="reveal-result-text"></div>
+            </div>
+        </section>
         
         <!-- Toasts / Notifications -->
         <div id="toast"></div>
 
-        <!-- IDs requis par guard.js mais non visibles/utilisés dans le lobby -->
-        <div style="display: none;">
-            <input id="hint-input">
-            <button id="btn-send-hint"></button>
-            <div id="hint-status"></div>
-            <div id="impostor-tip"></div>
-            <div id="hint-instruction"></div>
-            <div id="vote-buttons"></div>
-            <div id="hints"></div>
-            <div id="scoreboard"></div>
+        <!-- Scoreboard (déplacé dynamiquement par JS) -->
+        <div id="scoreboard" class="panel scoreboard-panel" style="display: none;">
+            <h3>Classement</h3>
             <ul id="score-list"></ul>
-            <div id="round-num"></div>
-            <div id="timer-hints"></div>
-            <div id="timer-vote"></div>
-            <div id="timer-reveal"></div>
+        </div>
+
+        <!-- Modale de fin de partie -->
+        <div id="modal" class="modal-overlay" style="display: none;">
+            <div class="box panel">
+                <!-- Contenu injecté par results.js -->
+                <button id="btn-modal-lobby" style="display:none"></button>
+            </div>
         </div>
 
     </main>

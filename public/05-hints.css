@@ -1,0 +1,45 @@
+.word-card {
+    background: var(--color-bg-matte);
+    border: 1px solid var(--color-glass-border);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.word-card span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.word-card strong {
+    font-size: 2rem;
+    color: var(--color-cyan);
+    text-shadow: 0 0 15px var(--color-cyan-glow);
+}
+
+#hint-input {
+    background: #05070a;
+    border: 1px solid var(--color-glass-border);
+    color: white;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: var(--transition-hud);
+}
+
+#hint-input:focus {
+    border-color: var(--color-cyan);
+    box-shadow: 0 0 15px var(--color-cyan-glow);
+    outline: none;
+}
+
+#hint-status {
+    text-align: center;
+    font-size: 0.9rem;
+    min-height: 1.2rem;
+}
