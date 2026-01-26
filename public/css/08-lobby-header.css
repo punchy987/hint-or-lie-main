@@ -4,57 +4,61 @@
 /* ===== HEADER LOBBY ===== */
 .lobby-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    gap: 1.5rem;
-    padding: 1.5rem 1rem;
+    width: 100%;
+    padding: 1rem 20px;
     background: var(--glass-bg);
     border: var(--border-thin) solid var(--glass-border);
     border-radius: var(--radius);
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     position: relative;
 }
 
-/* Logo HL réutilisé (identité visuelle) */
-.lobby-header::before {
-    content: 'HL';
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    width: 40px;
-    height: 40px;
+/* Logo HL réutilisé (identité visuelle - dimensions identiques à l'accueil) */
+.lobby-header .logo-square {
+    width: 50px;
+    height: 50px;
     background: linear-gradient(135deg, rgba(0,242,255,0.15), rgba(168,85,247,0.15));
     border: 2px solid rgba(0,242,255,0.25);
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     color: var(--accent-cyan);
     letter-spacing: -1px;
+    flex-shrink: 0;
     box-shadow: 0 4px 16px -4px rgba(0,242,255,0.3);
 }
 
-/* Bouton Quitter — discret mais élégant */
+/* Bouton Quitter — HUD secondaire compact */
 #btn-back-home {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+    width: 90px;
+    height: 40px;
+    padding: 0;
     background: rgba(255,255,255,0.04);
-    border: var(--border-thin) solid rgba(255,255,255,0.08);
+    border: var(--border-thin) solid rgba(255,255,255,0.12);
     color: var(--muted);
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    min-height: 36px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #btn-back-home:hover {
     background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.2);
     color: var(--text);
 }
 
@@ -64,7 +68,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 2rem;
+    flex-shrink: 0;
 }
 
 .lobby-code-container span {
@@ -101,35 +105,37 @@
     text-align: center;
     box-shadow: 0 4px 16px -6px rgba(0,242,255,0.25);
     letter-spacing: 0.5px;
+    margin: 0 auto 1.5rem;
+    display: block;
+    width: fit-content;
 }
 
 /* Responsive mobile */
 @media (max-width: 640px) {
     .lobby-header {
-        padding: 1.25rem 0.75rem;
+        padding: 0.85rem 15px;
     }
     
-    .lobby-header::before {
-        width: 35px;
-        height: 35px;
-        font-size: 1rem;
-        top: 0.75rem;
-        left: 0.75rem;
+    .lobby-header .logo-square {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+        border-radius: 10px;
     }
     
     #btn-back-home {
-        top: 0.75rem;
-        right: 0.75rem;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.8rem;
-    }
-    
-    .lobby-code-container {
-        margin-top: 1.5rem;
+        width: 80px;
+        height: 36px;
+        font-size: 0.7rem;
     }
     
     #lobby-code {
         font-size: 3rem;
         letter-spacing: 6px;
+    }
+    
+    #lobby-ready-pill {
+        font-size: 0.85rem;
+        padding: 0.5rem 1.2rem;
     }
 }
