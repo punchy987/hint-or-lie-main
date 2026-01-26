@@ -120,35 +120,457 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     Bouton "Manche suivante" (56px, cyan, full width)
 
 ================================================================================
+ ARCHITECTURE TECHNIQUE DÉTAILLÉE
+================================================================================
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/CSS/03-COMPONENTS.CSS — BOUTONS, PANELS, INPUTS (144 lignes)     ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ GLASS PANELS :
+   .glass-panel : background var(--glass-bg), border var(--glass-border)
+   backdrop-filter: blur(var(--blur)) pour effet de verre dépoli
+   Variant --thin : padding 0.6rem, border-radius var(--radius-sm)
+
+ BOUTONS STANDARDS :
+   .btn : height 52px !important (alignement input/button)
+   gap: 0.5rem, padding: 0.75rem 1.5rem, border-radius: var(--radius)
+   Transition: all var(--transition-smooth)
+   
+   .btn-primary : Matte gray background, glass border, léger glow cyan
+   .btn-action / .btn-cyan : Gradient cyan massif, shadow intense, uppercase
+   .btn-secondary : Glass transparent, muted text
+
+ ÉTATS INTERACTIFS :
+   :hover → Transform translateY(-2px) + shadow amplifiée
+   :active → Transform translateY(1px) (effet de clic)
+   :disabled → opacity 0.4, cursor not-allowed
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/CSS/04-PHASE.CSS — PHASE BAR, HEADERS, PILLS (111 lignes)        ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ PHASE BAR (Barre de progression en haut) :
+   Position: fixed top 0, height: 4px, z-index: 1200
+   .phase-progress__fill : width animée 0→100%, gradient cyan + glow
+   Transition: width 350ms linear (sync avec timer serveur)
+
+ LABEL SECONDAIRE :
+   .label-secondary : font-size 0.75rem, uppercase, letter-spacing 1px
+   color: rgba(255,255,255,0.6), text-align center
+   Usage : "THÈME DE LA MANCHE" dans screen-hint
+
+ ROUND TAG :
+   .round-tag : Matte gray panel, padding 6px 14px
+   .round-live (span interne) : color cyan, font-weight 800
+   Format : "Round 1" avec numéro en surbrillance
+
+ PILLS (Timers + Progress) :
+   #timer-hints, #timer-vote, #timer-reveal, #timer-lobby :
+   min-width 70px, padding 8px 16px, font-weight 800
+   color: cyan, font-variant-numeric: tabular-nums (alignement des chiffres)
+   Background: matte gray + glass border
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/CSS/05-HINTS.CSS — ÉCRAN INDICES (244 lignes)                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ RÔLE JOUEUR (#my-role-container) :
+   text-transform: uppercase, letter-spacing: 1.5px
+   #my-role : inline-block, padding 10px 24px, font-size 1.15rem
+   
+   .theme-crew → Gradient cyan, border cyan 0.3 opacity, text-shadow glow
+   .theme-impostor → Gradient rouge #ff5277, border rouge, text-shadow rouge
+
+ WORD CARD (Badge mot secret) :
+   .word-card, #crew-word-chip : padding 1.5rem 1rem
+   strong : font-size clamp(1.6rem, 7vw, 2.5rem) — responsive mobile-first
+   color: cyan, text-shadow double (25px + 45px blur) pour effet lueur intense
+   Animation chip-pulse : translateY + scale sur 2400ms infinite
+
+ INPUT INDICE (#hint-input) :
+   height: 52px !important, min-height: 52px
+   font-size: 1.05rem, padding: 0.75rem 1rem
+   Background: matte gray 900, border glass
+   :focus → border cyan, box-shadow 0 0 0 3px glow, background matte 800
+
+ TERMINAL IMPOSTEUR (#crew-live-box) :
+   font-family: monospace (ui-monospace, SFMono-Regular, Menlo, Monaco)
+   background: rgba(0,0,0,0.5), border-left: 2px solid cyan
+   max-height: non défini (auto), overflow-y: auto, scrollbar-width: none
+   
+   .live-hint-item : display flex, gap 12px, border-bottom subtle
+   .live-hint-name : width 90px, color muted, font-weight 700
+   .live-hint-text : color cyan, font-size 1.1rem, text-shadow glow
+
+ INPUT GROUP :
+   display: flex, flex-direction: column, gap: 8px
+   Alignement vertical mobile-first (input au-dessus du bouton)
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/CSS/07-SCOREBOARD.CSS — BOTTOM SHEET (167 lignes)                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ ARCHITECTURE BOTTOM SHEET :
+   .scoreboard-panel : position fixed bottom 0, left 50%
+   transform: translateX(-50%) translateY(calc(100% - 50px)) — état fermé
+   État ouvert (.is-open) : translateY(0) — panel complet visible
+   
+   Transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)
+   width: 95%, max-width: 500px (600px desktop)
+   background: rgba(19,24,35,0.9), backdrop-filter: blur(15px)
+   border-radius: 20px 20px 0 0 (coins arrondis haut uniquement)
+   cursor: pointer (toggle au clic)
+
+ POIGNÉE (Handle) :
+   ::before pseudo-element : width 40px, height 4px
+   background: rgba(0,242,255,0.5), border-radius 2px
+   margin: 12px auto (centré en haut du panel)
+
+ GRILLE INVISIBLE (Structure verrouillée) :
+   .player-row : display grid !important
+   grid-template-columns: 15px 32px 1fr 65px 35px !important
+   LED (15px) | Avatar (32px) | Nom (1fr) | Score (65px) | Emoji (35px)
+   gap: 12px, height: 44px, padding: 0 15px
+   border-bottom: 1px solid rgba(255,255,255,0.05)
+   :hover → background rgba(0,242,255,0.05)
+
+ AVATAR VERROUILLÉ :
+   .player-avatar-small : width 32px !important, height 32px !important
+   border-radius: 50%, object-fit: cover
+   border: 1px solid rgba(0,242,255,0.3)
+   flex-shrink: 0 (empêche compression)
+
+ STATUS LED (.status-led) :
+   width: 8px, height: 8px, border-radius: 50%
+   .status-online : background #00ff88, box-shadow 0 0 8px #00ff88
+   .status-lobby : background #ff5277, box-shadow 0 0 8px #ff5277
+   .status-offline : background #333 (pas de glow)
+
+ EMOJI STATUS (.status-icon) :
+   font-size: 1.1rem, text-align: center, line-height: 1
+   .status-icon-waiting : animation statusPulse 1.5s infinite
+   @keyframes statusPulse : opacity 1 → 0.4 → 1
+
+ SCORE DISPLAY :
+   .player-score : font-family monospace, color cyan, font-weight bold
+   text-align right, white-space nowrap
+
+ HIGHLIGHT JOUEUR LOCAL :
+   .player-row.me : background linear-gradient(90deg, rgba(0,242,255,0.08), transparent)
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/CSS/HUD.CSS — ASSEMBLY PRINCIPAL (352 lignes)                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ IMPORTS CSS :
+   @import './01-tokens.css' (variables design)
+   @import './02-base.css' (reset + base + grid background)
+   @import './03-components.css' (buttons, panels, inputs)
+   @import './04-phase.css' (phase bar, headers, pills)
+   @import './05-hints.css' (écran indices)
+   @import './06-vote.css' (écran vote)
+   @import './08-home.css' (écran accueil)
+   @import './08-lobby-header.css' (header lobby)
+   @import './09-spectator.css' (overlays, modals)
+
+ SCOPE ROOT :
+   .hud-root, body.hud-root : --hud-enabled: 1
+   Activation globale du système HUD sur <body>
+
+ LAYOUT CONTAINERS :
+   .hud-container : display flex, flex-direction column, gap 0.75rem
+   .hud-top : z-index 1200 (phase bar)
+   .hud-main : flex 1, alignement center
+   .hud-bottom : z-index 1000, padding 0.75rem
+
+ PANELS MAPPING :
+   .panel : background var(--glass-bg), border var(--glass-border)
+   padding: 1.5rem, backdrop-filter: blur(var(--blur))
+   width: 100%, max-width: 100%
+   .panel--compact : padding 0.8rem, border-radius var(--radius-sm)
+
+ SCREEN CONTAINERS :
+   .screen : width 100%, display flex, flex-direction column
+   align-items center, padding 1rem
+
+ TOAST SYSTÈME :
+   .hud-toast : position fixed bottom 20px, transform translateX(-50%)
+   background glass, border-radius 999px (pill), z-index 1300
+   #toast : display none par défaut, :not(:empty) → display block
+
+ LOBBY STYLES :
+   #screen-lobby : padding 1.5rem 1rem
+   h2 : text-align center, font-size 1.1rem, letter-spacing 1px
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/JS/MAIN.JS — INITIALISATION & BOTTOM SHEET TOGGLE (161 lignes)   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ FONCTION updateUIFromState(snap) :
+   Synchronise l'état du jeu avec l'UI selon snap.state :
+   - 'lobby' → show('screen-lobby')
+   - 'hints' → show('screen-hint')
+   - 'voting' → show('screen-vote')
+   - 'reveal' → show('screen-result')
+   
+   Met à jour #round-num, appelle updateScoreboard(snap.players)
+   Gère la liste des joueurs dans le lobby (#players)
+   Génère les cartes joueurs avec avatars DiceBear API
+   Format : https://api.dicebear.com/7.x/bottts/svg?seed={name}&backgroundColor=...
+
+ TIMER SYNC (initTimersFromServer) :
+   Écoute socket.on('timer', { phase, leftMs, totalMs })
+   Calcule lastDeadline = Date.now() + leftMs
+   Utilise requestAnimationFrame pour update fluide
+   
+   Timers par phase :
+   - 'hints' → #timer-hints
+   - 'voting' → #timer-vote
+   - 'reveal' → #timer-reveal
+   - 'lobby'/'prestart' → #timer-lobby
+   
+   Format affichage : fmt(remaining) fonction de formatage mm:ss
+   Désactive inputs/boutons quand remaining <= 0
+
+ PROGRESS TRACKING (phaseProgress) :
+   socket.on('phaseProgress', { phase, submitted, total })
+   'hints' → #progress-hints : "submitted/total"
+   'voting' → #progress-vote : "submitted/total"
+
+ ROOM STATE SYNC :
+   socket.on('roomState', snap) → updateUIFromState(snap)
+   socket.on('scoresReset') → Retour lobby, toast "Partie réinitialisée"
+
+ BOTTOM SHEET TOGGLE (dans init()) :
+   const sheet = document.querySelector('.scoreboard-panel');
+   sheet.onclick = () => sheet.classList.toggle('is-open');
+   Toggle classe 'is-open' pour animation translateY
+
+ INIT SEQUENCE :
+   1. features.home.init()
+   2. features.hints.init()
+   3. features.vote.init()
+   4. features.results.init()
+   5. features.leaderboard.init()
+   6. initTimersFromServer()
+   7. setAttribute('data-screen', 'screen-home')
+   8. Bottom Sheet toggle listener
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/JS/FEATURES/LEADERBOARD.JS — SCOREBOARD UNIFIÉ (108 lignes)      ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ FONCTION updateScoreboard(players) :
+   Cible : #score-list (ul)
+   Tri : sorted by score DESC (b.score - a.score)
+   
+   Structure DOM générée (5 éléments par player-row) :
+   
+   1. LED (.status-led) :
+      - p.disconnected → .status-offline (#333, no glow)
+      - p.spectator || p.phase==='lobby' || !p.active → .status-lobby (#ff5277 glow)
+      - else → .status-online (#00ff88 glow)
+   
+   2. AVATAR (img.player-avatar-small) :
+      - src : DiceBear API bottts style
+      - seed : p.name ou 'default'
+      - backgroundColor : b6e3f4,c0aede,d1d4f9
+   
+   3. NOM (.player-name) :
+      - textContent : p.name || 'Joueur'
+   
+   4. SCORE (.player-score) :
+      - textContent : "${p.score || 0} pts"
+      - font-family monospace, color cyan
+   
+   5. EMOJI (.status-icon) :
+      - Logique selon currentPhase (window.HOL.state.currentPhase) :
+      
+      p.disconnected → ❌
+      
+      phase 'lobby' :
+         p.isReady || p.ready → ✅
+         else → ⏳ (+ .status-icon-waiting animation)
+      
+      phase 'hint' :
+         p.hasSentHint || p.hintSent → 📤
+         else → ✍️ (+ .status-icon-waiting)
+      
+      phase 'vote' :
+         p.hasVoted || p.voted → 🗳️
+         else → 🤔 (+ .status-icon-waiting)
+
+ HIGHLIGHT JOUEUR LOCAL :
+   if (p.id === window.HOL.state.me.id) → li.classList.add('me')
+   Affiche gradient cyan sur la ligne
+
+ EXPORT GLOBAL :
+   window.HOL.updateScoreboard = updateScoreboard
+   Appelé depuis main.js lors des updates d'état
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  PUBLIC/INDEX.HTML — STRUCTURE HTML COMPLÈTE (231 lignes)                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ HEAD :
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <link rel="manifest" href="/manifest.json"> (PWA)
+   
+   CSS CHARGÉS (dans l'ordre) :
+   1. /css/hud.css (imports automatiques des autres CSS)
+   2. /css/07-scoreboard.css (Bottom Sheet)
+   3. /css/11-results-mobile.css
+   4. /css/99-pwa-update.css
+   5. /css/98-responsive.css
+   
+   Socket.io : <script defer src="/socket.io/socket.io.js"></script>
+
+ BODY (class="hud-root") :
+   Active le scope HUD global
+
+ OVERLAYS CINÉMATIQUES :
+   #role-reveal-overlay : Transition révélation rôle (ÉQUIPIER/IMPOSTEUR)
+   #result-reveal-overlay : Transition révélation résultat
+
+ MODAL SPECTATEUR :
+   #spectator-waiting : Mode attente entre manches
+   #spectator-phase : Texte dynamique
+   #btn-leave-spectator : Bouton quitter
+
+ ÉCRAN HOME (#screen-home) :
+   .logo-square : "HL"
+   .title-group : Titre + tagline
+   Système d'onglets : Rejoindre / Créer
+   Hero Avatar Central : Génération Dicebear 180px
+   Footer : Règles + Top 10 leaderboard
+
+ ÉCRAN LOBBY (#screen-lobby) :
+   .lobby-header : Logo + Code salle (4 lettres) + Bouton quitter
+   #lobby-ready-pill : "X/X prêts"
+   #players : Grille de cartes joueurs (2 cols mobile, 3-4 desktop)
+   #btn-ready : "Je suis prêt" (btn-primary, 56px)
+   #timer-lobby : Timer prestart (hidden par défaut)
+
+ ÉCRAN HINT (#screen-hint) :
+   .phase-bar : Barre progression 4px top
+   .screen-header :
+      - .round-tag : "Round <span id='round-num'>1</span>"
+      - .label-secondary : "Thème de la manche"
+      - h2#theme-hint-name : Nom du thème
+      - #timer-hints : Timer pill
+   
+   #my-role-container : "Rôle : <span id='my-role'>...</span>"
+   #crew-word-chip : Badge mot secret
+   #impostor-tip : Conseil pour imposteur (hidden par défaut)
+   
+   .input-group :
+      - #hint-input : Input indice (52px height)
+      - #btn-send-hint : Bouton envoyer (52px height)
+   
+   #hint-status : Message de statut
+   #progress-hints : "X/X" compteur progression
+
+ ÉCRAN VOTE (#screen-vote) :
+   .phase-bar
+   .screen-header :
+      - h2#theme-vote-name
+      - .header-pills : #timer-vote + #progress-vote
+   
+   .instruction : "Qui est l'imposteur ?"
+   #hints.vote-grid : Grille de cartes vote (2 cols mobile)
+
+ ÉCRAN RESULT (#screen-result) :
+   .phase-bar
+   .screen-header : h2 "Résultat" + #timer-reveal
+   
+   .result-box :
+      - .result-item : "Le mot était : <strong id='res-common'>...</strong>"
+      - #res-imp-name : Avatar + nom imposteur (150px)
+   
+   #res-votes : Détail des votes (logs monospace)
+   #btn-next : "Manche suivante" (btn-primary)
+
+ SCOREBOARD (#scoreboard) :
+   .panel.scoreboard-panel : Bottom Sheet
+   h3.label-secondary : "Tableau de Score"
+   ul#score-list : Liste des joueurs (générée par leaderboard.js)
+
+ TOAST SYSTÈME :
+   #toast : Messages temporaires (vide par défaut)
+
+ MODAL FIN DE PARTIE :
+   #modal.modal-overlay : GameOver screen
+   .box.panel : Contenu modal
+
+ PWA UPDATE BANNER :
+   #update-banner : Notification mise à jour disponible
+
+ SCRIPTS CHARGÉS (defer, dans l'ordre) :
+   Core :
+   - /js/core/dom.js
+   - /js/core/helpers.js
+   - /js/core/state.js
+   - /js/core/socket.js
+   
+   Features :
+   - /js/features/leaderboard.js
+   - /js/features/home.js
+   - /js/features/hints.js
+   - /js/features/vote.js
+   - /js/features/results.js
+   
+   PWA & Utils :
+   - /js/pwa/update.js
+   - /js/dev/guard.js
+   
+   Main :
+   - /js/main.js (init finale)
+   
+   Canvas Confetti :
+   - https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js
+
+================================================================================
  RÉSUMÉ DE LA SYNCHRONISATION
 ================================================================================
 
  Fichier mis à jour : MASTER_CONTEXT_HINT_OR_LIE.txt
- Date de synchronisation : 25 janvier 2026
- Dernière mise à jour Bottom Sheet : 25 janvier 2026
+ Date de création : 25 janvier 2026
+ Dernière mise à jour : 26 janvier 2026 (scan complet architecture)
  Source de vérité complète et validée
 
- Fichiers intégrés dans cette référence :
-    public/index.html (structure HTML complète validée)
-    public/css/01-tokens.css (design tokens)
-    public/css/02-base.css (reset + base + grid background)
-    public/css/03-components.css (buttons, panels, inputs)
-    public/css/04-phase.css (phase bar + headers + pills)
-    public/css/05-hints.css (écran indices + word card + rôles)
-    public/css/06-vote.css (écran vote + cartes tactiles)
-    public/css/07-scoreboard.css (scoreboard flottant)
-    public/css/08-home.css (écran accueil + hero avatar)
-    public/css/08-lobby-header.css (header lobby + code salle)
-    public/css/09-spectator.css (overlays + modals)
-    public/css/11-results-mobile.css (écran résultats)
-    public/css/98-responsive.css (mobile-first responsive)
-    public/css/hud.css (assembly principal + lobby styles)
+ Fichiers scannés et intégrés dans cette référence :
+    ✅ public/index.html (structure HTML complète — 231 lignes)
+    ✅ public/css/03-components.css (boutons, panels, inputs — 144 lignes)
+    ✅ public/css/04-phase.css (phase bar, headers, pills — 111 lignes)
+    ✅ public/css/05-hints.css (écran indices — 244 lignes)
+    ✅ public/css/07-scoreboard.css (Bottom Sheet — 167 lignes)
+    ✅ public/css/hud.css (assembly principal — 352 lignes)
+    ✅ public/js/main.js (initialisation — 161 lignes)
+    ✅ public/js/features/leaderboard.js (scoreboard unifié — 108 lignes)
+
+ Architecture technique documentée :
+    ✅ Bottom Sheet avec toggle au clic (transform-based sliding)
+    ✅ Grille verrouillée 5 colonnes : 15px|32px|1fr|65px|35px
+    ✅ Avatars bridés à 32×32px avec object-fit cover
+    ✅ Status LEDs avec couleurs et glows (online/lobby/offline)
+    ✅ Emojis de statut avec logique par phase et animation pulse
+    ✅ Input/button alignés à 52px height dans écran HINT
+    ✅ Word card avec clamp() responsive et animation chip-pulse
+    ✅ Terminal imposteur monospace avec auto height
+    ✅ Phase bar 4px top avec gradient cyan progressif
+    ✅ Timer sync via Socket.io avec requestAnimationFrame
+    ✅ DiceBear API pour génération avatars dynamiques
 
  Ce fichier est la SOURCE DE VÉRITÉ pour :
-    Les IDs et classes critiques (NE PAS MODIFIER)
-    Le design validé (Minimalist HUD Matte & Glass Cyan)
-    Les contraintes mobile-first (95% width, 48px+ touch targets)
-    La structure HTML exacte de chaque écran
+    ✅ Les IDs et classes critiques (NE PAS MODIFIER)
+    ✅ Le design validé (Minimalist HUD Matte & Glass Cyan)
+    ✅ Les contraintes mobile-first (95% width, 52px touch targets)
+    ✅ La structure HTML exacte de chaque écran
+    ✅ L'architecture CSS complète avec délimitations par fichier
+    ✅ La logique JavaScript d'initialisation et de synchronisation
+    ✅ Les animations, transitions et effets visuels
 
 ================================================================================
 FIN DU FICHIER DE CONTEXTE
