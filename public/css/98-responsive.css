@@ -1,0 +1,184 @@
+/* 98-responsive.css — Mobile-first responsive enhancements */
+
+/* Screen headers - larger and centered for mobile */
+.screen-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.screen-header h2, .theme-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+/* Pills (timers, status) - larger for mobile */
+.pill {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    min-height: 36px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent-cyan);
+}
+
+/* Button groups should stack on mobile */
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-group .btn {
+    width: 100%;
+}
+
+/* Lobby players list - mobile optimization */
+.players-list, #players-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 1rem 0;
+}
+
+.players-list li, #players-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    min-height: 56px;
+}
+
+/* Avatar sizes */
+.avatar, .player-avatar, img[src*="dicebear"] {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-small {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-medium {
+    width: 60px;
+    height: 60px;
+}
+
+.avatar-large {
+    width: 90px;
+    height: 90px;
+}
+
+/* Form elements - mobile-first */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
+/* Word display cards */
+.word-card {
+    padding: 2rem 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.word-card strong {
+    font-size: 2.2rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive utilities */
+.mobile-only {
+    display: block;
+}
+
+.desktop-only {
+    display: none;
+}
+
+/* Tablet and up */
+@media (min-width: 641px) {
+    .mobile-only {
+        display: none;
+    }
+    
+    .desktop-only {
+        display: block;
+    }
+    
+    #game-container {
+        max-width: 600px;
+    }
+    
+    .hud-card {
+        max-width: 600px;
+    }
+    
+    .btn-group {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+    }
+    
+    .screen-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    #game-container {
+        max-width: 700px;
+    }
+    
+    .hud-card {
+        max-width: 720px;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 360px) {
+    html, body {
+        font-size: 15px;
+    }
+    
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .screen-header h2, .theme-title {
+        font-size: 1.3rem;
+    }
+    
+    .word-card strong {
+        font-size: 1.8rem;
+    }
+}

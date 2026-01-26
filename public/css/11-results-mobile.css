@@ -1,0 +1,117 @@
+/* 11-results-mobile.css — Mobile-optimized result screen styles */
+
+/* Result box container */
+.result-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.result-item {
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+.result-item strong {
+    font-size: 1.4rem;
+    color: var(--accent-cyan);
+    display: block;
+    margin-top: 0.5rem;
+}
+
+/* Impostor reveal container (avatar is generated in JS) */
+.impostor-reveal {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 15px !important;
+    padding: 1.5rem !important;
+    margin: 1rem 0 !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 12px !important;
+}
+
+/* Override inline styles for avatar */
+.impostor-reveal img {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+}
+
+.impostor-reveal span {
+    font-size: 1.8rem !important;
+    text-align: center !important;
+}
+
+/* Votes detail container */
+.votes-detail, #res-votes {
+    margin-top: 1.5rem;
+}
+
+.votes-detail h4, #res-votes h4 {
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Vote entries - large blocks for mobile */
+.votes-detail > div,
+#res-votes > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+}
+
+.votes-detail > div > div,
+#res-votes > div > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 1rem !important;
+}
+
+.votes-detail > div > div span,
+#res-votes > div > div span {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+}
+
+/* Screen result panel */
+#screen-result .panel {
+    max-width: 100%;
+    padding: 1.5rem;
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 360px) {
+    .impostor-reveal img {
+        width: 100px !important;
+        height: 100px !important;
+        min-width: 100px !important;
+        min-height: 100px !important;
+    }
+    
+    .impostor-reveal span {
+        font-size: 1.5rem !important;
+    }
+    
+    .result-item strong {
+        font-size: 1.2rem;
+    }
+}

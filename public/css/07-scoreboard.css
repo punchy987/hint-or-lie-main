@@ -13,15 +13,18 @@
 
 #score-list {
     list-style: none;
+    padding-left: 0;
+    margin: 0;
 }
 
 #score-list li {
-    display: grid;
-    grid-template-columns: 10px 40px 1fr auto;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    padding: 8px 6px;
+    padding: 12px 10px;
     border-bottom: 1px solid rgba(255,255,255,0.02);
+    background: rgba(255,255,255,0.01);
 }
 
 .status-led { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 6px rgba(0,0,0,0.4) inset; }
@@ -31,16 +34,35 @@
 
 .pts { font-weight: 900; color: var(--accent-cyan); }
 
-/* Floating scoreboard */
+/* Floating scoreboard - mobile optimized */
 #scoreboard {
-  position: fixed; right: 18px; top: 18px; width: 260px; max-height: 70vh; overflow:auto;
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px; padding: 0.75rem; z-index: 1400; box-shadow: 0 12px 40px -28px rgba(0,0,0,0.6);
+  position: fixed; 
+  right: 10px; 
+  top: 60px; 
+  width: 90%;
+  max-width: 280px;
+  max-height: 60vh; 
+  overflow: auto;
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.04); 
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; 
+  padding: 1rem; 
+  z-index: 1400; 
+  box-shadow: 0 12px 40px -28px rgba(0,0,0,0.8);
 }
 
-/* small avatar in list */
-.score-avatar { width: 36px; height: 36px; }
+@media (min-width: 641px) {
+  #scoreboard {
+    right: 18px;
+    top: 18px;
+    width: 280px;
+  }
+}
+
+/* Avatar in list - larger for mobile */
+.score-avatar { width: 45px; height: 45px; border-radius: 50%; }
 
 .scoreboard-panel h3 { margin: 0 0 8px 0; }
 

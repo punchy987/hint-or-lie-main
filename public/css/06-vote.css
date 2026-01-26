@@ -1,7 +1,7 @@
-.vote-grid {
+.vote-grid, #hints {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
     margin-top: 1rem;
 }
 
@@ -10,14 +10,14 @@
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
-    padding: 1rem 1.1rem;
+    padding: 20px;
     border-radius: 12px;
     color: var(--text);
     cursor: pointer;
     transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
     text-align: center;
     font-family: var(--font-sans);
-    min-height: 72px; display:flex; align-items:center; justify-content:center; flex-direction:column;
+    min-height: 90px; display:flex; align-items:center; justify-content:center; flex-direction:column;
 }
 
 .vote-card:hover {
@@ -32,7 +32,7 @@
     box-shadow: 0 18px 40px -22px rgba(0,242,255,0.28);
 }
 
-.vote-card strong { font-size: 1.05rem; display:block; }
+.vote-card strong { font-size: 1.15rem; display:block; font-weight: 700; }
 
 /* Make #hints flexible when used as container */
 #hints.vote-grid { align-items: stretch; }

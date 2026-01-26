@@ -23,13 +23,14 @@
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem 0.9rem;
+  padding: 0.75rem 1.2rem;
+  min-height: 48px;
   border-radius: 999px;
   border: var(--border-thin) solid transparent;
   background: transparent;
   color: var(--muted);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
@@ -50,11 +51,13 @@
 
 /* Inputs */
 .input {
-  display: inline-block; width: 100%; padding: 0.6rem 0.8rem;
+  display: inline-block; width: 100%; padding: 0.75rem 1rem;
+  min-height: 48px;
   border-radius: var(--radius-sm);
   background: rgba(255,255,255,0.02);
   border: var(--border-thin) solid var(--glass-border);
   color: var(--text);
+  font-size: 1rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
