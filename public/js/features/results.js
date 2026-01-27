@@ -126,8 +126,11 @@
             const votedName = playersById.get(votedId);
 
             if (voterName && votedName) {
+              // Déterminer si le vote est correct (contre l'imposteur)
+              const isCorrectVote = votedId === res.impostorId;
+              
               const voteElement = document.createElement('div');
-              voteElement.className = 'arcade-bar';
+              voteElement.className = isCorrectVote ? 'arcade-bar vote-correct' : 'arcade-bar vote-incorrect';
               voteElement.style.width = 'fit-content';
               voteElement.style.animationDelay = `${index * 0.1}s`;
 

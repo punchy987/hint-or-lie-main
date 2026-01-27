@@ -63,7 +63,7 @@
 
 .word-card strong, #crew-word-chip strong {
     font-size: clamp(1.6rem, 7vw, 2.5rem);
-    color: #E8C547;
+    color: var(--color-crew);
     font-weight: 800;
     display: block;
     letter-spacing: 1px;

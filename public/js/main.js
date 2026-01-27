@@ -35,8 +35,8 @@
               
               // Determine status
               let statusText = '';
-              if (p.disconnected) statusText = 'Dconnect';
-              else if (p.ready) statusText = 'Prt ?';
+              if (p.disconnected) statusText = 'Déconnecté';
+              else if (p.ready) statusText = 'Prêt ✓';
 
               const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.name || 'default')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
               card.innerHTML = `

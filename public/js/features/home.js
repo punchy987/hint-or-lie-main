@@ -229,12 +229,14 @@
 
         if (btnShowRules && modalRules) {
             btnShowRules.onclick = () => {
+                modalRules.classList.add('active');
                 modalRules.style.display = 'flex';
             };
         }
 
         if (btnCloseRules && modalRules) {
             btnCloseRules.onclick = () => {
+                modalRules.classList.remove('active');
                 modalRules.style.display = 'none';
             };
         }
@@ -243,6 +245,7 @@
         if (modalRules) {
             modalRules.onclick = (e) => {
                 if (e.target === modalRules) {
+                    modalRules.classList.remove('active');
                     modalRules.style.display = 'none';
                 }
             };

@@ -108,10 +108,10 @@
     justify-content: center;
     gap: 16px;
     padding: 18px 24px;
-    background: rgba(232, 197, 71, 0.15);
+    background: rgba(72, 187, 120, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border: 2px solid rgba(232, 197, 71, 0.4);
+    border: 2px solid rgba(72, 187, 120, 0.4);
     border-radius: 12px;
     width: 100%;
     min-height: 60px;
@@ -136,8 +136,39 @@
 }
 
 .arcade-bar:hover {
-    background: rgba(232, 197, 71, 0.25);
-    border-color: rgba(232, 197, 71, 0.6);
+    background: rgba(72, 187, 120, 0.25);
+    border-color: rgba(72, 187, 120, 0.6);
+    transform: translateX(5px);
+}
+
+/* Vote Correct (contre l'imposteur) - Fond Vert */
+.vote-correct {
+    background: rgba(72, 187, 120, 0.2) !important;
+    border: 1px solid var(--color-crew) !important;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.1), 
+                inset 0 -3px 4px rgba(0,0,0,0.2) !important;
+}
+
+.vote-correct:hover {
+    background: rgba(72, 187, 120, 0.3) !important;
+    border-color: var(--color-crew) !important;
+}
+
+/* Vote Incorrect - Fond Transparent */
+.vote-incorrect {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+.vote-incorrect span {
+    color: var(--text-main) !important;
+    opacity: 0.7 !important;
+}
+
+.vote-incorrect:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
     transform: translateX(5px);
 }
 
@@ -148,10 +179,10 @@
     justify-content: center;
     gap: 16px;
     padding: 18px 24px;
-    background: rgba(232, 197, 71, 0.15);
+    background: rgba(72, 187, 120, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border: 2px solid rgba(232, 197, 71, 0.4);
+    border: 2px solid rgba(72, 187, 120, 0.4);
     border-radius: 12px;
     width: 100%;
     min-height: 60px;
@@ -163,8 +194,8 @@
 
 .votes-detail > div > div:not(.arcade-bar):hover,
 #res-votes > div > div:not(.arcade-bar):hover {
-    background: rgba(232, 197, 71, 0.25);
-    border-color: rgba(232, 197, 71, 0.6);
+    background: rgba(72, 187, 120, 0.25);
+    border-color: rgba(72, 187, 120, 0.6);
     transform: translateX(5px);
 }
 

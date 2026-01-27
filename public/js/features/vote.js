@@ -7,6 +7,7 @@
   let myTarget = null;     // dernier choix local (hintId)
   let votingClosed = false;
   let myOwnHintText = null; // Stockage de mon propre indice pour l'identifier
+  let voteConfirmTimer = null; // Timer pour le feedback temporaire
 
   // Affiche un message temporaire d'interdiction
   function showNoSelfVoteMessage() {
@@ -165,11 +166,25 @@
           box.querySelectorAll('.vote-card').forEach(b => b.classList.remove('selected'));
           card.classList.add('selected');
           
-          // Modifier l'instruction contextuelle
+          // Modifier l'instruction contextuelle (temporaire)
           const instruction = document.querySelector('.vote-instruction');
           if (instruction) {
-            instruction.textContent = 'Vote enregistré !';
+            // Clear le timer précédent si changement de vote
+            clearTimeout(voteConfirmTimer);
+            
+            // Sauvegarder le texte original s'il n'est pas déjà sauvegardé
+            if (!instruction.dataset.originalText) {
+              instruction.dataset.originalText = instruction.textContent;
+            }
+            
+            instruction.textContent = 'Vote enregistré ! ✓';
             instruction.classList.add('voted');
+            
+            // Restaurer le texte original après 2.5 secondes
+            voteConfirmTimer = setTimeout(() => {
+              instruction.textContent = instruction.dataset.originalText || 'Sélectionnez une carte pour voter';
+              instruction.classList.remove('voted');
+            }, 2500);
           }
 
           // Envoi au serveur

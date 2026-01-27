@@ -131,15 +131,40 @@
 /* Lightweight toast (uses accent cyan for emphasis) */
 .hud-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: transparent; border: none; color: var(--text); padding: 0.6rem 1rem; border-radius: 999px; backdrop-filter: none; z-index:1300; }
 
-/* Toast désactivé par défaut */
+/* Toast global fixe (anti-layout shift) */
 #toast {
-  display: none;
+  position: fixed !important;
+  top: 30px !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(-20px);
+  width: 90% !important;
+  max-width: 400px !important;
+  z-index: 10000 !important;
   pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0;
+  background: var(--relief-bg);
+  color: var(--color-crew);
+  border: 2px solid var(--color-crew);
+  padding: 14px 24px;
+  border-radius: 12px;
+  text-align: center;
+  font-family: 'Lexend', sans-serif !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.15);
 }
 
 #toast:not(:empty) {
-  display: block;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
   pointer-events: auto;
+}
+
+#toast.error {
+  color: var(--color-impostor);
+  border-color: var(--color-impostor);
 }
 
 /* Accessibility: reduce motion respects tokens */

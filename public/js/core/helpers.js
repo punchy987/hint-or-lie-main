@@ -76,14 +76,23 @@
     overlay.classList.remove('active');
   };
 
-  HOL.toast = HOL.toast || function (msg, ms = 2200) {
+  HOL.toast = HOL.toast || function (msg, ms = 2200, isError = false) {
     let t = document.getElementById('toast');
     if (!t) return console.log("Toast:", msg);
     t.textContent = String(msg || '');
-    t.style.display = 'block';
-    t.style.opacity = '1';
+    
+    // Ajouter ou retirer la classe error
+    if (isError) {
+      t.classList.add('error');
+    } else {
+      t.classList.remove('error');
+    }
+    
     clearTimeout(HOL._toastTimer);
-    HOL._toastTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
+    HOL._toastTimer = setTimeout(() => { 
+      t.textContent = ''; // Vider pour déclencher l'animation de sortie
+      t.classList.remove('error');
+    }, ms);
   };
 
   HOL.getDeviceId = HOL.getDeviceId || function () {

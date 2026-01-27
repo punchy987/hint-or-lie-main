@@ -20,12 +20,13 @@ points d'ancrage CRITIQUES pour :
 
 Design : Matte Grey Arcade (Relief Embossé + Typography Lexend)
    ✅ Thème Matte Grey Arcade avec reliefs tactiles 3D
-   ✅ Palette : #2F3542 (bg-main), #F1F2F6 (text), #E8C547 (primary yellow)
-   ✅ Couleurs sémantiques : #48BB78 (crew), #F56565 (impostor)
+   ✅ Palette : #2F3542 (bg-main), #F1F2F6 (text)
+   ✅ Couleurs sémantiques : #48BB78 (crew green), #F56565 (impostor red)
+   ✅ Jaune arcade (#E8C547) REMPLACÉ par dualité vert/rouge
    ✅ Police : Lexend (400, 600, 800) forcée globalement avec !important
    ✅ Effets de relief : box-shadow inset (light+dark) sur tous les éléments
    ✅ Aucun glow/gradient : tous supprimés pour style matte flat
-   ✅ Arcade Bars : Modules avec fond rgba(232,197,71,0.15) + relief embossé
+   ✅ Arcade Bars : Modules avec fond rgba(72,187,120,0.15) + relief embossé
    ✅ Typography Scale : base 1.1rem, titles 1.8-2.2rem, buttons 1.2rem
    ✅ Border-radius : 12px global, 16px pour boutons
    ✅ Transitions : cubic-bezier(0.175, 0.885, 0.32, 1.275) pour rebonds
@@ -33,9 +34,12 @@ Design : Matte Grey Arcade (Relief Embossé + Typography Lexend)
 Tokens CSS (public/css/01-tokens.css) :
    --bg-main: #2F3542 (anthracite matte)
    --text-main: #F1F2F6 (off-white)
-   --color-primary: #E8C547 (yellow arcade)
+   --color-primary: #48BB78 (green crew - REMPLACE le jaune)
+   --primary: #48BB78 (green crew)
+   --accent-cyan: #48BB78 (green crew)
    --color-crew: #48BB78 (green sage)
    --color-impostor: #F56565 (red coral)
+   --color-impostor-alt: #F56565 (red variant)
    --relief-light: rgba(255,255,255,0.15)
    --relief-dark: rgba(0,0,0,0.3)
    --relief-bg: #3a4150
@@ -914,30 +918,76 @@ Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales 
 
  ✅ RÈGLES ACCESSIBLES DEPUIS LE LOBBY :
     ✅ Bouton #btn-show-rules-lobby dans .lobby-actions
-    ✅ Style .btn-link-secondary : compact, jaune arcade, uppercase, sans relief
+    ✅ Style .btn-link-secondary : compact, vert crew, uppercase, sans relief
     ✅ Modal #modal-rules-lobby : overlay fullscreen, z-index:8888, backdrop-filter:blur(8px)
-    ✅ .rules-panel : max-width:500px, border:2px var(--color-primary), scrollable
-    ✅ Contenu en .arcade-bar : police 0.9rem, padding compact
-    ✅ Logique JS : initRulesModal() dans home.js
+    ✅ Classe .active requise pour affichage (contourne display:none !important de 02-base.css)
+    ✅ .rules-panel : max-width:500px, border:2px var(--color-crew), scrollable
+    ✅ Contenu .home-concept-box : fond vert crew, relief embossé, 3 règles (🎯✍️🗳️)
+    ✅ Même bloc "LE CONCEPT" utilisé sur home ET dans modal lobby (cohérence)
+    ✅ Logique JS : initRulesModal() dans home.js avec classList.add/remove('active')
     ✅ Fermeture : bouton #btn-close-rules-lobby + clic hors panneau
+    ✅ Import CSS : public/css/08-lobby-header.css ajouté dans index.html
+
+ ✅ SYSTÈME DE NOTIFICATIONS TOAST GLOBALISÉ :
+    ✅ Position fixed top 30px, centrage horizontal parfait (translateX(-50%))
+    ✅ z-index: 10000 pour priorité absolue sur tout le HUD
+    ✅ Design Arcade Premium : fond relief-bg, border 2px crew, Lexend 800 uppercase
+    ✅ Animation temporaire : opacity 0→1 au remplissage, :not(:empty) trigger
+    ✅ Box-shadow : 0 10px 25px rgba(0,0,0,0.5) + inset relief
+    ✅ Variante .error : couleur impostor red au lieu de crew green
+    ✅ Fonction toast() : paramètre isError optionnel pour gestion de variante
+    ✅ Auto-clear : textContent vidé après timeout pour animation sortie
+    ✅ Anti layout shift : position fixed empêche tout décalage d'interface
+
+ ✅ FEEDBACKS TEMPORAIRES DANS TOUTES LES PHASES :
+    ✅ Phase Vote : "Vote enregistré ! ✓" disparaît après 2.5s
+    ✅ Changement de vote : clearTimeout() + nouveau feedback à chaque modification
+    ✅ Phase Hints : "Indice envoyé ✅" disparaît après 2.5s
+    ✅ Phase Hints erreur : "Indice rejeté" disparaît après 3.5s (+ classe .error)
+    ✅ Variables timers : voteConfirmTimer (vote.js), hintStatusTimer (hints.js)
+    ✅ Sauvegarde texte original : dataset.originalText pour restauration
+    ✅ Tous feedbacks avec clearTimeout() pour éviter conflits de timers
+
+ ✅ PHASE VOTE - CENTRAGE CARTES ET OPTIMISATIONS :
+    ✅ Cartes centrées horizontalement : justify-content: center sur .vote-grid
+    ✅ Fonctionne quel que soit le nombre de joueurs (2-7)
+    ✅ Carrousel scroll-snap conservé pour navigation avec beaucoup de cartes
+    ✅ Dimensions compactes : 110px × 160px (anti-clipping)
+    ✅ Padding-top : 100px !important pour sécurité animation selected
+    ✅ overflow: visible pour permettre élévation au survol
+
+ ✅ CORRECTIONS UX LOBBY :
+    ✅ Statut joueurs : "Prt ?" remplacé par "Prêt ✓" (plus lisible)
+    ✅ Statut déconnecté : "Dconnect" remplacé par "Déconnecté" (complet)
+    ✅ Fichier : public/js/main.js ligne 39 (updateUIFromState)
 
  Fichiers modifiés durant cette session d'optimisation :
-    ✅ public/css/01-tokens.css — --font-size-title responsive clamp(), --gap-compact ajouté
-    ✅ public/css/03-components.css — Padding boutons réduit à 12px 24px
+    ✅ public/css/01-tokens.css — --color-primary: #48BB78, --primary: #48BB78, --color-impostor-alt: #F56565
+    ✅ public/css/03-components.css — .input:focus border-color crew, .arcade-bar rgba(72,187,120,0.15)
     ✅ public/css/04-phase.css — margin-bottom screen-header 12px, h2 titles 1.8rem
-    ✅ public/css/06-vote.css — aspect-ratio 2/2.3, max-height 50vh, margin-bottom 60px
+    ✅ public/css/05-hints.css — .word-card strong: var(--color-crew)
+    ✅ public/css/06-vote.css — justify-content: center, aspect-ratio 2/3, width 110px, height 160px
     ✅ public/css/07-scoreboard.css — Chevron CSS, max-height 40vh, handlePullHint animation
-    ✅ public/css/08-home.css — Harmonisation complète couleurs Arcade Premium
-    ✅ public/css/08-lobby-header.css — Styles modal règles + btn-link-secondary
-    ✅ public/css/11-results-mobile.css — Avatar 110px, gap 10px, padding réduit, fadeIn animation
-    ✅ public/css/hud.css — #screen-vote 100dvh, panel padding 1rem, overlay transition global
-    ✅ public/index.html — Overlay logo "HL", modal règles lobby, btn-show-rules-lobby
-    ✅ public/js/core/helpers.js — transitionTo() avec Promise.all et délai 600ms
-    ✅ public/js/main.js — updateUIFromState() avec transitionTo()
-    ✅ public/js/features/home.js — initRulesModal() pour gestion modal règles
-    ✅ public/js/features/results.js — Temporisation btnNext avec fadeIn
+    ✅ public/css/08-home.css — Dualité vert/rouge, .text-crew, .text-impostor, .home-concept-box
+    ✅ public/css/08-lobby-header.css — Styles modal règles + .home-concept-box dans modal
+    ✅ public/css/11-results-mobile.css — .vote-correct (green), .vote-incorrect (transparent)
+    ✅ public/css/hud.css — Toast globalisé position fixed top 30px, z-index 10000, design arcade
+    ✅ public/index.html — Titre coloré (Hint/or/Lie), .home-concept-box, modal-rules-lobby content, import 08-lobby-header.css
+    ✅ public/js/core/helpers.js — toast() avec paramètre isError, textContent vidé après timeout
+    ✅ public/js/main.js — updateUIFromState() avec transitionTo(), statuts "Prêt ✓" et "Déconnecté"
+    ✅ public/js/features/home.js — initRulesModal() avec classList.add/remove('active')
+    ✅ public/js/features/vote.js — voteConfirmTimer, feedback temporaire 2.5s, dataset.originalText
+    ✅ public/js/features/hints.js — hintStatusTimer, feedbacks temporaires 2.5s/3.5s
+    ✅ public/js/features/results.js — vote classification, .vote-correct vs .vote-incorrect
 
  Nouvelles fonctionnalités UX/UI avancées :
+    ✅ Dualité couleurs : Vert crew (#48BB78) / Rouge impostor (#F56565) remplace jaune arcade
+    ✅ Toast globalisé : Position fixed top 30px, z-index 10000, design arcade relief embossé
+    ✅ Feedbacks temporaires : Tous messages disparaissent automatiquement (2.5-3.5s)
+    ✅ Centrage cartes vote : justify-content: center pour alignement parfait
+    ✅ Vote classification : Votes corrects en vert, incorrects transparents dans résultats
+    ✅ Modal règles lobby : Classe .active requise, même bloc "LE CONCEPT" que home
+    ✅ Statuts lisibles : "Prêt ✓" et "Déconnecté" au lieu de "Prt ?" et "Dconnect"
     ✅ Layout vertical équilibré : 100dvh avec space-between, safe zones garanties
     ✅ Interface densifiée : Espaces réduits, titres responsifs, éléments compacts
     ✅ Chevron animé : Indicateur visuel de mouvement avec respiration verticale
@@ -945,18 +995,24 @@ Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales 
     ✅ Sécurité grands lobbies : max-height relatifs (vh) au lieu de valeurs fixes
     ✅ Transition globale : Logo "HL" pulsant élimine FOPC entre tous les écrans
     ✅ Délai minimal garanti : Promise.all évite effet flash avec 600ms minimum
-    ✅ Harmonisation totale : Toute l'application utilise palette Matte Grey + Jaune Arcade
+    ✅ Harmonisation totale : Toute l'application utilise palette Matte Grey + Vert/Rouge
     ✅ Accessibilité règles : Disponibles depuis lobby sans quitter la salle
     ✅ Modal réutilisable : Overlay avec fermeture multiple (bouton + clic extérieur)
 
  Architecture technique optimisée :
+    ✅ Dualité sémantique : Vert crew / Rouge impostor pour clarté visuelle du gameplay
+    ✅ Toast système : Position fixed anti-layout-shift avec transition cubic-bezier
+    ✅ Feedbacks intelligents : Timers avec clearTimeout() pour éviter conflits
+    ✅ Classe .active : Pattern pour contourner display:none !important des overlays
+    ✅ Dataset persistence : originalText sauvegardé pour restauration de contenu
+    ✅ Vote UX : Feedback temporaire re-trigger à chaque changement de vote
     ✅ Système de transition : transitionTo() centralisé dans helpers.js
     ✅ Promise.all : Garantit durée minimale + exécution callback en parallèle
     ✅ Clamp() responsive : Typographie s'adapte de 1.3rem à 1.8rem selon viewport
     ✅ Max-height relatifs : 40vh scoreboard, 50vh carrousel pour flexibilité
     ✅ Chevron CSS pur : Triangle via borders, pas d'image, animé avec transform
     ✅ Temporisation cascade : Calcul basé sur nombre de barres × délai + marge
-    ✅ Overlay z-index : 9999 transition global, 8888 modals, 1200 scoreboard
+    ✅ Overlay z-index : 10000 toast, 9999 transition global, 8888 modals, 1200 scoreboard
     ✅ Lexend forcé : !important sur tous éléments critiques (home, logo, boutons)
     ✅ Relief embossé partout : inset shadows light/dark + outer shadow sur tous boutons
     ✅ Modal pattern : .modal-overlay + .panel réutilisable, backdrop-filter blur

@@ -23,13 +23,17 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: center;
     flex-grow: 1;
     gap: 20px;
-    padding: 30px 20px;
+    padding-top: 100px !important;
+    padding-bottom: 30px;
+    padding-left: 20px;
+    padding-right: 20px;
     width: 100%;
     max-height: 50vh;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow: visible;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -43,13 +47,15 @@
 
 /* Les Cartes : Conteneur parent avec scroll-snap */
 .vote-card {
-    width: 75%;
-    aspect-ratio: 2 / 2.3;
-    flex: 0 0 75%;
+    width: 110px !important;
+    height: 160px !important;
+    flex: 0 0 110px;
     cursor: pointer;
     position: relative;
     scroll-snap-align: center;
     font-family: 'Lexend', sans-serif !important;
+    transform: translateY(60%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Le pivot 3D interne */
@@ -84,7 +90,7 @@
     background: var(--bg-main);
     border: 2px solid var(--color-primary);
     border-radius: 12px;
-    padding: 20px;
+    padding: 10px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -100,7 +106,7 @@
 
 .card-front .hint-text {
     font-family: 'Lexend', sans-serif !important;
-    font-size: 1.1rem;
+    font-size: var(--font-size-base);
     font-weight: 600;
     line-height: 1.4;
     color: #FFFFFF;
@@ -115,12 +121,20 @@
     letter-spacing: 0.5px;
 }
 
-/* État révélé : flip + élévation */
-.vote-card.revealed .vote-card-inner {
-    transform: translateY(-40px) rotateY(180deg);
+/* État révélé : flip + remise à position naturelle */
+.vote-card.revealed {
+    transform: translateY(0);
 }
 
-/* Carte sélectionnée : Bordure Cyan intense + Glow */
+.vote-card.revealed .vote-card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Carte sélectionnée : Bordure Cyan intense + Glow + Léger saut */
+.vote-card.selected {
+    transform: translateY(-25px) scale(1.05);
+}
+
 .vote-card.selected .card-front {
     border: 3px solid #00FFFF;
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 20px 50px rgba(0, 0, 0, 0.8);

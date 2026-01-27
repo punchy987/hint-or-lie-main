@@ -5,6 +5,7 @@
   let locked  = false;
   let liveBox = null;
   let liveList = null;
+  let hintStatusTimer = null;
 
   const ui = {
     role:   () => $('my-role'),
@@ -147,8 +148,16 @@
       locked = true; sending = false;
       const status = ui.status();
       if (status) {
+        clearTimeout(hintStatusTimer);
         status.textContent = 'Indice envoyé ✅';
         status.classList.remove('error');
+        
+        // Effacer le message après 2.5 secondes
+        hintStatusTimer = setTimeout(() => {
+          if (status) {
+            status.textContent = '';
+          }
+        }, 2500);
       }
     });
 
@@ -158,8 +167,17 @@
       if (btn) btn.disabled = false;
       const status = ui.status();
       if (status) {
+        clearTimeout(hintStatusTimer);
         status.textContent = reason || 'Indice rejeté.';
         status.classList.add('error');
+        
+        // Effacer le message après 3.5 secondes (erreur = plus de temps de lecture)
+        hintStatusTimer = setTimeout(() => {
+          if (status) {
+            status.textContent = '';
+            status.classList.remove('error');
+          }
+        }, 3500);
       }
       toast(reason || 'Indice rejeté.', 'danger');
     });
