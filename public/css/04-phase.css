@@ -44,7 +44,7 @@
 
 /* Ligne 2 : Focus Thème (Titre centré) */
 .screen-header h2, .theme-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     color: var(--text-main);
     text-align: center;

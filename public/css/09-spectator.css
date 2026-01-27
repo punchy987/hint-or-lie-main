@@ -84,7 +84,8 @@
 .cinematic-overlay.playing {
 	display: flex;
 	background-color: rgba(18, 24, 32, 0.98);
-	backdrop-filter: blur(10px);
+	backdrop-filter: blur(15px);
+	-webkit-backdrop-filter: blur(15px);
 	pointer-events: auto;
 	z-index: 1500;
 	opacity: 1;
@@ -109,32 +110,30 @@
 /* ===== BANNIÈRES VICTOIRE/DÉFAITE (Smooth Arcade) ===== */
 #victory-banner,
 #defeat-banner {
-	font-family: 'Outfit', sans-serif;
+	font-family: 'Lexend', sans-serif;
 	font-size: 4rem;
 	font-weight: 800;
 	text-align: center;
-	padding: 2rem 3rem;
-	border-radius: 20px;
-	letter-spacing: 3px;
+	letter-spacing: -0.02em;
 	text-transform: uppercase;
 	opacity: 0;
 	transform: translateY(-50px) scale(0.8);
 	transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }
 
 #victory-banner:not(.hidden) {
-	background: linear-gradient(135deg, rgba(232,197,71,0.95), rgba(240,208,96,0.95));
-	color: var(--bg-dark);
-	border: 3px solid var(--primary);
+	color: var(--primary);
 	opacity: 1;
 	transform: translateY(0) scale(1);
 	animation: victory-pulse 1.5s ease-in-out infinite;
 }
 
 #defeat-banner:not(.hidden) {
-	background: linear-gradient(135deg, rgba(255,50,80,0.95), rgba(255,96,92,0.95));
-	color: #ffffff;
-	border: 3px solid #ff5277;
+	color: #ff605c;
 	opacity: 1;
 	transform: translateY(0) scale(1);
 }

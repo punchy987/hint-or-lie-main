@@ -80,6 +80,11 @@
         });
 
         $('btn-ready')?.addEventListener('click', () => {
+            // Retour haptique double tap
+            if (navigator.vibrate) {
+                navigator.vibrate([30, 50, 30]);
+            }
+            
             const roomState = window.HOL?.state?.room?.state;
             const br = $('btn-ready');
 

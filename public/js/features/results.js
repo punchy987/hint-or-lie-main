@@ -123,6 +123,7 @@
               const voteElement = document.createElement('div');
               voteElement.className = 'arcade-bar';
               voteElement.style.width = 'fit-content';
+              voteElement.style.animationDelay = `${index * 0.1}s`;
 
               const voterSpan = document.createElement('span');
               voterSpan.textContent = voterName;
@@ -147,7 +148,7 @@
               voteElement.appendChild(votedSpan);
               votesList.appendChild(voteElement);
             }
-          }, index * 400);
+          }, index * 100);
         });
 
         votesContainer.appendChild(votesList);

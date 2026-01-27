@@ -34,7 +34,6 @@
 
 #hint-input:focus {
     border-color: var(--color-cyan);
-    box-shadow: 0 0 15px var(--color-cyan-glow);
     outline: none;
 }
 

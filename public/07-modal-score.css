@@ -31,7 +31,7 @@
     background: var(--muted);
 }
 
-.status-led.is-active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.status-led.is-active { background: #10b981; }
 .status-led.is-disconnected { background: var(--danger); }
 
 .pts {

@@ -101,48 +101,80 @@
     width: 100%;
 }
 
-.votes-detail > div > div,
-#res-votes > div > div {
+/* Barre Tactile Arcade */
+.arcade-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 18px;
-    background: var(--mat-gray-800);
+    justify-content: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: rgba(232, 197, 71, 0.15);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border: var(--border-thin) solid var(--glass-border);
-    border-radius: var(--radius-sm);
+    border: 2px solid rgba(232, 197, 71, 0.4);
+    border-radius: 12px;
     width: 100%;
-    min-height: 52px;
-    font-size: 1rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
-    transition: all var(--transition-fast);
+    min-height: 60px;
+    font-size: 1.2rem;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 800;
+    transition: all 0.3s ease-out;
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: slideIn 0.5s ease-out forwards;
 }
 
-.votes-detail > div > div:hover,
-#res-votes > div > div:hover {
-    background: var(--mat-gray-700);
-    transform: translateX(4px);
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-.votes-detail > div > div span,
-#res-votes > div > div span {
-    font-size: 1rem !important;
-    font-weight: 700 !important;
+.arcade-bar:hover {
+    background: rgba(232, 197, 71, 0.25);
+    border-color: rgba(232, 197, 71, 0.6);
+    transform: translateX(5px);
+}
+
+.votes-detail > div > div:not(.arcade-bar),
+#res-votes > div > div:not(.arcade-bar) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: rgba(232, 197, 71, 0.15);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 2px solid rgba(232, 197, 71, 0.4);
+    border-radius: 12px;
+    width: 100%;
+    min-height: 60px;
+    font-size: 1.2rem;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 800;
+    transition: all 0.3s ease-out;
+}
+
+.votes-detail > div > div:not(.arcade-bar):hover,
+#res-votes > div > div:not(.arcade-bar):hover {
+    background: rgba(232, 197, 71, 0.25);
+    border-color: rgba(232, 197, 71, 0.6);
+    transform: translateX(5px);
+}
+
+.votes-detail > div > div:not(.arcade-bar) span,
+#res-votes > div > div:not(.arcade-bar) span,
+.arcade-bar span {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
     color: var(--text) !important;
-}
-
-/* Vote vers l'imposteur : Rouge */
-.votes-detail > div > div.correct-vote,
-#res-votes > div > div.correct-vote {
-    border-color: rgba(255,50,80,0.3) !important;
-    background: linear-gradient(135deg, rgba(255,50,80,0.08), rgba(255,50,80,0.04)) !important;
-}
-
-.votes-detail > div > div.correct-vote span,
-#res-votes > div > div.correct-vote span {
-    color: #ff5277 !important;
+    font-family: 'Lexend', sans-serif !important;
 }
 
 /* Screen result panel */

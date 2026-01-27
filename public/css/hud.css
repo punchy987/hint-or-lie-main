@@ -99,7 +99,7 @@
 
 #screen-lobby h2 {
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 600;
     letter-spacing: 1px;
     color: var(--muted);
@@ -306,6 +306,12 @@
 /* Écrans de jeu communs */
 #screen-hint, #screen-vote, #screen-result {
     padding-top: 1rem;
+}
+
+#screen-vote {
+    display: flex;
+    flex-direction: column;
+    min-height: 80vh;
 }
 
 #screen-hint {

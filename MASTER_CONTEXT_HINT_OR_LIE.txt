@@ -703,62 +703,122 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  Fichier mis à jour : MASTER_CONTEXT_HINT_OR_LIE.txt
  Date de création : 25 janvier 2026
- Dernière mise à jour : 26 janvier 2026 — Refonte Matte Grey Arcade complète
+ Dernière mise à jour : 26 janvier 2026 — Refonte Tactile Arcade Premium v3.0
 
- ✅ REFONTE DESIGN "MATTE GREY ARCADE" COMPLÉTÉE :
+ ✅ REFONTE DESIGN "TACTILE ARCADE PREMIUM" COMPLÉTÉE :
     ✅ Police Lexend (400, 600, 800) forcée globalement avec !important
     ✅ Palette Matte Grey (#2F3542 bg, #E8C547 primary, #48BB78 crew, #F56565 impostor)
     ✅ Effets de relief embossé (box-shadow inset) sur tous les boutons/panels
     ✅ Arcade Bars (.arcade-bar) avec fond jaune transparent + relief 3D
-    ✅ Typography Scale : base 1.1rem, titles 1.8-2.2rem, buttons 1.2rem
-    ✅ Suppression complète des glows, gradients, backdrop-filter (~90+ instances)
+    ✅ Typography Scale : base 1.1rem, titles 2.5rem, buttons 1.2rem (800 weight)
+    ✅ Suppression complète des glows (box-shadow: 0 0) dans tous les fichiers CSS
     ✅ Border-radius : 12px global, 16px boutons
     ✅ Inputs "creusés" avec inset shadow
-    ✅ Bannières victoire/défaite avec Outfit conservé pour consistance
-    ✅ Modale game-over intégrée au thème Lexend avec arcade bars
-    ✅ Cinématiques fixées : #reveal-result-text supprimé, uniquement bannières stylisées
-    ✅ Bug double cinématique corrigé : isGameOver flag ajouté dans roundResult
+    ✅ Bannières victoire/défaite avec Lexend 4rem, sans bordures ni backgrounds
+    ✅ Cinématique résultats : black-out 98% opacité + backdrop-filter blur(15px)
+
+ ✅ CINÉMATIQUES VICTOIRE/DÉFAITE ALIGNÉES SUR ATTRIBUTION DE RÔLE :
+    ✅ Police : Lexend au lieu d'Outfit
+    ✅ Letter-spacing : -0.02em (serré) au lieu de 3px
+    ✅ Style minimaliste : texte simple sans cadre, bordure ou background
+    ✅ Couleurs : var(--primary) pour victoire, #ff605c pour défaite
+    ✅ Animation victory-pulse conservée pour victoire
+    ✅ Bannières en flex column avec gap 1rem pour labels futurs
+
+ ✅ CENTRAGE PARFAIT ET DYNAMIQUE DES CARTES DE VOTE :
+    ✅ #screen-vote : display flex, flex-direction column, min-height 80vh
+    ✅ .vote-grid (#hints) : Flexbox avec justify-content center, align-items center
+    ✅ flex-grow: 1 pour occuper l'espace central et centrer verticalement
+    ✅ gap: 20px, padding: 20px, max-width: 600px, margin: 0 auto
+    ✅ .vote-card : min-width 140px, flex: 0 1 auto, police Lexend 1.15rem
+    ✅ Suppression de la grille 2 colonnes pour flexbox adaptatif
+
+ ✅ BARRES TACTILES ARCADE POUR LES RÉSULTATS :
+    ✅ .arcade-bar : background rgba(232, 197, 71, 0.15)
+    ✅ border: 2px solid rgba(232, 197, 71, 0.4)
+    ✅ font-family: Lexend, font-size: 1.2rem, font-weight: 800
+    ✅ Animation slideIn en cascade : opacity 0→1, translateX(-30px→0)
+    ✅ Hover : background rgba(232, 197, 71, 0.25), translateX(5px)
+    ✅ Animation delay de 0.1s par barre dans results.js (index * 100ms)
+    ✅ Suppression des anciennes boîtes de votes grises monospace
+
+ ✅ INTERDICTION DE L'AUTO-VOTE :
+    ✅ Stockage de myOwnHintText dans hints.js lors de la soumission
+    ✅ Identification de sa propre carte par comparaison du texte
+    ✅ Classe .is-me ajoutée sur la carte du joueur local
+    ✅ Condition qui bloque le clic si isMyOwnHint === true
+    ✅ Message d'erreur : "Tu ne peux pas voter contre toi-même !"
+    ✅ Style .is-me : opacity 0.5, cursor not-allowed
+    ✅ Pas d'effet hover sur la carte du joueur local
+
+ ✅ ANIMATION SHAKE SUR AUTO-VOTE :
+    ✅ @keyframes shake-error : translateX 0→-5px→5px→-5px→0
+    ✅ Classe .shake-error avec animation 0.3s ease-in-out
+    ✅ Ajout/retrait de la classe via setTimeout(300ms) pour permettre répétition
+    ✅ Vibration mobile : navigator.vibrate(50) pour feedback tactile
+
+ ✅ RETOURS HAPTIQUES (VIBRATIONS) MOBILES :
+    ✅ Révélation de rôle : vibration 200ms lors de playRoleCinematic()
+    ✅ Bouton "Je suis prêt" : double tap [30, 50, 30]
+    ✅ Envoi d'indice : double tap [30, 50, 30]
+    ✅ Sélection carte de vote (succès) : double tap [30, 50, 30]
+    ✅ Interception indices imposteur : micro-vibration 10ms
+    ✅ Toutes les vibrations conditionnées par if (navigator.vibrate)
 
  Fichiers modifiés durant cette session :
-    ✅ public/css/01-tokens.css — Tokens Matte Grey Arcade
-    ✅ public/css/02-base.css — Import Lexend + reset global
-    ✅ public/css/03-components.css — Boutons, arcade bars, inputs avec relief
-    ✅ public/css/04-phase.css — Headers restructurés, pills avec relief
-    ✅ public/css/05-hints.css — Rôle, word card, live hints en arcade bars
-    ✅ public/css/06-vote.css — Vote cards avec relief embossé
-    ✅ public/css/09-spectator.css — Bannières victoire/défaite, modal overlay
-    ✅ public/css/11-results-mobile.css — Labels, révélation, bouton avec relief
-    ✅ public/css/hud.css — Player cards transparent, btn-ready avec relief
-    ✅ public/index.html — Suppression #reveal-result-text
-    ✅ public/js/features/results.js — showGameOverModal() refonte Lexend, suppression resultText
-    ✅ routes/sockets/game/controller.js — Ajout isGameOver flag dans roundResult emit
+    ✅ public/css/01-tokens.css — Font-size-title passé à 2.5rem
+    ✅ public/css/02-base.css — Lexend forcé avec !important sur *
+    ✅ public/css/03-components.css — Relief embossé déjà présent
+    ✅ public/css/04-phase.css — Suppression glow, titles 2.5rem
+    ✅ public/css/05-hints.css — Suppression glow
+    ✅ public/css/06-vote.css — Centrage flexbox, police Lexend, animations shake+slide
+    ✅ public/css/07-modal-score.css — Suppression glow LED
+    ✅ public/css/08-home.css — Titles augmentés à 2.5rem
+    ✅ public/css/09-spectator.css — Bannières sans bordures, black-out 98%, blur 15px
+    ✅ public/css/11-results-mobile.css — Barres tactiles arcade avec animation
+    ✅ public/css/hud.css — #screen-vote min-height 80vh, #screen-lobby h2 1.3rem
+    ✅ public/js/features/hints.js — Stockage myOwnHintText, vibration 200ms rôle, double tap envoi
+    ✅ public/js/features/vote.js — Anti auto-vote, message erreur, shake, vibrations
+    ✅ public/js/features/home.js — Vibration double tap sur btn-ready
+    ✅ public/js/features/results.js — Animation cascade barres, police Lexend
 
  Architecture technique documentée :
     ✅ Lexend font family forcée sur * selector avec !important
     ✅ Relief embossé : inset 0 2px 3px light, inset 0 -3px 4px dark, 0 4px 6px shadow
     ✅ Arcade bars : rgba(232,197,71,0.15) background + relief box-shadow
-    ✅ Typography scale cohérente : var(--font-size-base/title/label)
+    ✅ Typography scale cohérente : 1.1rem base, 2.5rem titles, 1.2rem buttons
     ✅ Transparent panels : background: transparent, border: none (Floating Matte)
-    ✅ Color coding : crew green, impostor red, primary yellow
-    ✅ Input creusé : inset 0 2px 4px rgba(0,0,0,0.3)
-    ✅ Button transforms : translateY(-2px) hover, translateY(1px) active
-    ✅ Bannières cinématiques : Outfit 4rem avec gradients conservés
-    ✅ Game Over modal : Contenu dynamique JS avec Lexend + arcade bars
-    ✅ Double cinématique fixée : roundResult skip si isGameOver true
+    ✅ Zéro glow : tous les box-shadow: 0 0 supprimés
+    ✅ Bannières cinématiques : Lexend 4rem, letter-spacing -0.02em, pas de cadre
+    ✅ Centrage vote : Flexbox avec justify-content/align-items center, flex-grow: 1
+    ✅ Barres résultats : Animation slideIn en cascade, Lexend 1.2rem, weight 800
+    ✅ Auto-vote bloqué : Comparaison texte, classe .is-me, message + shake + vibration
+    ✅ Retours haptiques : 200ms rôle, [30,50,30] actions, 10ms interception, 50ms erreur
+
+ Nouvelles fonctionnalités UX/UI :
+    ✅ Feedback visuel d'erreur : Message temporaire rouge avec slideDown/slideUp
+    ✅ Animation shake : Secousse horizontale de la carte sur erreur
+    ✅ Vibrations progressives : Micro (10ms), courte (50ms), normale (200ms), double tap (30-50-30)
+    ✅ Identification visuelle : Carte du joueur local en demi-transparence
+    ✅ Animation cascade : Barres de résultats apparaissent une par une (0.1s delay)
+    ✅ Cinématique unifiée : Même style Lexend pour rôle et victoire/défaite
 
  Ce fichier est la SOURCE DE VÉRITÉ pour :
     ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)
-    ✅ Le design validé (Matte Grey Arcade avec Lexend + Relief Embossé)
+    ✅ Le design validé (Tactile Arcade Premium avec Lexend + Relief Embossé)
     ✅ Les contraintes mobile-first (95% width, 52px touch targets)
     ✅ La structure HTML exacte de chaque écran
     ✅ L'architecture CSS complète avec délimitations par fichier
     ✅ La logique JavaScript d'initialisation et de synchronisation
     ✅ Les animations, transitions et effets visuels (relief 3D matte)
-    ✅ Les tokens de couleur et typography scale
+    ✅ Les tokens de couleur et typography scale augmentée
     ✅ Les arcade bars comme pattern de présentation de données
     ✅ La cohérence typographique Lexend sur toute l'application
-    ✅ Les cinématiques victory/defeat avec bannières stylisées uniquement
+    ✅ Les cinématiques victory/defeat minimalistes sans cadres
+    ✅ Le système anti auto-vote avec feedback multi-sensoriel
+    ✅ Les retours haptiques calibrés par type d'action
 
 ================================================================================
-FIN DU FICHIER DE CONTEXTE — MATTE GREY ARCADE [v2.0]
+FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v3.0]
 ================================================================================
+

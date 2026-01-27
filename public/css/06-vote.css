@@ -2,12 +2,19 @@
 /* ÉCRAN DE VOTE — Minimalist HUD */
 /* ==================== */
 
-/* Grille de Cartes : 2 colonnes sur mobile */
+/* Grille de Cartes : Centrage dynamique avec Flexbox */
 .vote-grid, #hints {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    flex-grow: 1;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Les Cartes : Tuiles tactiles haut de gamme */
@@ -20,8 +27,10 @@
     cursor: pointer;
     transition: all 0.2s ease-out;
     text-align: center;
-    font-family: var(--font-sans);
+    font-family: 'Lexend', sans-serif;
     min-height: 100px;
+    min-width: 140px;
+    flex: 0 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -39,7 +48,7 @@
     background: var(--primary);
     color: #000000;
     padding: 4px 10px;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-weight: 800;
     font-size: 0.7rem;
     border-radius: 6px;
@@ -104,7 +113,7 @@
 /* Instruction */
 .instruction {
     text-align: center;
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     color: var(--text);
     margin: 1rem 0;
     font-weight: 800;
@@ -140,12 +149,53 @@
 
 /* Make #hints flexible when used as container */
 #hints.vote-grid {
-    align-items: stretch;
+    align-items: center;
 }
 
-/* Responsive: 1 colonne sur très petits écrans */
-@media (max-width: 360px) {
-    .vote-grid, #hints {
-        grid-template-columns: 1fr;
+/* Carte du joueur local : non-cliquable */
+.vote-card.is-me {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: auto;
+}
+
+.vote-card.is-me:hover {
+    transform: none;
+    box-shadow: inset 0 1px 2px var(--relief-light), inset 0 -2px 3px var(--relief-dark), 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Animations pour le message d'interdiction */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
     }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+/* Animation de secousse pour les cartes */
+@keyframes shake-error {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.shake-error {
+    animation: shake-error 0.3s ease-in-out;
 }

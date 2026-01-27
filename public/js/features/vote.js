@@ -6,6 +6,42 @@
 
   let myTarget = null;     // dernier choix local (hintId)
   let votingClosed = false;
+  let myOwnHintText = null; // Stockage de mon propre indice pour l'identifier
+
+  // Affiche un message temporaire d'interdiction
+  function showNoSelfVoteMessage() {
+    let msg = document.getElementById('no-self-vote-msg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.id = 'no-self-vote-msg';
+      msg.style.cssText = `
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 96, 92, 0.95);
+        color: #FFFFFF;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-family: 'Lexend', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        z-index: 2000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease-out;
+        text-align: center;
+      `;
+      msg.textContent = "Tu ne peux pas voter contre toi-même !";
+      document.body.appendChild(msg);
+    }
+    msg.style.display = 'block';
+    msg.style.animation = 'slideDown 0.3s ease-out';
+    
+    setTimeout(() => {
+      msg.style.animation = 'slideUp 0.3s ease-out';
+      setTimeout(() => { msg.style.display = 'none'; }, 300);
+    }, 2500);
+  }
 
   // Fixe le thème avec fallback
   function setVoteTheme(domainMaybe) {
@@ -29,6 +65,7 @@
     box.innerHTML = ''; // On efface la liste précédente
 
     const shuffledHints = [...(hints || [])].sort(() => Math.random() - 0.5);
+    myOwnHintText = state?.myOwnHintText || null;
 
     shuffledHints.forEach(h => {
       // Création de la CARTE (c'est un bouton géant)
@@ -37,14 +74,6 @@
       card.className = 'vote-card'; // La classe CSS qu'on a ajoutée tout à l'heure
       card.dataset.id = h.id;
 
-      // Badge auteur (nom du joueur)
-      if (h.playerName) {
-        const authorBadge = document.createElement('span');
-        authorBadge.className = 'author-badge';
-        authorBadge.textContent = h.playerName;
-        card.appendChild(authorBadge);
-      }
-
       // Le texte de l'indice
       const fullText = (h.text ?? h.hint ?? '').toString().trim();
       const strong = document.createElement('strong');
@@ -52,10 +81,40 @@
       
       card.appendChild(strong);
 
+      // Vérifier si c'est ma propre carte
+      const isMyOwnHint = myOwnHintText && fullText === myOwnHintText;
+      if (isMyOwnHint) {
+        card.classList.add('is-me');
+        card.title = "C'est ton propre indice !";
+      }
+
       // Le clic sur la carte
       card.onclick = () => {
         if (votingClosed) return;
+        
+        // INTERDICTION DE L'AUTO-VOTE
+        if (isMyOwnHint) {
+          // Animation de secousse sur la carte
+          card.classList.add('shake-error');
+          setTimeout(() => {
+            card.classList.remove('shake-error');
+          }, 300);
+          
+          // Vibration mobile si disponible
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+          
+          showNoSelfVoteMessage();
+          return;
+        }
+        
         myTarget = h.id;
+
+        // Retour haptique double tap pour validation
+        if (navigator.vibrate) {
+          navigator.vibrate([30, 50, 30]);
+        }
 
         // Visuel : On retire la sélection des autres cartes et on allume celle-ci
         box.querySelectorAll('.vote-card').forEach(b => b.classList.remove('selected'));

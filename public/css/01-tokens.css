@@ -49,11 +49,11 @@
 
     /* Typography Scale */
     --font-size-base: 1.1rem;
-    --font-size-title: 2.2rem;
+    --font-size-title: 2.5rem;
     --font-size-label: 0.9rem;
 
     /* Semantic tokens (for compatibility) */
-    --font-sans: 'Outfit', sans-serif;
+    --font-sans: 'Lexend', sans-serif;
     --color-accent-hud: var(--primary);
     --color-glass-bg: var(--glass-bg);
     --color-glass-border: var(--glass-border);

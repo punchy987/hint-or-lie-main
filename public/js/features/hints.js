@@ -38,6 +38,11 @@
     const roleText = $('reveal-role-text');
     if (!overlay || !roleText) { callback(); return; } 
 
+    // Retour haptique pour la révélation de rôle
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+
     overlay.style.display = '';
     roleText.textContent = isImpostor ? 'IMPOSTEUR' : 'ÉQUIPIER';
     roleText.className = isImpostor ? 'impostor' : 'crew';
@@ -81,6 +86,17 @@
     sending = true;
     const sendBtn = ui.send();
     if (sendBtn) { sendBtn.disabled = true; }
+    
+    // Retour haptique double tap
+    if (navigator.vibrate) {
+      navigator.vibrate([30, 50, 30]);
+    }
+    
+    // Stocker l'indice pour le retrouver pendant le vote
+    if (window.HOL && window.HOL.state) {
+      window.HOL.state.myOwnHintText = val;
+    }
+    
     socket.emit('submitHint', { hint: val });
   }
 
@@ -173,6 +189,12 @@
 
     socket.on('crewHintAdded', (h) => {
       if (!state.myIsImpostor) return;
+      
+      // Micro-retour haptique pour l'interception
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+      
       ensureLiveUI();
       const li = document.createElement('li');
       li.className = 'live-hint-item';
