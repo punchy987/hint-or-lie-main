@@ -219,6 +219,34 @@
         initTabs();
         initHomeActions();
         initSocketRoom();
+        initRulesModal();
+    }
+
+    function initRulesModal() {
+        const btnShowRules = $('btn-show-rules-lobby');
+        const btnCloseRules = $('btn-close-rules-lobby');
+        const modalRules = $('modal-rules-lobby');
+
+        if (btnShowRules && modalRules) {
+            btnShowRules.onclick = () => {
+                modalRules.style.display = 'flex';
+            };
+        }
+
+        if (btnCloseRules && modalRules) {
+            btnCloseRules.onclick = () => {
+                modalRules.style.display = 'none';
+            };
+        }
+
+        // Fermer en cliquant à côté du panneau
+        if (modalRules) {
+            modalRules.onclick = (e) => {
+                if (e.target === modalRules) {
+                    modalRules.style.display = 'none';
+                }
+            };
+        }
     }
 
     window.HOL.features = window.HOL.features || {};

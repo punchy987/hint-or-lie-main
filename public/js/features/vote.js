@@ -68,18 +68,44 @@
     myOwnHintText = state?.myOwnHintText || null;
 
     shuffledHints.forEach(h => {
-      // Création de la CARTE (c'est un bouton géant)
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'vote-card'; // La classe CSS qu'on a ajoutée tout à l'heure
+      // Création de la CARTE 3D (conteneur parent scroll-snap)
+      const card = document.createElement('div');
+      card.className = 'vote-card';
       card.dataset.id = h.id;
 
-      // Le texte de l'indice
-      const fullText = (h.text ?? h.hint ?? '').toString().trim();
-      const strong = document.createElement('strong');
-      strong.textContent = fullText || '—';
+      // Pivot 3D interne
+      const cardInner = document.createElement('div');
+      cardInner.className = 'vote-card-inner';
+
+      // FACE ARRIÈRE (visible au départ - emoji 🤫)
+      const cardBack = document.createElement('div');
+      cardBack.className = 'card-back';
+      cardBack.textContent = '🤫';
+
+      // FACE AVANT (cachée - indice révélé)
+      const cardFront = document.createElement('div');
+      cardFront.className = 'card-front';
       
-      card.appendChild(strong);
+      const fullText = (h.text ?? h.hint ?? '').toString().trim();
+      
+      // Texte de l'indice
+      const hintText = document.createElement('div');
+      hintText.className = 'hint-text';
+      hintText.textContent = fullText || '—';
+      cardFront.appendChild(hintText);
+      
+      // Nom du joueur (si disponible)
+      if (h.playerName) {
+        const playerName = document.createElement('div');
+        playerName.className = 'player-name-hint';
+        playerName.textContent = h.playerName;
+        cardFront.appendChild(playerName);
+      }
+
+      // Assemblage de la hiérarchie
+      cardInner.appendChild(cardBack);
+      cardInner.appendChild(cardFront);
+      card.appendChild(cardInner);
 
       // Vérifier si c'est ma propre carte
       const isMyOwnHint = myOwnHintText && fullText === myOwnHintText;
@@ -109,25 +135,52 @@
           return;
         }
         
-        myTarget = h.id;
+        // SYSTÈME 3D FLIP : Révélation en deux temps
+        const isRevealed = card.classList.contains('revealed');
+        
+        if (!isRevealed) {
+          // PREMIER CLIC : Flip la carte (révèle l'indice)
+          // Retirer .revealed de toutes les autres cartes
+          box.querySelectorAll('.vote-card').forEach(b => {
+            b.classList.remove('revealed', 'selected');
+          });
+          
+          // Ajouter .revealed à cette carte (déclenchement du flip 3D)
+          card.classList.add('revealed');
+          
+          // Micro-vibration pour feedback de flip
+          if (navigator.vibrate) {
+            navigator.vibrate(20);
+          }
+        } else {
+          // DEUXIÈME CLIC : Valider le vote
+          myTarget = h.id;
 
-        // Retour haptique double tap pour validation
-        if (navigator.vibrate) {
-          navigator.vibrate([30, 50, 30]);
-        }
+          // Retour haptique double tap pour validation
+          if (navigator.vibrate) {
+            navigator.vibrate([30, 50, 30]);
+          }
 
-        // Visuel : On retire la sélection des autres cartes et on allume celle-ci
-        box.querySelectorAll('.vote-card').forEach(b => b.classList.remove('selected'));
-        card.classList.add('selected');
+          // Visuel : On retire la sélection des autres cartes et on allume celle-ci
+          box.querySelectorAll('.vote-card').forEach(b => b.classList.remove('selected'));
+          card.classList.add('selected');
+          
+          // Modifier l'instruction contextuelle
+          const instruction = document.querySelector('.vote-instruction');
+          if (instruction) {
+            instruction.textContent = 'Vote enregistré !';
+            instruction.classList.add('voted');
+          }
 
-        // Envoi au serveur
-        socket.emit('submitVote', { hintId: h.id });
+          // Envoi au serveur
+          socket.emit('submitVote', { hintId: h.id });
 
-        // Petit effet immédiat sur le compteur (UX fluide)
-        const pv = $('progress-vote');
-        if (pv) {
-          const [cur, tot] = (pv.textContent || '0/0').split('/').map(x => parseInt(x, 10) || 0);
-          if (cur < tot) pv.textContent = `${cur + 1}/${tot}`;
+          // Petit effet immédiat sur le compteur (UX fluide)
+          const pv = $('progress-vote');
+          if (pv) {
+            const [cur, tot] = (pv.textContent || '0/0').split('/').map(x => parseInt(x, 10) || 0);
+            if (cur < tot) pv.textContent = `${cur + 1}/${tot}`;
+          }
         }
       };
 

@@ -40,8 +40,9 @@ Tokens CSS (public/css/01-tokens.css) :
    --relief-dark: rgba(0,0,0,0.3)
    --relief-bg: #3a4150
    --font-size-base: 1.1rem
-   --font-size-title: 2.2rem
+   --font-size-title: clamp(1.3rem, 4vh, 1.8rem) — Responsive avec clamp()
    --font-size-label: 0.9rem
+   --gap-compact: 12px
 
 Format : Mobile-First (Largeur 95%, cibles tactiles 48px+)
    Responsive design prioritairement pour mobile
@@ -125,10 +126,14 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  4. ÉCRAN VOTE (screen-vote)
     Phase Bar + Header (Thème + Timer + Progress)
+    Instruction contextuelle : "Touche une carte pour l'inspecter" (devient "Vote enregistré !" après sélection)
     Instruction : "Qui est l'imposteur ?"
-    Grille de cartes : 2 cols mobile, tactiles (min 100px height)
-    Cartes vote : Glass panels avec halos cyan au hover
-    Carte sélectionnée : Bordure cyan 2px + shadow + transform
+    Grille de cartes : Système peeking avec cartes glassmorphism
+    Cartes vote : rgba(47,53,66,0.6) + backdrop-filter blur + cyan borders
+    État initial : translateY(70%) (tiroir fermé, seule icône visible)
+    Carte révélée (.revealed) : translateY(0) + vibration 20ms (premier clic)
+    Carte sélectionnée (.selected) : Bordure cyan 2px + glow + validation vote (deuxième clic)
+    Carte .is-me : opacity 0.4, cursor not-allowed, bloque peek ET select
 
  5. ÉCRAN RESULT (screen-result)
     Phase Bar + Header (Titre + Timer)
@@ -763,7 +768,26 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     ✅ Envoi d'indice : double tap [30, 50, 30]
     ✅ Sélection carte de vote (succès) : double tap [30, 50, 30]
     ✅ Interception indices imposteur : micro-vibration 10ms
+    ✅ Peek de carte (révélation) : micro-vibration 20ms
     ✅ Toutes les vibrations conditionnées par if (navigator.vibrate)
+
+ ✅ SYSTÈME DE CARTES "PEEKING" (TIROIR) — RÉVÉLATION EN DEUX TEMPS :
+    ✅ État initial : Cards à translateY(70%) → seule l'icône/top visible
+    ✅ Container : overflow: hidden + padding-top: 50px pour viewport clipping
+    ✅ Premier clic : Ajoute .revealed → translateY(0) + vibration 20ms
+    ✅ Deuxième clic : Ajoute .selected → bordure cyan + émission vote + vibration [30,50,30]
+    ✅ Logique JS : Vérifie isRevealed avant d'agir (peek ou select)
+    ✅ Transition : 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    ✅ Auto-reset : Retrait automatique de .revealed sur autres cartes au peek
+    ✅ Préserve : Logique anti auto-vote (bloque peek ET select sur .is-me)
+
+ ✅ INSTRUCTION CONTEXTUELLE PHASE VOTE :
+    ✅ Texte : "Touche une carte pour l'inspecter" (avant .vote-grid)
+    ✅ Style : Lexend 400, 0.9rem, rgba(255,255,255,0.6), letter-spacing 0.5px
+    ✅ Position : Centrée avec margin-bottom 20px
+    ✅ Dynamique : Devient "Vote enregistré !" après sélection + opacity 0.3
+    ✅ Classe .voted pour état post-vote (transition 0.3s ease-out)
+    ✅ Look HUD professionnel avec légère transparence
 
  Fichiers modifiés durant cette session :
     ✅ public/css/01-tokens.css — Font-size-title passé à 2.5rem
@@ -771,14 +795,15 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     ✅ public/css/03-components.css — Relief embossé déjà présent
     ✅ public/css/04-phase.css — Suppression glow, titles 2.5rem
     ✅ public/css/05-hints.css — Suppression glow
-    ✅ public/css/06-vote.css — Centrage flexbox, police Lexend, animations shake+slide
+    ✅ public/css/06-vote.css — Glassmorphism cards, peeking system, instruction contextuelle
     ✅ public/css/07-modal-score.css — Suppression glow LED
     ✅ public/css/08-home.css — Titles augmentés à 2.5rem
     ✅ public/css/09-spectator.css — Bannières sans bordures, black-out 98%, blur 15px
     ✅ public/css/11-results-mobile.css — Barres tactiles arcade avec animation
     ✅ public/css/hud.css — #screen-vote min-height 80vh, #screen-lobby h2 1.3rem
+    ✅ public/index.html — Ajout <p class="vote-instruction"> dans #screen-vote
     ✅ public/js/features/hints.js — Stockage myOwnHintText, vibration 200ms rôle, double tap envoi
-    ✅ public/js/features/vote.js — Anti auto-vote, message erreur, shake, vibrations
+    ✅ public/js/features/vote.js — Anti auto-vote, peeking two-step, instruction dynamique
     ✅ public/js/features/home.js — Vibration double tap sur btn-ready
     ✅ public/js/features/results.js — Animation cascade barres, police Lexend
 
@@ -798,10 +823,14 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
  Nouvelles fonctionnalités UX/UI :
     ✅ Feedback visuel d'erreur : Message temporaire rouge avec slideDown/slideUp
     ✅ Animation shake : Secousse horizontale de la carte sur erreur
-    ✅ Vibrations progressives : Micro (10ms), courte (50ms), normale (200ms), double tap (30-50-30)
+    ✅ Vibrations progressives : Micro (10ms peek), courte (50ms erreur), normale (200ms rôle), double tap (30-50-30 actions)
     ✅ Identification visuelle : Carte du joueur local en demi-transparence
     ✅ Animation cascade : Barres de résultats apparaissent une par une (0.1s delay)
     ✅ Cinématique unifiée : Même style Lexend pour rôle et victoire/défaite
+    ✅ Système peeking : Révélation en deux temps (peek → select) avec états visuels distincts
+    ✅ Instruction contextuelle : Guide HUD qui se met à jour après action
+    ✅ Glassmorphism cards : rgba(47,53,66,0.6) + backdrop-filter blur(10px) + cyan borders
+    ✅ Interaction progressive : 20ms vibration pour peek, [30,50,30] pour validation finale
 
  Ce fichier est la SOURCE DE VÉRITÉ pour :
     ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)
@@ -819,6 +848,135 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     ✅ Les retours haptiques calibrés par type d'action
 
 ================================================================================
-FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v3.0]
+FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v4.0]
 ================================================================================
+Dernière mise à jour : 26 janvier 2026 — Session Densification & Optimisation UX
+Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales + Chevron animé + Règles accessibles
+
+ ✅ MODIFICATIONS SESSION DENSIFICATION & OPTIMISATION [26 JANVIER 2026] :
+
+ ✅ ÉQUILIBRAGE DU LAYOUT VERTICAL (screen-vote) :
+    ✅ #screen-vote : height: 100dvh, justify-content: space-between
+    ✅ .vote-grid : margin-bottom: 60px pour éviter chevauchement scoreboard
+    ✅ .vote-card : aspect-ratio: 2 / 2.3 (~260px hauteur max)
+    ✅ .vote-card.revealed : translateY(-40px) pour effet "saut" prononcé
+    ✅ .scoreboard-panel : z-index: 1200, box-shadow: 0 -8px 20px rgba(0,0,0,0.4)
+
+ ✅ DENSIFICATION DE L'INTERFACE :
+    ✅ --font-size-title : clamp(1.3rem, 4vh, 1.8rem) — responsive
+    ✅ --gap-compact: 12px ajouté aux tokens
+    ✅ .screen-header : margin-bottom: 12px (au lieu de 1.5rem)
+    ✅ .btn : padding: 12px 24px (au lieu de 0.75rem 1.5rem)
+    ✅ .panel : padding: 1rem (au lieu de 1.5rem)
+    ✅ Avatar imposteur : 110px (au lieu de 150px)
+    ✅ .result-box : gap: 10px (au lieu de 1.5rem)
+    ✅ .impostor-reveal : padding: 1rem, margin: 1rem 0
+
+ ✅ CHEVRON ANIMÉ SUR LE SCOREBOARD :
+    ✅ Remplacement de .scoreboard-panel::before rectangulaire par triangle CSS
+    ✅ Triangle : border-left/right: 10px transparent, border-top: 12px solid var(--color-primary)
+    ✅ Dimensions : 20px largeur × 12px hauteur
+    ✅ Animation handlePullHint : translateY(0→5px→0) + opacity(0.5→1→0.5) sur 2s infinite
+    ✅ Cursor: grab pour indiquer la possibilité de glisser
+
+ ✅ TEMPORISATION DU BOUTON #btn-next :
+    ✅ Masquage initial : btnNext.style.display = 'none' au début de roundResult
+    ✅ Calcul délai : 1.8s (5 barres × 0.1s + 0.5s animation + marge)
+    ✅ Révélation : setTimeout(1800ms) + classe .fade-in-vibrant
+    ✅ Animation fadeIn : opacity 0→1 + translateY(10px→0) sur 0.5s ease-out
+
+ ✅ SÉCURISATION POUR GRANDS LOBBIES (10+ joueurs) :
+    ✅ #score-list : max-height: 40vh (au lieu de 250px fixe)
+    ✅ .vote-grid : max-height: 50vh pour laisser air au HUD
+    ✅ --font-size-title : clamp(1.3rem, 4vh, 1.8rem) s'adapte aux écrans
+    ✅ Grille 15px 32px 1fr 65px 35px préservée
+    ✅ Scrollbar masquée avec scrollbar-width: none
+
+ ✅ SYSTÈME DE TRANSITION GLOBAL ANTI-FOPC :
+    ✅ #global-transition-overlay : fixed inset:0, z-index:9999, flexbox centré
+    ✅ Logo .logo-loader : "HL", 80px×80px, Lexend 800, color var(--color-primary)
+    ✅ Relief embossé : gradient + bordure jaune + inset shadows + ombre externe
+    ✅ Animation logoPulse : scale(1→1.1→1) + opacity(0.8→1→0.8) sur 2s infinite
+    ✅ Fonction transitionTo() : Promise.all avec délai minimal 600ms
+    ✅ Transition CSS : opacity 0.4s ease-out (au lieu de 0.3s ease-in-out)
+    ✅ Séquence : Lever rideau (400ms) → traitement parallèle (600ms) → changement écran → baisse rideau
+    ✅ Intégration dans updateUIFromState() : tous les show() remplacés par transitionTo()
+
+ ✅ HARMONISATION COULEURS SCREEN-HOME :
+    ✅ .logo-square : background: var(--color-primary), color: var(--bg-main), relief embossé
+    ✅ .tab-btn inactif : background: var(--relief-bg)
+    ✅ .tab-btn actif : border: 2px solid var(--color-primary) + relief inset
+    ✅ .btn-cyan et .btn-violet : background: var(--color-primary), suppression du violet
+    ✅ Boutons : color: var(--bg-main), uppercase, letter-spacing: 1px
+    ✅ .form-compact .input : background: var(--relief-bg), box-shadow: inset 0 2px 4px
+    ✅ Input focus : border-color: var(--color-primary)
+    ✅ .home-panel * : font-family: 'Lexend', sans-serif !important
+
+ ✅ RÈGLES ACCESSIBLES DEPUIS LE LOBBY :
+    ✅ Bouton #btn-show-rules-lobby dans .lobby-actions
+    ✅ Style .btn-link-secondary : compact, jaune arcade, uppercase, sans relief
+    ✅ Modal #modal-rules-lobby : overlay fullscreen, z-index:8888, backdrop-filter:blur(8px)
+    ✅ .rules-panel : max-width:500px, border:2px var(--color-primary), scrollable
+    ✅ Contenu en .arcade-bar : police 0.9rem, padding compact
+    ✅ Logique JS : initRulesModal() dans home.js
+    ✅ Fermeture : bouton #btn-close-rules-lobby + clic hors panneau
+
+ Fichiers modifiés durant cette session d'optimisation :
+    ✅ public/css/01-tokens.css — --font-size-title responsive clamp(), --gap-compact ajouté
+    ✅ public/css/03-components.css — Padding boutons réduit à 12px 24px
+    ✅ public/css/04-phase.css — margin-bottom screen-header 12px, h2 titles 1.8rem
+    ✅ public/css/06-vote.css — aspect-ratio 2/2.3, max-height 50vh, margin-bottom 60px
+    ✅ public/css/07-scoreboard.css — Chevron CSS, max-height 40vh, handlePullHint animation
+    ✅ public/css/08-home.css — Harmonisation complète couleurs Arcade Premium
+    ✅ public/css/08-lobby-header.css — Styles modal règles + btn-link-secondary
+    ✅ public/css/11-results-mobile.css — Avatar 110px, gap 10px, padding réduit, fadeIn animation
+    ✅ public/css/hud.css — #screen-vote 100dvh, panel padding 1rem, overlay transition global
+    ✅ public/index.html — Overlay logo "HL", modal règles lobby, btn-show-rules-lobby
+    ✅ public/js/core/helpers.js — transitionTo() avec Promise.all et délai 600ms
+    ✅ public/js/main.js — updateUIFromState() avec transitionTo()
+    ✅ public/js/features/home.js — initRulesModal() pour gestion modal règles
+    ✅ public/js/features/results.js — Temporisation btnNext avec fadeIn
+
+ Nouvelles fonctionnalités UX/UI avancées :
+    ✅ Layout vertical équilibré : 100dvh avec space-between, safe zones garanties
+    ✅ Interface densifiée : Espaces réduits, titres responsifs, éléments compacts
+    ✅ Chevron animé : Indicateur visuel de mouvement avec respiration verticale
+    ✅ Temporisation intelligente : Bouton apparaît après animations pour éviter clics prématurés
+    ✅ Sécurité grands lobbies : max-height relatifs (vh) au lieu de valeurs fixes
+    ✅ Transition globale : Logo "HL" pulsant élimine FOPC entre tous les écrans
+    ✅ Délai minimal garanti : Promise.all évite effet flash avec 600ms minimum
+    ✅ Harmonisation totale : Toute l'application utilise palette Matte Grey + Jaune Arcade
+    ✅ Accessibilité règles : Disponibles depuis lobby sans quitter la salle
+    ✅ Modal réutilisable : Overlay avec fermeture multiple (bouton + clic extérieur)
+
+ Architecture technique optimisée :
+    ✅ Système de transition : transitionTo() centralisé dans helpers.js
+    ✅ Promise.all : Garantit durée minimale + exécution callback en parallèle
+    ✅ Clamp() responsive : Typographie s'adapte de 1.3rem à 1.8rem selon viewport
+    ✅ Max-height relatifs : 40vh scoreboard, 50vh carrousel pour flexibilité
+    ✅ Chevron CSS pur : Triangle via borders, pas d'image, animé avec transform
+    ✅ Temporisation cascade : Calcul basé sur nombre de barres × délai + marge
+    ✅ Overlay z-index : 9999 transition global, 8888 modals, 1200 scoreboard
+    ✅ Lexend forcé : !important sur tous éléments critiques (home, logo, boutons)
+    ✅ Relief embossé partout : inset shadows light/dark + outer shadow sur tous boutons
+    ✅ Modal pattern : .modal-overlay + .panel réutilisable, backdrop-filter blur
+
+ Ce fichier est la SOURCE DE VÉRITÉ pour :
+    ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)
+    ✅ Le design validé (Tactile Arcade Premium avec Lexend + Relief Embossé)
+    ✅ Les contraintes mobile-first (95% width, 52px touch targets)
+    ✅ La structure HTML exacte de chaque écran
+    ✅ L'architecture CSS complète avec délimitations par fichier
+    ✅ La logique JavaScript d'initialisation et de synchronisation
+    ✅ Les animations, transitions et effets visuels (relief 3D matte)
+    ✅ Les tokens de couleur et typography scale responsive
+    ✅ Les arcade bars comme pattern de présentation de données
+    ✅ La cohérence typographique Lexend sur toute l'application
+    ✅ Les cinématiques victory/defeat minimalistes sans cadres
+    ✅ Le système anti auto-vote avec feedback multi-sensoriel
+    ✅ Les retours haptiques calibrés par type d'action
+    ✅ Le système de transition global anti-FOPC avec logo animé
+    ✅ L'interface densifiée et optimisée pour grands lobbies
+
+
 

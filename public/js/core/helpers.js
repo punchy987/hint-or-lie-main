@@ -45,6 +45,37 @@
     }
   };
 
+  // Transition système anti-FOPC (Flash of Page Content)
+  HOL.transitionTo = HOL.transitionTo || async function (screenId, updateCallback) {
+    const overlay = document.getElementById('global-transition-overlay');
+    if (!overlay) {
+      // Fallback si l'overlay n'existe pas encore
+      if (updateCallback) updateCallback();
+      HOL.show(screenId);
+      return;
+    }
+
+    // Étape A : Lever le rideau
+    overlay.classList.add('active');
+    await new Promise(resolve => setTimeout(resolve, 400)); // Attendre la transition opacity (0.4s)
+
+    // Étape B : Garantir une durée minimale pour éviter l'effet flash
+    const minDelay = new Promise(resolve => setTimeout(resolve, 600));
+    const dataInjected = Promise.resolve(
+      updateCallback ? updateCallback() : null
+    );
+    
+    // Attendre que les deux promesses soient résolues
+    await Promise.all([minDelay, dataInjected]);
+
+    // Étape C : Changer l'écran
+    HOL.show(screenId);
+
+    // Étape D : Baisser le rideau après un court délai
+    await new Promise(resolve => setTimeout(resolve, 50));
+    overlay.classList.remove('active');
+  };
+
   HOL.toast = HOL.toast || function (msg, ms = 2200) {
     let t = document.getElementById('toast');
     if (!t) return console.log("Toast:", msg);

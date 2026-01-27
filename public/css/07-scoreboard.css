@@ -7,33 +7,45 @@
     position: fixed !important;
     bottom: 0;
     left: 50%;
-    transform: translateX(-50%) translateY(calc(100% - 50px));
+    transform: translateX(-50%) translateY(0);
     width: 95%;
     max-width: 500px;
     background: rgba(27, 36, 48, 0.9) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(232, 197, 71, 0.2);
     border-bottom: none;
     border-radius: 20px 20px 0 0;
-    z-index: 1000;
+    z-index: 1200;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0 0 20px 0 !important;
-    cursor: pointer;
+    cursor: default;
+    animation: slideUpBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s backwards;
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* État Ouvert (Ajouté par JS) */
-.scoreboard-panel.is-open {
-    transform: translateX(-50%) translateY(0);
+/* État Caché (Masqué mais poignée visible) */
+.scoreboard-panel.is-hidden {
+    transform: translateX(-50%) translateY(calc(100% - 45px));
 }
 
-/* La poignée pour coulisser */
+/* NOUVEL INDICATEUR : Chevron animé */
 .scoreboard-panel::before {
-    content: "";
+    content: '';
     display: block;
-    width: 40px;
-    height: 4px;
-    background: rgba(232, 197, 71, 0.5);
-    border-radius: 2px;
-    margin: 12px auto;
+    width: 0;
+    height: 0;
+    /* Création du triangle pointant vers le bas */
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 12px solid var(--color-primary); /* Utilise le Jaune Arcade */
+    
+    /* Centrage et espacement */
+    margin: 15px auto 10px auto;
+    
+    /* Animation d'invite au swipe */
+    animation: handlePullHint 2s infinite ease-in-out;
+    cursor: grab;
 }
 
 /* Titre du panneau */
@@ -53,7 +65,7 @@
     padding: 0 !important;
     margin: 0 !important;
     margin-bottom: 20px !important;
-    max-height: 250px;
+    max-height: 40vh;
     overflow-y: auto;
     scrollbar-width: none;
 }
@@ -149,6 +161,33 @@
 
 .status-icon-waiting {
     animation: statusPulse 1.5s infinite;
+}
+
+/* Animation du chevron : Respiration verticale */
+@keyframes handlePullHint {
+    0%, 100% { 
+        transform: translateY(0); 
+        opacity: 0.5; 
+    }
+    50% { 
+        transform: translateY(5px); /* Petit mouvement vers le bas */
+        opacity: 1; 
+    }
+}
+
+/* Animation Game Juice : Entrée du panneau avec overshoot */
+@keyframes slideUpBounce {
+    0% { 
+        transform: translateX(-50%) translateY(120%);
+        opacity: 0;
+    }
+    60% { 
+        transform: translateX(-50%) translateY(-5%);
+    }
+    100% { 
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Highlight du joueur local */

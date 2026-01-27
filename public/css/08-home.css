@@ -9,6 +9,10 @@
     padding: 2rem 1.5rem;
 }
 
+.home-panel * {
+    font-family: 'Lexend', sans-serif !important;
+}
+
 /* ===== HEADER avec Logo et Titre ===== */
 .home-header {
     display: flex;
@@ -20,17 +24,21 @@
 .logo-square {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, rgba(232,197,71,0.15), rgba(168,85,247,0.15));
-    border: 2px solid rgba(232,197,71,0.25);
+    background: var(--color-primary);
+    border: none;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Lexend', sans-serif !important;
     font-weight: 800;
     font-size: 1.4rem;
-    color: var(--primary);
+    color: var(--bg-main);
     letter-spacing: -1px;
     flex-shrink: 0;
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 4px 6px rgba(0,0,0,0.2);
 }
 
 .title-group {
@@ -117,10 +125,11 @@
 .tab-btn {
     flex: 1;
     padding: 0.85rem 1.2rem;
-    border: none;
+    border: 2px solid transparent;
     border-radius: 11px;
-    background: transparent;
+    background: var(--relief-bg);
     color: var(--muted);
+    font-family: 'Lexend', sans-serif !important;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
@@ -128,8 +137,11 @@
 }
 
 .tab-btn[aria-selected="true"] {
-    background: linear-gradient(135deg, rgba(232,197,71,0.12), rgba(232,197,71,0.06));
+    background: var(--relief-bg);
+    border: 2px solid var(--color-primary);
     color: var(--text);
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark);
 }
 
 .tab-btn:hover {
@@ -149,11 +161,13 @@
     padding: 0.9rem 1.2rem;
     min-height: 52px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--glass-border);
+    background: var(--relief-bg);
+    border: 1px solid rgba(255,255,255,0.1);
     color: var(--text);
+    font-family: 'Lexend', sans-serif !important;
     font-size: 1rem;
     transition: border-color var(--transition-fast);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .form-compact .input::placeholder {
@@ -161,7 +175,7 @@
 }
 
 .form-compact .input:focus {
-    border-color: rgba(232,197,71,0.25);
+    border-color: var(--color-primary);
     outline: none;
 }
 
@@ -180,28 +194,45 @@
 }
 
 .btn-cyan {
-    background: linear-gradient(135deg, rgba(232,197,71,0.25), rgba(232,197,71,0.15));
-    color: var(--text);
-    border: 1px solid rgba(232,197,71,0.3);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--color-primary);
+    color: var(--bg-main);
+    border: none;
+    font-family: 'Lexend', sans-serif !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 4px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease-out;
 }
 
 .btn-cyan:hover {
-    background: linear-gradient(135deg, rgba(232,197,71,0.35), rgba(232,197,71,0.25));
-    transform: translateY(-5px) scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 6px 10px rgba(0,0,0,0.25);
 }
 
 .btn-violet {
-    background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(168,85,247,0.15));
-    color: var(--text);
-    border: 1px solid rgba(168,85,247,0.3);
-    box-shadow: none;
+    background: var(--color-primary);
+    color: var(--bg-main);
+    border: none;
+    font-family: 'Lexend', sans-serif !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 4px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease-out;
 }
 
 .btn-violet:hover {
-    background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(168,85,247,0.25));
-    box-shadow: none;
     transform: translateY(-2px);
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 6px 10px rgba(0,0,0,0.25);
 }
 
 .btn-action:active {

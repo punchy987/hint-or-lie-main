@@ -56,11 +56,17 @@
       
       show('screen-result');
 
+      // Masquer initialement le bouton "Manche suivante"
+      const btnNext = $('btn-next');
+      if (btnNext) {
+        btnNext.style.display = 'none';
+        btnNext.disabled = false;
+        btnNext.textContent = 'Manche suivante';
+      }
+
       // Suspense de 3 secondes avant d'afficher les détails
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      const btnNext = $('btn-next');
-      if (btnNext) { btnNext.disabled = false; btnNext.textContent = 'Manche suivante'; }
       const resCommon = $('res-common');
       if (resCommon) resCommon.textContent = res.common || '';
 
@@ -152,6 +158,15 @@
         });
 
         votesContainer.appendChild(votesList);
+      }
+
+      // Révéler le bouton "Manche suivante" après les animations de cascade
+      // Calcul : 5 barres max * 0.1s délai + 0.5s animation = ~1.8s
+      if (btnNext) {
+        setTimeout(() => {
+          btnNext.style.display = 'block';
+          btnNext.classList.add('fade-in-vibrant');
+        }, 1800);
       }
     });
 

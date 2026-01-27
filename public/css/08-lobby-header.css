@@ -134,3 +134,60 @@
         padding: 0.5rem 1.2rem;
     }
 }
+
+/* Bouton secondaire pour afficher les règles dans le lobby */
+.btn-link-secondary {
+    background: none;
+    border: none;
+    color: rgba(232,197,71,0.7);
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+}
+
+.btn-link-secondary:hover {
+    color: var(--color-primary);
+}
+
+/* Modal pour les règles du jeu */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 8888;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.rules-panel {
+    width: 95%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: var(--bg-main);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+
+.rules-content {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.rules-content .arcade-bar {
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+}

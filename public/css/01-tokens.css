@@ -49,8 +49,9 @@
 
     /* Typography Scale */
     --font-size-base: 1.1rem;
-    --font-size-title: 2.5rem;
+    --font-size-title: clamp(1.3rem, 4vh, 1.8rem);
     --font-size-label: 0.9rem;
+    --gap-compact: 12px;
 
     /* Semantic tokens (for compatibility) */
     --font-sans: 'Lexend', sans-serif;

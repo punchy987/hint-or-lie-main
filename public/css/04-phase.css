@@ -31,7 +31,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 12px;
 }
 
 /* Ligne 1 : Top Bar (Round Tag + Timer) */
@@ -44,7 +44,7 @@
 
 /* Ligne 2 : Focus Thème (Titre centré) */
 .screen-header h2, .theme-title {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-weight: 800;
     color: var(--text-main);
     text-align: center;
