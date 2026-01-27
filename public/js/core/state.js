@@ -3,8 +3,24 @@
 (function () {
   const HOL = window.HOL || (window.HOL = {});
 
+  // Génération et stockage de l'ID persistant
+  function getPersistentId() {
+    let pid = localStorage.getItem('hol_player_id');
+    if (!pid) {
+      // Générer un UUID unique
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        pid = crypto.randomUUID();
+      } else {
+        // Fallback pour navigateurs plus anciens
+        pid = 'pid-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      }
+      localStorage.setItem('hol_player_id', pid);
+    }
+    return pid;
+  }
+
   const state = {
-    me: { id: null, code: null },
+    me: { id: null, code: null, persistentId: getPersistentId() },
     room: { players: [], state: 'lobby', round: 0 },
     myIsImpostor: false,
     myLobbyReady: false,
@@ -68,6 +84,7 @@
 
   Object.assign(HOL, {
     state,
+    getPersistentId,
     tierFromWins,
     resetPhaseProgress,
     startPhaseAnim,

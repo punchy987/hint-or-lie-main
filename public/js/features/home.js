@@ -42,20 +42,22 @@
         const btnJoin = $('btn-join');
         if (btnJoin) {
             btnJoin.onclick = () => {
-                const name = $('name-join')?.value.trim() || 'Joueur';
+                const name = $('name-join')?.value.trim() || '';
                 const code = ($('join-code')?.value.trim() || '').replace(/\D/g, '').slice(0, 4);
                 if (code.length !== 4) { toast('Code à 4 chiffres requis.'); return; }
-                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, name });
-                socket.emit('joinRoom', { code, pseudo: name, name, deviceId: getDeviceId() });
+                const persistentId = window.HOL.getPersistentId();
+                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, name, persistentId });
+                socket.emit('joinRoom', { code, pseudo: name, name, deviceId: getDeviceId(), persistentId });
             };
         }
 
         const btnCreate = $('btn-create');
         if (btnCreate) {
             btnCreate.onclick = () => {
-                const name = $('name-create')?.value.trim() || 'Joueur';
-                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name });
-                socket.emit('createRoom', { name: name, deviceId: getDeviceId() });
+                const name = $('name-create')?.value.trim() || '';
+                const persistentId = window.HOL.getPersistentId();
+                socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, persistentId });
+                socket.emit('createRoom', { name: name, deviceId: getDeviceId(), persistentId });
             };
         }
 
@@ -125,6 +127,10 @@
         $('btn-back-home')?.addEventListener('click', () => {
             socket.emit('leaveRoom');
             state.myLobbyReady = false;
+            
+            // Nettoyer le code de salle du localStorage
+            localStorage.removeItem('hol_room_code');
+            
             if ($('btn-ready')) $('btn-ready').textContent = 'Je suis prêt';
             show('screen-home');
         });
@@ -140,6 +146,25 @@
         socket.on('connect', () => {
             socket.emit('getLeaderboard');
             state.me.id = socket.id;
+            
+            // Tentative de reconnexion automatique si on a un code de salle en mémoire
+            const savedRoomCode = localStorage.getItem('hol_room_code');
+            if (savedRoomCode && /^\d{4}$/.test(savedRoomCode)) {
+                // Attendre un court délai pour que le socket soit bien établi
+                setTimeout(() => {
+                    const persistentId = window.HOL.getPersistentId();
+                    const deviceId = window.HOL.getDeviceId();
+                    
+                    // Tenter de rejoindre automatiquement la salle
+                    socket.emit('hello', { deviceId, persistentId });
+                    socket.emit('joinRoom', { 
+                        code: savedRoomCode, 
+                        deviceId, 
+                        persistentId,
+                        autoReconnect: true // Flag pour indiquer que c'est une reconnexion auto
+                    });
+                }, 300);
+            }
         });
 
         const codeSpan = $('lobby-code');
@@ -157,6 +182,10 @@
 
         const onRoomEntry = ({ code }) => {
             state.me.code = code;
+            
+            // Stocker le code de salle dans localStorage pour persistance
+            localStorage.setItem('hol_room_code', code);
+            
             const lobbyCode = $('lobby-code');
             if (lobbyCode) lobbyCode.textContent = code;
             show('screen-lobby');
@@ -166,7 +195,14 @@
 
         socket.on('roomCreated', onRoomEntry);
         socket.on('roomJoined', onRoomEntry);
-        socket.on('errorMsg', (message) => toast(message || 'Erreur de salle.'));
+        socket.on('errorMsg', (message) => {
+            // Si erreur de reconnexion automatique, nettoyer le localStorage
+            const savedRoomCode = localStorage.getItem('hol_room_code');
+            if (savedRoomCode && (message.includes('introuvable') || message.includes('invalide'))) {
+                localStorage.removeItem('hol_room_code');
+            }
+            toast(message || 'Erreur de salle.');
+        });
 
 
 
@@ -206,6 +242,10 @@
 
         socket.on('leftRoom', () => {
             state.myLobbyReady = false;
+            
+            // Nettoyer le code de salle du localStorage
+            localStorage.removeItem('hol_room_code');
+            
             const btnReady = $('btn-ready');
             if (btnReady) {
                 btnReady.textContent = 'Je suis prêt';

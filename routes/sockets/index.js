@@ -42,11 +42,12 @@ module.exports = function setupSockets(io, db){
 
   io.on('connection',(socket)=>{
     let joined  = { code:null };
-    let profile = { deviceId:null, lastPseudo:null };
+    let profile = { deviceId:null, lastPseudo:null, persistentId:null };
 
-    socket.on('hello', ({ deviceId, pseudo } = {})=>{
+    socket.on('hello', ({ deviceId, pseudo, persistentId } = {})=>{
       if (deviceId) profile.deviceId   = String(deviceId).slice(0,64);
       if (pseudo)   profile.lastPseudo = String(pseudo).slice(0,16);
+      if (persistentId) profile.persistentId = String(persistentId).slice(0,64);
     });
 
     socket.on('getLeaderboard', async ()=>{
@@ -73,9 +74,16 @@ module.exports = function setupSockets(io, db){
       } : { rp:0, rounds:0, wins:0, winsCrew:0, winsImpostor:0 });
     });
 
-    socket.on('createRoom', ({ name, deviceId, pseudo } = {}) => {
+    socket.on('createRoom', ({ name, deviceId, pseudo, persistentId } = {}) => {
       try {
-        const displayName = String(name || pseudo || profile.lastPseudo || 'Joueur').slice(0, 16);
+        let displayName = String(name || pseudo || profile.lastPseudo || '').trim();
+        
+        // Attribution automatique si nom vide
+        if (!displayName) {
+          displayName = 'Joueur 1';
+        }
+        
+        displayName = displayName.slice(0, 16);
         
         const code = createRoom(socket.id, displayName);
 
@@ -83,10 +91,13 @@ module.exports = function setupSockets(io, db){
         joined.code = code;
         profile.lastPseudo = displayName;
         profile.deviceId = String(deviceId || profile.deviceId || '').slice(0, 64) || null;
+        profile.persistentId = String(persistentId || profile.persistentId || '').slice(0, 64) || null;
 
         const r = rooms.get(code);
         if (r && r.players.has(socket.id)) {
-          r.players.get(socket.id).deviceId = profile.deviceId;
+          const p = r.players.get(socket.id);
+          p.deviceId = profile.deviceId;
+          p.persistentId = profile.persistentId;
         }
 
         socket.emit('roomCreated', { code });
@@ -95,7 +106,7 @@ module.exports = function setupSockets(io, db){
         socket.emit('errorMsg', 'Erreur lors de la création de la salle.');
       }
     });
-    socket.on('joinRoom', ({ code, name, deviceId, pseudo } = {})=>{
+    socket.on('joinRoom', ({ code, name, deviceId, pseudo, persistentId } = {})=>{
       code = String(code || '').trim();
       if (!/^\d{4}$/.test(code)) return socket.emit('errorMsg','Code invalide (4 chiffres)');
       const r = rooms.get(code); if (!r) return socket.emit('errorMsg','Salle introuvable');
@@ -103,10 +114,118 @@ module.exports = function setupSockets(io, db){
       socket.join(code);
       joined.code = code;
 
-      const displayName = String(name || pseudo || profile.lastPseudo || 'Joueur').slice(0,16);
+      let displayName = String(name || pseudo || profile.lastPseudo || '').trim();
       profile.lastPseudo = displayName;
       profile.deviceId   = String(deviceId || profile.deviceId || '').slice(0,64) || null;
+      profile.persistentId = String(persistentId || profile.persistentId || '').slice(0,64) || null;
 
+      // Tentative de reconnexion via persistentId
+      let reconnectedPlayer = null;
+      if (profile.persistentId) {
+        for (const [oldSocketId, p] of r.players.entries()) {
+          // Chercher un joueur avec le même persistentId (déconnecté OU avec un socket différent)
+          if (p.persistentId === profile.persistentId && oldSocketId !== socket.id) {
+            reconnectedPlayer = { oldSocketId, playerData: p };
+            break;
+          }
+        }
+      }
+
+      if (reconnectedPlayer) {
+        // RECONNEXION DÉTECÉE
+        const { oldSocketId, playerData } = reconnectedPlayer;
+        
+        // Annuler le timeout de déconnexion
+        if (playerData.disconnectTimeout) {
+          clearTimeout(playerData.disconnectTimeout);
+          playerData.disconnectTimeout = null;
+        }
+        
+        // Transférer le joueur vers le nouveau socket.id
+        r.players.delete(oldSocketId);
+        if (r.active?.has(oldSocketId)) {
+          r.active.delete(oldSocketId);
+          r.active.add(socket.id);
+        }
+        if (r.lobbyReady?.has(oldSocketId)) {
+          r.lobbyReady.delete(oldSocketId);
+          r.lobbyReady.add(socket.id);
+        }
+        if (r.readyNext?.has(oldSocketId)) {
+          r.readyNext.delete(oldSocketId);
+          r.readyNext.add(socket.id);
+        }
+        
+        // Mettre à jour les données du joueur
+        playerData.disconnected = false;
+        playerData.disconnectedSince = undefined;
+        r.players.set(socket.id, playerData);
+        
+        // Conserver le nom si le joueur reconnecté n'a pas fourni de nouveau nom
+        if (!displayName) {
+          displayName = playerData.name || 'Joueur';
+        } else {
+          playerData.name = displayName;
+        }
+
+        io.to(code).emit('system', { text: `🎉 ${displayName} est de retour !` });
+
+        // Synchroniser l'état actuel avec le joueur reconnecté
+        const gameState = {
+          state: r.state,
+          phase: r.state,
+          round: r.round || 0,
+          theme: r.words?.domain || '',
+          players: Array.from(r.players.entries()).map(([id, p]) => ({
+            id: id,
+            name: p.name,
+            score: p.score || 0,
+            disconnected: !!p.disconnected,
+            ready: r.lobbyReady?.has(id) || false,
+            isReady: r.lobbyReady?.has(id) || false
+          })),
+          scores: Object.fromEntries(
+            Array.from(r.players.entries()).map(([id, p]) => [id, p.score || 0])
+          )
+        };
+        
+        // Envoyer l'état de synchronisation
+        socket.emit('roomState', gameState);
+        
+        // Si en cours de partie, renvoyer les données de la manche
+        if (r.state === 'hints' && playerData.isImpostor && r.liveCrewHints) {
+          socket.emit('crewLiveHints', r.liveCrewHints);
+        }
+        if (r.state === 'hints' && !playerData.isImpostor && r.words?.common) {
+          socket.emit('roundStarted', {
+            round: r.round,
+            domain: r.words.domain,
+            common: r.words.common,
+            isImpostor: false
+          });
+        }
+        if (r.state === 'hints' && playerData.isImpostor && r.words?.domain) {
+          socket.emit('roundStarted', {
+            round: r.round,
+            domain: r.words.domain,
+            isImpostor: true
+          });
+        }
+        
+        broadcast(io, code);
+        socket.emit('roomJoined', { code });
+        return;
+      }
+      
+      // Attribution automatique si nom vide et pas de reconnexion
+      if (!displayName) {
+        const playerNumber = r.players.size + 1;
+        displayName = `Joueur ${playerNumber}`;
+      }
+      
+      displayName = displayName.slice(0,16);
+
+      // Recherche par nom (ancienne logique)
       let disconnectedPlayerEntry = null;
       for (const [id, p] of r.players.entries()) {
         if (p.name === displayName && p.disconnected) {
@@ -161,6 +280,7 @@ module.exports = function setupSockets(io, db){
         r.players.set(socket.id, {
           name: displayName, hint:null, vote:null, isImpostor:false, score:0,
           deviceId: profile.deviceId,
+          persistentId: profile.persistentId,
           spectator: false
         });
       }
@@ -361,6 +481,7 @@ module.exports = function setupSockets(io, db){
       const name = me.name || 'Un joueur';
       const wasHost = (r.hostId === socket.id);
       const wasImpostor = !!me.isImpostor;
+      const isInActiveGame = r.active?.has(socket.id) && (r.state === 'hints' || r.state === 'voting');
 
       const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
       if (activePlayers.length === 0) {
@@ -385,28 +506,90 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('readyProgress', { ready: r.readyNext.size, total: totalPlayers });
       }
 
+      // Définir le délai de timeout selon le rôle
+      const disconnectDelay = (wasImpostor && isInActiveGame) ? 15000 : 45000; // 15s pour imposteur, 45s pour équipiers
+      
+      // Lancer le timeout de déconnexion
+      me.disconnectTimeout = setTimeout(() => {
+        // Vérifier si le joueur est toujours déconnecté
+        const currentPlayer = r.players.get(socket.id);
+        if (!currentPlayer || !currentPlayer.disconnected) return;
+        
+        // Le délai a expiré, traiter la déconnexion définitive
+        const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+        
+        // Condition de rupture : < 3 joueurs OU l'imposteur a expiré
+        const needsReset = (activeInGame.length < 3) || (wasImpostor && (r.state === 'hints' || r.state === 'voting'));
+        
+        if (needsReset && (r.state === 'hints' || r.state === 'voting')) {
+          clearRoomTimer(r);
+          
+          // Réinitialiser les drapeaux de phase SANS toucher aux scores
+          for (const id of r.players.keys()) {
+            const p = r.players.get(id);
+            if (p) {
+              p.hint = null;
+              p.vote = null;
+              p.isImpostor = false;
+              p.spectator = false;
+              p.hasSentHint = false;
+              p.hasVoted = false;
+              p.votedFor = null;
+              if (p.disconnectTimeout) {
+                clearTimeout(p.disconnectTimeout);
+                p.disconnectTimeout = null;
+              }
+              // ⚠️ CONSERVATION DU SCORE : p.score n'est PAS réinitialisé
+            }
+          }
+          
+          r.state = 'lobby';
+          r.lobbyReady = new Set();
+          r.readyNext  = new Set();
+          r.used = {};
+          r.impostor = null;
+          r.active = new Set();
+          r.liveCrewHints = [];
+          r.usedHints = new Set();
 
-      const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
-      if ((r.state === 'hints' || r.state === 'voting') && activeInGame.length < 3) {
-        clearRoomTimer(r);
-        for (const id of r.players.keys()) {
-          const p = r.players.get(id);
-          if (p) { p.hint = null; p.vote = null; p.isImpostor = false; }
+          io.to(code).emit('lobbyCountdownCancelled');
+          
+          const reason = wasImpostor 
+            ? "Partie interrompue : l'imposteur a quitté la partie."
+            : 'Partie interrompue : manque de joueurs.';
+          
+          io.to(code).emit('system', { text: reason });
+          io.to(code).emit('toast', { message: reason, isError: true });
+          
+          broadcast(io, code);
+          return;
         }
-        r.state = 'lobby';
-        r.lobbyReady = new Set();
-        r.readyNext  = new Set();
-        r.used = {};
-        r.impostor = null;
-
-        io.to(code).emit('lobbyCountdownCancelled');
-        io.to(code).emit('errorMsg', 'Pas assez de joueurs actifs, retour au lobby');
+        
+        // Mise à jour des progressions si toujours en jeu
+        if (r.state === 'hints') {
+          const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+          const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
+          io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: activeConnected.length });
+          if (submitted === activeConnected.length && activeConnected.length > 0) {
+            controller.maybeStartVoting(code);
+          }
+        } else if (r.state === 'voting') {
+          const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+          const submitted = activeConnected.filter(id => !!r.players.get(id)?.vote).length;
+          io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: activeConnected.length });
+          if (submitted === activeConnected.length && activeConnected.length > 0) {
+            controller.finishVoting(code);
+          }
+        }
+        
         broadcast(io, code);
-        return;
-      }
+      }, disconnectDelay);
 
+      // Mise à jour immédiate des progressions
+      const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+      
       if (r.state === 'hints') {
-        const activeConnected = Array.from(r.active).filter(id => !r.players.get(id)?.disconnected);
+        const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
         const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
         io.to(code).emit('phaseProgress', { phase:'hints', submitted, total: activeConnected.length });
         if (submitted === activeConnected.length && activeConnected.length > 0) {
@@ -418,45 +601,6 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('phaseProgress', { phase:'voting', submitted, total: activeConnected.length });
         if (submitted === activeConnected.length && activeConnected.length > 0) {
           controller.finishVoting(code);
-        }
-      }
-
-      if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
-        clearRoomTimer(r);
-        for (const id of r.active || []) {
-          const p = r.players.get(id);
-          if (p && !p.isImpostor && !p.disconnected) p.score = (p.score || 0) + 1;
-        }
-
-        io.to(code).emit('roundResult', {
-          round: r.round,
-          impostorId: socket.id,
-          impostorName: name,
-          common: r.words?.common,
-          impostor: null,
-          impostorHint: null,
-          commonDisplay: r.words?.common,
-          impostorDisplay: "—",
-          votes: {},
-          impostorCaught: true,
-          domain: r.words?.domain
-        });
-
-        r.state = 'reveal';
-        r.readyNext = new Set();
-        io.to(code).emit('readyProgress', { ready: 0, total: totalPlayers });
-
-        const scores = Array.from(r.players.values()).filter(p => !p.disconnected).map(p => p.score || 0);
-        const maxScore = Math.max(0, ...scores);
-        if (maxScore >= 10) {
-           const winnersArr = Array.from(r.players.entries())
-            .filter(([_, p]) => !p.disconnected && (p.score || 0) === maxScore)
-            .map(([id, p]) => ({ id, name: p.name, score: p.score || 0 }));
-          io.to(code).emit('gameOver', { winners: winnersArr, round: r.round, autoReset: true });
-
-          for (const p of r.players.values()) { p.score = 0; p.hint = null; p.vote = null; p.isImpostor = false; p.spectator = false; }
-          r.round = 0; r.state = 'lobby'; r.lobbyReady = new Set(); r.readyNext = new Set(); r.used = {};
-          clearRoomTimer(r);
         }
       }
 

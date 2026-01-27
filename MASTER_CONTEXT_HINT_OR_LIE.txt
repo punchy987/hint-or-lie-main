@@ -1017,6 +1017,46 @@ Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales 
     ✅ Relief embossé partout : inset shadows light/dark + outer shadow sur tous boutons
     ✅ Modal pattern : .modal-overlay + .panel réutilisable, backdrop-filter blur
 
+ ✅ PERSISTANCE JOUEURS & GESTION DÉCONNEXIONS :
+    ✅ Attribution pseudonyme par défaut : "Joueur X" (X = nombre de joueurs + 1) si input vide
+    ✅ Génération persistentId unique : crypto.randomUUID() stocké dans localStorage (hol_player_id)
+    ✅ Stockage code de salle : 4 chiffres dans localStorage (hol_room_code) à l'entrée de salle
+    ✅ Nettoyage room_code : Sur btn-back-home, leftRoom event, et erreurs de salle
+    ✅ Auto-reconnexion : Event socket.connect vérifie room_code et envoie hello avec persistentId
+    ✅ Délai reconnexion : 300ms après connect pour stabilisation de la connexion
+    ✅ Délais disconnect différenciés : 15s pour imposteur en partie active, 45s pour équipiers
+    ✅ Conservation score : Scores préservés pendant toute la durée du timeout
+    ✅ Reset salle conditionnel : Si <3 joueurs restants OU timeout imposteur expiré
+    ✅ Logique reconnexion server : `p.persistentId === profile.persistentId && oldSocketId !== socket.id`
+    ✅ Transfert player : Cancel timeout, migration vers nouveau socket.id, sync Sets (active/lobbyReady/readyNext)
+    ✅ Sync état complet : Envoi roomData, scores, phase, thème, indices, status impostor/révélé
+    ✅ Scoreboard lobby : Visible dans SCORE_SCREENS (ajout 'screen-lobby' dans helpers.js)
+    ✅ État persistant : persistentId ajouté à state.me et propagé dans tous les events
+    ✅ Export global : window.HOL.getPersistentId() disponible pour toute l'application
+
+ ✅ LABEL THÈME REPOSITIONNÉ ET AGRANDI :
+    ✅ HTML restructuré : Wrapper .theme-container (flexbox column) autour label + h2
+    ✅ Font-size label : 0.75rem → 1.15rem pour meilleure lisibilité
+    ✅ Font-weight label : 600 ajouté pour renforcer la hiérarchie
+    ✅ Position label : Au-dessus du nom du thème (flex-direction: column)
+    ✅ Espacement : gap: 4px entre label et titre, margin-bottom: 4px sur label
+    ✅ Reset margin titre : margin-top: 0 !important sur h2.theme-title
+    ✅ Centrage : align-items: center sur .theme-container
+    ✅ Implémenté sur : screen-hint (#theme-hint-name) et screen-vote (#theme-vote-name)
+
+ Fichiers modifiés pour persistance et déconnexions :
+    ✅ public/js/core/state.js — getPersistentId() avec crypto.randomUUID(), export window.HOL
+    ✅ public/js/features/home.js — Envoi empty string si input vide, auto-reconnexion socket.connect, storage/clear room_code
+    ✅ routes/sockets/index.js — Génération "Joueur X", reconnexion via persistentId, timeouts 15s/45s, reset conditionnel
+    ✅ public/index.html — Structure .theme-container wrapper sur screen-hint et screen-vote
+    ✅ public/css/04-phase.css — .theme-container flex column, .label-secondary 1.15rem/600, h2.theme-title margin-top:0
+    ✅ public/js/main.js — Scoreboard visible en lobby (updateUIFromState + transitionTo scoresReset)
+    ✅ public/js/core/helpers.js — 'screen-lobby' ajouté à SCORE_SCREENS Set
+
+ Bugs connus à corriger ultérieurement :
+    ⚠️ Reconnexion rapide (<1s) : Quelques cas edge où le joueur n'est pas immédiatement restauré
+    ⚠️ Condition reconnexion : Logique `oldSocketId !== socket.id` fonctionne presque parfaitement mais nécessite tests supplémentaires
+
  Ce fichier est la SOURCE DE VÉRITÉ pour :
     ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)
     ✅ Le design validé (Tactile Arcade Premium avec Lexend + Relief Embossé)
@@ -1033,6 +1073,8 @@ Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales 
     ✅ Les retours haptiques calibrés par type d'action
     ✅ Le système de transition global anti-FOPC avec logo animé
     ✅ L'interface densifiée et optimisée pour grands lobbies
+    ✅ Le système de persistance joueurs avec UUID et reconnexion automatique
+    ✅ La gestion des déconnexions avec timeouts différenciés et conservation des scores
 
 
 

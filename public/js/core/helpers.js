@@ -2,7 +2,8 @@
 (function () {
   const HOL = (window.HOL = window.HOL || {});
 
-  HOL.SCORE_SCREENS = new Set(['screen-hint', 'screen-vote', 'screen-result']);
+  // Écrans où le scoreboard doit être visible (ajout de screen-lobby)
+  HOL.SCORE_SCREENS = new Set(['screen-lobby', 'screen-hint', 'screen-vote', 'screen-result']);
 
   // Sélecteurs
   HOL.$ = HOL.$ || ((s, r = document) => {

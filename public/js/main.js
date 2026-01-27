@@ -6,7 +6,16 @@
 
       if ($('round-num')) $('round-num').textContent = snap.round;
       
-      if (window.HOL.updateScoreboard) window.HOL.updateScoreboard(snap.players);
+      // Mettre à jour le scoreboard systématiquement pour tous les états, y compris lobby
+      if (window.HOL.updateScoreboard) {
+        window.HOL.updateScoreboard(snap.players);
+      }
+      
+      // S'assurer que le scoreboard est visible (pas de display:none)
+      const scoreboardPanel = document.querySelector('.scoreboard-panel');
+      if (scoreboardPanel && scoreboardPanel.style.display === 'none') {
+        scoreboardPanel.style.display = '';
+      }
 
       // Utiliser transitionTo() au lieu de show() pour éliminer les FOPC
       switch (snap.state) {
@@ -129,7 +138,7 @@
     });
 
     socket.on('scoresReset', () => {
-      window.HOL.show('screen-lobby');
+      window.HOL.transitionTo('screen-lobby');
       const btnReady = $('btn-ready');
       if (btnReady) {
         btnReady.textContent = 'Je suis pret';
