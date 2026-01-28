@@ -16,7 +16,7 @@ points d'ancrage CRITIQUES pour :
    avant toute modification.
 
 ================================================================================
- MISE À JOUR — 28 JANVIER 2026 (v6.1)
+ MISE À JOUR — 28 JANVIER 2026 (v6.1.1)
 ================================================================================
 
  OPTIMISATIONS MOBILE-FIRST & UX TACTILE :
@@ -52,46 +52,76 @@ points d'ancrage CRITIQUES pour :
     Résultat : Interface edge-to-edge immersive sur mobile, 
                expérience nappe uniforme sans limites visuelles
 
- 2. Zones Tactiles Invisibles (Edge-Based Interaction)
-    ✅ Panneau Réactions : Zone tactile 40px sur bord droit de l'écran
-       - Mobile : Swipe gauche = ouvrir, swipe droite = fermer
+ 2. Zones Tactiles Élargies (Edge-Based Interaction v6.1.1)
+    ✅ Panneau Réactions : Zone tactile 25% du bord droit (toute hauteur)
+       - Mobile : Swipe horizontal gauche = ouvrir, droite = fermer
        - Desktop : Clic = toggle, hover = révéler poignée
-       - Poignée cachée par défaut (left: -100px)
+       - Poignée complètement cachée quand fermé (left: -150px)
+       - Poignée visible quand ouvert (left: -70px)
        - Animation peek périodique (toutes les 8s) quand fermé
     
-    ✅ Scoreboard : Zone tactile 40px sur bord bas de l'écran
-       - Mobile : Swipe haut = ouvrir, swipe bas = fermer
+    ✅ Scoreboard : Zone tactile 15% du bas de l'écran (toute largeur)
+       - Mobile : Swipe vertical haut = ouvrir, bas = fermer
        - Desktop : Clic = toggle, hover = révéler poignée
-       - Poignée cachée par défaut (bottom: -120px mobile, -130px)
+       - Poignée cachée quand fermé (bottom: -120px mobile, -130px)
+       - Poignée visible quand ouvert (bottom: -50px)
        - Animation peek périodique (toutes les 8s) quand fermé
+    
+    ✅ Chevauchement coin inférieur droit :
+       - Les deux zones se superposent, pas de problème
+       - Le sens de la glissade détermine l'action (H vs V)
     
     Fichiers :
-       - public/css/hud.css (#reaction-touch-zone, .reaction-handle)
-       - public/css/07-scoreboard.css (#scoreboard-touch-zone, .scoreboard-handle)
+       - public/css/hud.css (#reaction-touch-zone: 25vw, .reaction-handle)
+       - public/css/07-scoreboard.css (#scoreboard-touch-zone: 15dvh, .scoreboard-handle)
        - public/index.html (zones tactiles ajoutées)
        - public/js/main.js (initReactionSystem, initScoreboardSystem)
+    
+ 3. Bulles de Réaction (Emoji + Nom Joueur) - CORRIGÉ v6.1.1
+    ✅ Fix affichage noms joueurs sous les emojis
+       - .reaction-bubble : overflow: visible !important (pas de coupure)
+       - .reaction-bubble : min-height: 60px (place pour nom)
+       - .reaction-bubble-name : display: block !important, opacity: 1 !important
+       - .reaction-bubble-name : flex-shrink: 0 (empêche compression)
+       - .reaction-bubble-emoji : flex-shrink: 0
+    
+    Structure :
+       <div class="reaction-bubble">
+         <span class="reaction-bubble-emoji">😂</span>
+         <span class="reaction-bubble-name">PlayerName</span>
+       </div>
+    
+    Fichier : public/css/hud.css (lignes 790-850)
     
     Z-index hiérarchie :
        - Zone tactile : 19999 (réactions), 1199 (scoreboard)
        - Panneau : 20000 (réactions), 1200 (scoreboard)
-       - Boutons emoji : 21000 (au-dessus de tout)
+       - Bulles réaction : 21000 (au-dessus de tout)
     
- 3. Touch Targets Optimisés (48-56px minimum)
+ 4. Touch Targets Optimisés (48-56px minimum)
     ✅ Boutons emoji : 56px avec emoji 1.8rem
     ✅ Gap entre boutons : 12px (anti-clics accidentels)
     ✅ Poignées : 70-120px mobile (grip pouce optimisé)
     ✅ Feedback haptique : vibration sur swipe/clic
+    ✅ Zones tactiles étendues : 25vw (réactions), 15dvh (scoreboard)
     
- 4. Android Chrome Optimisations
+ 5. Android Chrome Optimisations
     ✅ Viewport dynamique : 100dvh (corrige problème barre d'adresse)
     ✅ Input font-size : 16px minimum (empêche zoom automatique)
     ✅ Performance : translate3d, backface-visibility, will-change
     ✅ Keyboard handling : masquage auto scoreboard si hauteur < 500px
     Fichier : public/css/12-android-fixes.css
 
- 5. Documentation Mobile
+ 6. Documentation Mobile
     ✅ MOBILE_OPTIMIZATIONS.md (guide complet mobile-first)
     ✅ Z_INDEX_HIERARCHY.md (21 couches, -1 à 21000)
+
+ COMMITS RÉCENTS (28 janvier 2026) :
+    - 2bf5d10 : feat: zones tactiles élargies - 25% bord droit et 15% bas écran
+    - 05547ec : fix: noms joueurs visibles dans bulles réaction (overflow:visible)
+    - 5a7e445 : fix: poignée réactions complètement invisible quand fermée (-150px)
+    - 79b9fda : fix: logique visibilité poignées inversée (visible par défaut)
+    - 7e1e0f1 : fix: suppression inline styles bloquants + gestion display en JS
 
 ================================================================================
  MISE À JOUR — 27 JANVIER 2026
