@@ -1,6 +1,6 @@
 // --- Service Worker : Hint or Lie -------------------------------------------
 // ⚠️ BUMPER LA VERSION À CHAQUE DEPLOIEMENT (déclenche la mise à jour PWA)
-const CACHE = 'hol-v38';
+const CACHE = 'hol-v39';
 
 // Liste des assets à précacher (shell). Ajoute ici ce qui doit marcher offline.
 const ASSETS = [
@@ -20,7 +20,7 @@ const ASSETS = [
   '/css/04-phase.css',
   '/css/05-hints.css',
   '/css/06-vote.css',
-  '/css/07-modal-score.css',
+  '/css/07-scoreboard.css',
   '/css/98-responsive.css',
   '/css/99-pwa-update.css', // garde si tu utilises le bandeau de MAJ
 
