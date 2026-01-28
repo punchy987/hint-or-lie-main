@@ -82,6 +82,7 @@
   if (btnLeaveSpectator) {
     btnLeaveSpectator.addEventListener('click', () => {
       socket.emit('leaveRoom');
+      localStorage.removeItem('hol_room_code'); // Nettoyer le code de salle
       const modal = document.getElementById('spectator-waiting');
       if (modal) modal.style.display = 'none';
     });

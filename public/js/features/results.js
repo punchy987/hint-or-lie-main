@@ -329,6 +329,7 @@
     `;
     btnHome.onclick = () => {
       modal.style.display = 'none';
+      localStorage.removeItem('hol_room_code'); // Nettoyer le code de salle
       socket.emit('leaveRoom');
     };
     btnHome.onmouseover = () => btnHome.style.transform = 'translateY(-2px)';

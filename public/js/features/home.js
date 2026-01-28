@@ -141,6 +141,9 @@
                     const persistentId = window.HOL.getPersistentId();
                     const deviceId = window.HOL.getDeviceId();
                     
+                    // Marquer qu'on tente une reconnexion automatique
+                    state.attemptingAutoReconnect = true;
+                    
                     // Tenter de rejoindre automatiquement la salle
                     socket.emit('hello', { deviceId, persistentId });
                     socket.emit('joinRoom', { 
@@ -168,6 +171,7 @@
 
         const onRoomEntry = ({ code }) => {
             state.me.code = code;
+            state.attemptingAutoReconnect = false; // Reconnexion réussie
             
             // Stocker le code de salle dans localStorage pour persistance
             localStorage.setItem('hol_room_code', code);
@@ -189,11 +193,15 @@
         socket.on('roomCreated', onRoomEntry);
         socket.on('roomJoined', onRoomEntry);
         socket.on('errorMsg', (message) => {
-            // Si erreur de reconnexion automatique, nettoyer le localStorage
-            const savedRoomCode = localStorage.getItem('hol_room_code');
-            if (savedRoomCode && (message.includes('introuvable') || message.includes('invalide'))) {
-                localStorage.removeItem('hol_room_code');
+            // Si c'est une reconnexion automatique qui a échoué, ne pas afficher l'erreur
+            if (state.attemptingAutoReconnect) {
+                state.attemptingAutoReconnect = false;
+                localStorage.removeItem('hol_room_code'); // Nettoyer le code invalide
+                console.log('[Home] Reconnexion automatique échouée (salle fermée):', message);
+                return; // Ne pas afficher de toast
             }
+            
+            // Pour les erreurs manuelles, afficher normalement
             toast(message || 'Erreur de salle.');
         });
 
