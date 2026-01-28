@@ -1,11 +1,4 @@
-#reaction-touch-zone,
-#scoreboard-touch-zone {
-    pointer-events: none !important;
 
-.scoreboard-handle,
-.btn-reaction {
-    pointer-events: auto !important;
-}
 @import './01-tokens.css';
 @import './02-base.css';
 @import './03-components.css';
@@ -19,6 +12,16 @@
 @import './11-results-mobile.css';
 @import './98-responsive.css';
 @import './99-pwa-update.css';
+
+#reaction-touch-zone,
+#scoreboard-touch-zone {
+    pointer-events: none !important;
+}
+
+.scoreboard-handle,
+.btn-reaction {
+    pointer-events: auto !important;
+}
 
 /* Désactive la transition pendant le drag */
 .is-dragging {
