@@ -47,7 +47,8 @@
     left: 50% !important;
     transform: translateX(-50%);
     width: 100%;
-    height: 80px;
+    height: 15vh; /* 15% du bas de l'écran */
+    height: 15dvh;
     z-index: 1199 !important;
     cursor: pointer;
     /* Zone invisible (debug: rendre visible avec background rouge) */
