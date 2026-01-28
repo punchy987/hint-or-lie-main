@@ -787,7 +787,7 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     font-family: 'Lexend', sans-serif;
     font-weight: 800;
     font-size: 0.75rem;
-    color: var(--text-main);
+    color: #FFFFFF;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -797,6 +797,13 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     /* RÈGLE D'OR : Assurer la visibilité */
     display: block !important;
     opacity: 1 !important;
+    /* Contour pour lisibilité sur tous les fonds */
+    text-shadow: 
+        -1px -1px 2px rgba(0, 0, 0, 0.8),
+        1px -1px 2px rgba(0, 0, 0, 0.8),
+        -1px 1px 2px rgba(0, 0, 0, 0.8),
+        1px 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(0, 0, 0, 0.9);
 }
 
 /* Animation : Montée Arcade */
