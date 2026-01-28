@@ -5,6 +5,7 @@
 /* Le conteneur principal qui coulisse — RÈGLE D'OR : Full-screen immersif */
 .scoreboard-panel {
     position: fixed !important;
+    will-change: transform;
     bottom: 0;
     left: 50%;
     /* État par défaut : visible (pour lobby/jeu) */
@@ -45,6 +46,7 @@
 
 #scoreboard-touch-zone {
     position: fixed !important;
+    touch-action: none !important;
     bottom: 0 !important;
     left: 50% !important;
     transform: translateX(-50%);

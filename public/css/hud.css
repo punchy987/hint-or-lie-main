@@ -572,7 +572,12 @@
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: none !important;
-    touch-action: auto;
+    touch-action: none !important;
+}
+
+/* Optimisation GPU pour le panneau de réactions */
+#reaction-triggers {
+    will-change: transform;
 }
 
 /* Triggers à droite (ergonomie droitier) */
