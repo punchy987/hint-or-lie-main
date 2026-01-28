@@ -104,7 +104,7 @@ Format : Mobile-First (Largeur 95%, cibles tactiles 48px+)
 Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  1. ÉCRAN HOME (screen-home)
-    Header : Logo HL + Titre "Hint or Lie" + tagline
+    Header : Logo HL + Titre "Hint or Lie" (Hint vert, or rouge, Lie rouge) + tagline
     Hero Avatar Central (180px, effet de lueur cyan)
     Système d'onglets intégrés : Rejoindre / Créer
     Formulaires compacts avec inputs (52px min-height)
@@ -1488,6 +1488,10 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     
     ✅ Logo page d'accueil (.logo-square dans home-header) :
        HTML : Même structure <span> bicolore
+       Titre : <h1 class="game-title">
+         - "Hint" : <span class="text-crew"> (vert #34A853)
+         - "or" : <span class="text-impostor"> (rouge #EA4335)
+         - "Lie" : <span class="text-impostor"> (rouge #EA4335)
        CSS (08-home.css) :
        - Fond : --bg-main + bordure rgba(255,255,255,0.1)
        - Text-shadow adapté (taille 1.4rem)
