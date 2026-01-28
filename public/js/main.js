@@ -54,6 +54,18 @@
         }
       }
 
+      // Gestion du scoreboard (même logique de visibilité)
+      const scoreboardPanel = document.querySelector('.scoreboard-panel');
+      if (scoreboardPanel) {
+        if (!targetScreen) {
+          // Retour à l'accueil : masquer complètement
+          scoreboardPanel.classList.add('is-hidden');
+        } else {
+          // Sur tous les autres écrans : visible avec poignée
+          scoreboardPanel.classList.remove('is-hidden');
+        }
+      }
+
       // Transition SEULEMENT si on change réellement d'écran
       if (targetScreen && targetScreen !== currentScreen) {
         window.HOL.transitionTo(targetScreen);

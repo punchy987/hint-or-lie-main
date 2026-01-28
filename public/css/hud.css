@@ -523,6 +523,7 @@
     position: fixed !important;
     right: 0 !important;
     top: 50% !important;
+    /* État par défaut (HOME) : complètement invisible */
     transform: translateY(-50%) translateX(120%) !important;
     display: flex !important;
     flex-direction: column !important;
@@ -534,7 +535,7 @@
     overflow: visible;
 }
 
-/* État persistant : tiroir complètement caché sauf poignée */
+/* État persistant (LOBBY/JEU) : tiroir caché mais poignée visible */
 #reaction-triggers.is-persistent {
     transform: translateY(-50%) translateX(100%) !important;
 }
