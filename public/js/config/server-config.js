@@ -25,8 +25,9 @@ const SERVER_CONFIG = {
 function getServerUrl() {
   const hostname = window.location.hostname;
   
-  // RÈGLE D'OR : Forcer le mode développement si l'URL de production n'est pas configurée
-  const isProductionConfigured = SERVER_CONFIG.production !== 'https://hint-or-lie.onrender.com';
+  // RÈGLE D'OR : Vérifier si l'URL de production est définie et valide
+  const isProductionConfigured = SERVER_CONFIG.production && 
+                                 SERVER_CONFIG.production.startsWith('http');
   
   // Détection localhost : inclut localhost, 127.0.0.1 et adresses IPv4 locales
   const isLocalhost = hostname === 'localhost' || 
