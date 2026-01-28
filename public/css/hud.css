@@ -624,6 +624,23 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     pointer-events: none;
 }
 
+/* ========== POIGNÉE RÉACTIONS : Ligne néon 2px (v6.5) ========== */
+.reaction-handle {
+    position: absolute;
+    left: 0; /* Collée au bord gauche du panneau */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 60px;
+    background: var(--primary);
+    box-shadow: -1px 0 4px var(--primary);
+    border-radius: 0 2px 2px 0;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Animation pulse permanente */
+    animation: handleGlowPulse 3s infinite ease-in-out;
+}
+
 /* RÈGLE D'OR : Cacher complètement quand panneau fermé (pas .is-open) */
 #reaction-triggers:not(.is-open) .reaction-handle {
     left: -20px; /* Complètement hors vue */
