@@ -852,10 +852,762 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     ✅ Les retours haptiques calibrés par type d'action
 
 ================================================================================
-FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v4.0]
+ SYSTÈME DE SALONS PUBLICS [27 JANVIER 2026]
 ================================================================================
-Dernière mise à jour : 26 janvier 2026 — Session Densification & Optimisation UX
-Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales + Chevron animé + Règles accessibles
+
+ ✅ ARCHITECTURE CÔTÉ SERVEUR :
+    ✅ Flag room.isPublic : Boolean ajouté à chaque salle (défaut: true à la création)
+    ✅ Fonction broadcastPublicRooms() : 
+       - Parcourt toutes les salles actives
+       - Filtre : isPublic === true, state === 'lobby', players.size > 0, activePlayers > 0
+       - Émet 'publicRoomsList' à tous les clients connectés
+       - Format : [{ code, playerCount, maxPlayers: 10 }]
+    ✅ Event 'togglePrivacy' : 
+       - Réservé au host (vérification r.hostId === socket.id)
+       - Toggle r.isPublic entre true/false
+       - Émet 'system' avec message de confirmation
+       - Émet 'privacyToggled' avec { isPublic } pour feedback client
+       - Appelle broadcastPublicRooms() immédiatement
+    ✅ Nettoyage automatique : broadcastPublicRooms() appelé après leaveRoom, disconnect, migration host
+
+ ✅ INTERFACE CLIENT (HTML) :
+    ✅ Écran Home (#screen-home) :
+       - Conteneur #public-rooms-container.panel après les onglets
+       - Titre h3 "Salons Publics" centré
+       - Liste ul#public-rooms-list vide au chargement
+    ✅ Écran Lobby (#screen-lobby) :
+       - Bouton #btn-toggle-privacy dans .lobby-actions
+       - Style: .btn.btn-secondary avec display: none par défaut
+       - Texte dynamique: "🔒 PRIVÉ" ou "🌍 PUBLIC"
+       - Visible uniquement pour le host
+
+ ✅ LOGIQUE CLIENT (JavaScript) :
+    ✅ Listener socket.on('publicRoomsList', rooms) dans home.js :
+       - Vide #public-rooms-list
+       - Si rooms vide : affiche message "Aucun salon public disponible"
+       - Sinon : génère .public-room-item pour chaque salle
+       - Format item : Nom salle + Badge joueurs (ex: "3/10")
+       - Au clic : remplit #join-code et émet 'joinRoom' automatiquement
+       - Vibration [30, 50, 30] au clic
+    ✅ Gestion bouton privacy dans main.js (updateUIFromState) :
+       - Affichage conditionnel : display: block si socket.id === snap.hostId
+       - Mise à jour texte et classe (.public ou .private) selon snap.isPublic
+       - Clone du bouton pour éviter doublons de listeners
+       - onclick émet 'togglePrivacy' + vibration [20, 40, 20]
+    ✅ Listener socket.on('privacyToggled') dans main.js :
+       - Affiche toast avec message "Salon désormais PUBLIC 🌍" ou "PRIVÉ 🔒"
+
+ ✅ DESIGN CSS (Matte Arcade) :
+    ✅ #public-rooms-container (08-home.css) :
+       - Style panel glassmorphism standard
+       - Titre h3 en crew green, uppercase, centré
+    ✅ .public-room-item :
+       - Style arcade-bar : fond rgba(72,187,120,0.15), bordure crew green
+       - Layout flex space-between
+       - Relief embossé avec box-shadow inset
+       - Hover : background plus opaque + translateY(-1px)
+       - Cursor pointer + transition smooth
+    ✅ .public-room-players :
+       - Badge à droite : background relief-bg, color cyan
+       - Padding 0.4rem 0.8rem, border-radius 8px
+       - Font 0.85rem, weight 800, letter-spacing 0.5px
+    ✅ .public-rooms-empty :
+       - Message état vide : Lexend 400, opacity 0.5
+       - Text-align center, padding 2rem 1rem
+    ✅ #btn-toggle-privacy (08-lobby-header.css) :
+       - Style btn-secondary avec bordure adaptative
+       - Classe .public : border-color crew green
+       - Classe .private : border-color muted
+       - Uppercase, letter-spacing 1px, padding 0.9rem 1.5rem
+       - Hover : background rgba(255,255,255,0.06) + translateY(-1px)
+
+ Fichiers modifiés pour salons publics :
+    ✅ public/index.html — Ajout #public-rooms-container et #btn-toggle-privacy
+    ✅ public/css/08-home.css — Styles liste salons publics + badge joueurs
+    ✅ public/css/08-lobby-header.css — Styles bouton toggle privacy
+    ✅ public/js/features/home.js — Listener publicRoomsList + auto-join
+    ✅ public/js/main.js — Gestion affichage bouton privacy + listener privacyToggled
+    ✅ routes/sockets/index.js — broadcastPublicRooms() + event togglePrivacy
+
+================================================================================
+ MIGRATION AUTOMATIQUE DU HOST [27 JANVIER 2026]
+================================================================================
+
+ ✅ LOGIQUE SERVEUR (leaveRoom & disconnect) :
+    ✅ Détection départ host : if (r.hostId === socket.id)
+    ✅ Sélection nouveau host :
+       - leaveRoom : Premier joueur dans r.players.keys()
+       - disconnect : Premier joueur actif (non-déconnecté)
+    ✅ Mise à jour r.hostId avant toute autre action
+    ✅ Émission event 'newHost' avec { newHostId } à toute la salle
+    ✅ Message système : "👑 [Nom] est le nouveau leader de la salle."
+    ✅ Appel broadcastPublicRooms() pour mise à jour liste publique
+
+ ✅ LOGIQUE CLIENT (socket.js & main.js) :
+    ✅ Listener socket.on('newHost') dans socket.js :
+       - Met à jour window.HOL.state.room.hostId
+       - Appelle refreshHostControls() pour rafraîchir l'UI
+    ✅ Fonction refreshHostControls() dans main.js :
+       - Vérifie if (socket.id === state.room.hostId)
+       - Affiche/masque #btn-toggle-privacy selon isHost
+       - Met à jour texte et classe du bouton privacy
+       - Ajoute badge "👑 HOST" dans la liste des joueurs
+       - Style badge : font-size 0.7rem, color crew green, weight 700
+
+ ✅ SÉCURITÉ LISTE PUBLIQUE :
+    ✅ Conditions strictes de broadcastPublicRooms() :
+       - room.isPublic === true
+       - room.state === 'lobby'
+       - room.players.size > 0 (sécurité anti-zombies)
+       - activePlayers.length > 0 (joueurs connectés)
+    ✅ Garantie d'émission : io.emit() toujours appelé, même avec tableau vide []
+    ✅ Permet affichage "Aucun salon disponible" côté client
+
+ Fichiers modifiés pour migration host :
+    ✅ routes/sockets/index.js — Logique migration + broadcastPublicRooms sécurisé
+    ✅ public/js/core/socket.js — Listener newHost
+    ✅ public/js/main.js — Fonction refreshHostControls + badge HOST
+
+================================================================================
+ NETTOYAGE RADICAL DES SALLES VIDES [27 JANVIER 2026]
+================================================================================
+
+ ✅ LOGIQUE leaveRoom :
+    ✅ Comptage strict : if (r.players.size === 0)
+    ✅ Arrêt timers : clearRoomTimer(r)
+    ✅ Suppression room : rooms.delete(code)
+    ✅ Broadcast immédiat : broadcastPublicRooms()
+    ✅ Log sécurité : console.log(`[Room Cleanup] Salon ${code} fermé (vide).`)
+    ✅ Émission leftRoom + socket.leave(code)
+
+ ✅ LOGIQUE disconnect :
+    ✅ Comptage strict : if (activePlayers.length === 0)
+    ✅ Arrêt timers : clearRoomTimer(r)
+    ✅ Nettoyage timeouts : clearTimeout(p.disconnectTimeout) pour tous les joueurs
+    ✅ Suppression room : rooms.delete(code)
+    ✅ Broadcast immédiat : broadcastPublicRooms()
+    ✅ Log sécurité : console.log(`[Room Cleanup] Salon ${code} fermé (vide).`)
+
+ ✅ SÉCURITÉ broadcastPublicRooms() :
+    ✅ Double vérification : room.players.size > 0 ET activePlayers.length > 0
+    ✅ Filtrage strict : Aucune salle zombie ne peut apparaître dans la liste
+    ✅ Émission garantie : Tableau vide [] si aucune salle valide
+    ✅ Commentaires explicites dans le code pour maintenabilité
+
+ Fichiers modifiés pour nettoyage :
+    ✅ routes/sockets/index.js — leaveRoom + disconnect + broadcastPublicRooms
+
+================================================================================
+ SYSTÈME DE STATUT "PRÊT" OBLIGATOIRE [27 JANVIER 2026]
+================================================================================
+
+ ✅ ARCHITECTURE SERVEUR :
+    ✅ Flag player.ready : Boolean ajouté à chaque joueur (défaut: false)
+    ✅ Initialisation createRoom : p.ready = false pour le host
+    ✅ Initialisation joinRoom : p.ready = false pour tous les nouveaux joueurs
+    ✅ Event playerReadyLobby :
+       - Met à jour player.ready selon paramètre { ready }
+       - Ajoute/retire socket.id du Set r.lobbyReady
+       - Calcule readyCount = r.lobbyReady.size
+       - Émet 'lobbyReadyProgress' avec { ready: readyCount, total: totalCount }
+       - Lance countdown si readyCount === totalCount ET totalCount >= 3
+       - Annule countdown sinon
+       - Appelle broadcast() pour sync UI
+    ✅ Fonction startRound (controller.js) :
+       - Sélection joueurs actifs : filter(p => !p.disconnected && p.ready)
+       - Vérification : if (r.active.size < 3) → Erreur "Minimum 3 joueurs prêts"
+       - Seuls les joueurs avec ready: true participent à la manche
+
+ ✅ INTERFACE CLIENT :
+    ✅ État initial :
+       - Tous les joueurs entrent avec ready: false
+       - Bouton #btn-ready affiche "Je suis prêt" avec classe .not-active
+       - Animation pulse active par défaut
+    ✅ Cartes joueurs :
+       - Classe .not-ready : opacity 0.7, background grisé, texte muted
+       - Badge "ATTENTE ⏳" pour joueurs non-prêts
+       - Classe .is-ready : background rgba(72,187,120,0.08), bordure crew green
+       - Badge "PRÊT ✓" en vert fluo pour joueurs prêts
+    ✅ Bouton #btn-ready :
+       - Animation pulse active via .not-active
+       - Retrait animation quand joueur devient prêt
+       - Texte change : "Je suis prêt" → "Annuler prêt"
+       - Vibration [30, 50, 30] à chaque clic
+
+ ✅ DESIGN CSS :
+    ✅ .player-card.not-ready (hud.css) :
+       - opacity: 0.7
+       - background: rgba(255, 255, 255, 0.02)
+       - .player-name : color muted
+       - .player-status : color muted, background rgba(255,255,255,0.05)
+    ✅ .player-card.is-ready :
+       - background: rgba(72, 187, 120, 0.08)
+       - border: 2px solid var(--color-crew)
+       - box-shadow: inset + outer avec crew green glow
+       - .player-status : color crew green, background rgba(72,187,120,0.15), weight 800
+    ✅ #btn-ready.not-active :
+       - Animation pulse-ready : scale(1→1.02) + shadow glow crew green
+       - Durée 2s ease-in-out infinite
+       - Attire l'œil visuellement
+    ✅ @keyframes pulse-ready :
+       - 0%, 100% : scale(1), shadow normale
+       - 50% : scale(1.02), shadow rgba(72,187,120,0.4) 0 8px 16px
+
+ ✅ LOGIQUE DÉMARRAGE MANCHE :
+    ✅ Seuls les joueurs avec ready: true sont ajoutés à r.active
+    ✅ Attribution rôles (équipier/imposteur) uniquement parmi les actifs
+    ✅ Joueurs non-prêts restent au lobby en spectateur
+    ✅ Rejoignent la manche suivante s'ils se marquent prêts
+
+ Fichiers modifiés pour système Prêt :
+    ✅ routes/sockets/index.js — Flag ready, playerReadyLobby avec broadcast
+    ✅ routes/sockets/game/controller.js — startRound filtre par p.ready
+    ✅ public/js/main.js — updateUIFromState avec classes not-ready/is-ready + badges
+    ✅ public/js/features/home.js — Animation pulse, vibration, initialisation not-active
+    ✅ public/css/hud.css — Styles cartes not-ready/is-ready + animation pulse-ready
+
+================================================================================
+ RECONNEXION IMPOSTEUR & RELANCE AUTOMATIQUE [27 JANVIER 2026]
+================================================================================
+
+ ✅ RECONNEXION IMPOSTEUR (F5) :
+    ✅ Conservation flag isImpostor dans playerData
+    ✅ Phase HINTS :
+       - Émet 'roundInfo' (et non 'roundStarted') avec isImpostor: true
+       - Inclut word: null, wordDisplay: "Aucun mot — observe les indices"
+       - Émet 'crewLiveHints' avec tous les indices déjà envoyés
+       - Cinématique de rôle se rejoue automatiquement
+       - Terminal imposteur affiché avec liste live des indices
+    ✅ Phase VOTING :
+       - Émet 'votingStarted' avec toutes les cartes
+       - Grille de vote complète restaurée
+    ✅ Phase REVEAL :
+       - Émet 'roundResult' avec tous les détails
+       - Écran résultat fonctionnel
+
+ ✅ DÉCONNEXION IMPOSTEUR (Timeout) :
+    ✅ Délai différencié : 15s pour imposteur, 45s pour équipiers
+    ✅ Après expiration timeout :
+       - Compte joueurs prêts au total : allReadyPlayers = filter(p => !p.disconnected && p.ready)
+       - Si wasImpostor OU activeInGame < 3 → Reset lobby
+    ✅ Reset lobby :
+       - clearRoomTimer(r)
+       - Réinitialisation flags (hint, vote, isImpostor, spectator) SANS toucher scores
+       - r.state = 'lobby', nettoyage Sets
+       - Message système selon cause : "Imposteur quitté" ou "Manque de joueurs"
+       - Toast rouge avec isError: true
+    ✅ Relance automatique si ≥3 joueurs prêts :
+       - Réactivation flag ready pour tous les joueurs prêts
+       - Message : "🔄 Nouvelle manche lancée automatiquement..."
+       - setTimeout(2000ms) puis controller.startRound(code)
+       - Nouvelle attribution de rôles avec les joueurs prêts
+    ✅ Attente au lobby si <3 prêts :
+       - Message : "⏳ En attente de joueurs prêts..."
+       - Reste en lobby jusqu'à ce que 3+ joueurs se marquent prêts
+
+ Fichiers modifiés pour reconnexion et relance :
+    ✅ routes/sockets/index.js — Correction roundInfo, logique relance automatique
+    ✅ routes/sockets/game/controller.js — Filtre par p.ready dans startRound
+
+================================================================================
+ PROTECTION SCORES NÉGATIFS & GESTION MULTI-ONGLETS [27 JANVIER 2026]
+================================================================================
+
+ PROTECTION ANTI-SCORES NÉGATIFS :
+    Problématique : Possibilité de scores < 0 si pénalités appliquées sans validation
+    
+    ✅ 8 points de protection Math.max(0, ...) :
+       1. routes/sockets/game/controller.js ligne 199 : Gain équipier (+1 point)
+          - p.score = Math.max(0, (p.score || 0) + 1)
+       2. routes/sockets/game/controller.js ligne 203 : Gain imposteur (+2 points)
+          - imp.score = Math.max(0, (imp.score || 0) + 2)
+       3. routes/sockets/game/controller.js ligne 287 : Reset scores fin de partie
+          - p.score = Math.max(0, 0)
+       4. routes/sockets/persistence.js ligne 54 : Lecture RP Firebase
+          - const rpBefore = Math.max(0, Number(prev.rp || 0))
+       5. routes/sockets/persistence.js ligne 57 : Calcul RP après pénalité
+          - const rpAfter = Math.max(0, rpBefore - penalty)
+       6. routes/sockets/state/room.js ligne 43 : Création host (score initial)
+          - score: Math.max(0, 0)
+       7. routes/sockets/index.js ligne 414 : Nouveau joueur (score initial)
+          - score: Math.max(0, 0)
+       8. routes/sockets/index.js ligne 747 : Reset scores manuel (host)
+          - p.score = Math.max(0, 0)
+    
+    ✅ Impact : Impossible d'avoir un score négatif dans toute l'application
+    ✅ Validation : Tous les points d'attribution/modification de scores protégés
+    ✅ Pénalités : Même avec système de malus, score plancher à 0 garanti
+
+ DÉCONNEXION AUTOMATIQUE MULTI-ONGLETS :
+    Problématique : Si joueur ouvre 2 onglets → 2 sockets avec même persistentId → conflits
+    
+    ✅ Logique implémentée dans routes/sockets/index.js ligne 193 :
+       - Détection via boucle for (r.players.entries())
+       - Condition : p.persistentId === profile.persistentId && oldSocketId !== socket.id
+       - Récupération ancien socket : io.sockets.sockets.get(oldSocketId)
+       - Notification : oldSocket.emit('toast', { message: 'Connexion depuis un autre onglet détectée', isError: true })
+       - Déconnexion forcée : oldSocket.disconnect(true)
+       - Transfert état : r.players.delete(oldSocketId) puis r.players.set(socket.id, playerData)
+       - Migration Sets : active, lobbyReady, readyNext migrés vers nouveau socket.id
+    
+    ✅ Flux utilisateur :
+       1. Joueur ouvre onglet A → connecté avec persistentId: abc123
+       2. Joueur ouvre onglet B → même persistentId: abc123
+       3. Serveur détecte collision lors de joinRoom
+       4. Onglet A reçoit toast rouge "Connexion depuis un autre onglet détectée"
+       5. Onglet A déconnecté automatiquement (disconnect(true))
+       6. Onglet B prend le contrôle et récupère tout l'état du joueur
+    
+    ✅ Sécurités :
+       - Annulation timeout de déconnexion si existant
+       - Conservation complète de l'état (score, rôle, ready, spectator)
+       - Pas de duplication de socket dans la salle
+       - Message d'erreur explicite pour l'utilisateur
+    
+    ✅ Prévention conflits :
+       - Empêche envoi double d'indices/votes
+       - Évite confusion sur l'état "actif" du joueur
+       - Garantit unicité du socket par persistentId
+
+ RETOUR AU LOBBY VOLONTAIRE (BOUTON 🏠) [27 JANVIER 2026] :
+    Problématique : Joueurs bloqués dans une manche sans possibilité de sortie
+    
+    ✅ Boutons HTML (3 écrans de jeu) :
+       - public/index.html ligne 151 : #btn-lobby-hint dans screen-hint
+       - public/index.html ligne 181 : #btn-lobby-vote dans screen-vote
+       - public/index.html ligne 202 : #btn-lobby-result dans screen-result
+       - Classe commune : .btn-quit-to-lobby
+       - Icône : 🏠 (emoji maison)
+    
+    ✅ Styles CSS (public/css/03-components.css ligne 163) :
+       - Position : absolute top 10px left 10px
+       - Taille : 44px × 44px (cible tactile optimale)
+       - Style : background relief-bg, border 1px rgba(255,255,255,0.1)
+       - Relief embossé : inset shadows + outer shadow
+       - Hover : background rgba(245,101,101,0.15), border color-impostor, glow rouge
+       - z-index : 100 (au-dessus du contenu)
+    
+    ✅ Logique client (public/js/main.js ligne 186) :
+       - Initialisation : querySelectorAll('.btn-quit-to-lobby')
+       - Confirmation : confirm('Quitter la manche en cours et revenir au lobby ?')
+       - Vibration : [30, 50, 30] si confirmé
+       - Émission : socket.emit('requestReturnToLobby')
+       - Transition : transitionTo('screen-lobby')
+       - Toast : 'Mode spectateur : tu reviens au lobby'
+    
+    ✅ Logique serveur (routes/sockets/index.js ligne 628) :
+       - Event handler : socket.on('requestReturnToLobby')
+       - Détection rôle : wasImpostor, wasInActive
+       - Passage spectateur : player.ready = false, player.spectator = true
+       - Retrait de active : r.active.delete(socket.id)
+       - Retrait de lobbyReady : r.lobbyReady.delete(socket.id)
+    
+    ✅ Si l'imposteur quitte :
+       - Reset complet vers lobby (clearRoomTimer)
+       - Réinitialisation flags SANS toucher aux scores
+       - Message : "⚠️ ${playerName} (imposteur) a quitté. Retour au lobby."
+       - Toast rouge : "Partie interrompue : imposteur a quitté"
+       - Tous joueurs retournent au lobby
+    
+    ✅ Si un équipier quitte :
+       - Message : "⏸️ ${playerName} est passé en spectateur."
+       - Recalcul des actifs : activeConnected = r.active sans déconnectés
+       - Vérification phase HINTS : Si tous ont soumis → maybeStartVoting()
+       - Vérification phase VOTE : Si tous ont voté → finishVoting()
+       - Si < 3 actifs restants → reset automatique vers lobby
+    
+    ✅ Recalcul intelligent :
+       - Mise à jour phaseProgress avec nouveau total
+       - Auto-avancement si départ débloque la phase
+       - Préservation totale des scores
+
+ Fichiers modifiés session protection :
+    ✅ routes/sockets/game/controller.js — Math.max(0, ...) sur gains de points
+    ✅ routes/sockets/persistence.js — Math.max(0, ...) sur RP Firebase
+    ✅ routes/sockets/state/room.js — Math.max(0, 0) création host
+    ✅ routes/sockets/index.js — Math.max(0, 0) nouveau joueur + reset + déconnexion multi-onglets
+    ✅ public/index.html — 3 boutons .btn-quit-to-lobby (hint, vote, result)
+    ✅ public/css/03-components.css — Styles bouton retour lobby
+    ✅ public/js/main.js — initLobbyQuitButtons() avec confirmation + vibration
+
+================================================================================
+ NETTOYAGE ARCHITECTURE CSS & CODE OBSOLÈTE [27 JANVIER 2026]
+================================================================================
+
+ SUPPRESSION FICHIERS CSS DUPLIQUÉS ET ORPHELINS :
+    ✅ Fichiers dupliqués à la racine /public/ supprimés (5 fichiers) :
+       - 01-tokens.css (doublé de css/01-tokens.css)
+       - 04-phase.css (doublé de css/04-phase.css)
+       - 05-hints.css (doublé de css/05-hints.css)
+       - 06-vote.css (doublé de css/06-vote.css)
+       - 07-modal-score.css (doublé de css/07-modal-score.css)
+    
+    ✅ Fichiers orphelins supprimés (2 fichiers) :
+       - public/css/07-modal-score.css (non utilisé, aucun @import)
+       - public/css/10-scoreboard.css (non utilisé, aucun @import)
+    
+    ✅ Impact : 
+       - Réduction bloat (7 fichiers parasites)
+       - Élimination confusion (1 seule source par fichier)
+       - Structure CSS plus claire
+
+ UNIFICATION ARCHITECTURE CSS VIA hud.css :
+    Architecture avant : Imports éclatés entre HTML et hud.css (duplication)
+    Architecture après : Point d'entrée unique via hud.css
+    
+    ✅ public/index.html :
+       AVANT : 6 imports CSS (hud.css + 5 autres)
+       APRÈS : 1 seul import → <link rel="stylesheet" href="/css/hud.css">
+    
+    ✅ public/css/hud.css — @imports consolidés (13 modules) :
+       @import './01-tokens.css';         → Tokens design
+       @import './02-base.css';           → Reset global + Lexend forcé
+       @import './03-components.css';     → Boutons, panels, inputs
+       @import './04-phase.css';          → Phases de jeu
+       @import './05-hints.css';          → Phase indices
+       @import './06-vote.css';           → Phase vote + cartes 3D
+       @import './07-scoreboard.css';     → Bottom sheet HUD
+       @import './08-home.css';           → Écran accueil
+       @import './08-lobby-header.css';   → Lobby + modal règles
+       @import './09-spectator.css';      → Mode spectateur
+       @import './11-results-mobile.css'; → Résultats mobiles
+       @import './98-responsive.css';     → Media queries
+       @import './99-pwa-update.css';     → PWA updates
+    
+    ✅ Avantages :
+       - Ordre de chargement garanti (cascade CSS respectée)
+       - 0 duplication d'imports
+       - Maintenance centralisée (tout dans hud.css)
+       - Performance optimisée (1 point d'entrée)
+
+ SUPPRESSION CODE OBSOLÈTE home.js & 08-home.css :
+    Problématique : Système "Règles rapides" (btn-how + #how) présent dans JS/CSS mais absent du HTML
+    
+    ✅ public/js/features/home.js (14 lignes supprimées) :
+       - Listener $('btn-how')?.addEventListener('click') [lignes 64-77]
+       - Logique toggle panel #how (display show/hide)
+       - Code inutilisé car éléments HTML n'existent pas
+    
+    ✅ public/css/08-home.css (63 lignes supprimées) :
+       - .rules-container (wrapper obsolète)
+       - .btn-link (bouton toggle obsolète)
+       - #how (panneau règles obsolète avec li::before, ul, etc.)
+       - Styles jamais appliqués car HTML manquant
+    
+    ✅ Remplacement :
+       - Système "Modal Règles Lobby" déjà implémenté et fonctionnel
+       - Bouton #btn-show-rules-lobby accessible depuis le lobby
+       - Modal #modal-rules-lobby avec .home-concept-box
+       - Pas de perte de fonctionnalité
+
+ VÉRIFICATION SYSTÈME ANTI-AUTO-VOTE (COMPLET) :
+    Audit du système d'interdiction de voter pour soi-même
+    
+    ✅ Détection carte personnelle (vote.js ligne 113-116) :
+       - Comparaison myOwnHintText avec fullText
+       - Ajout classe .is-me si correspondance
+       - Tooltip "C'est ton propre indice !"
+    
+    ✅ Blocage clic (vote.js ligne 122-137) :
+       - if (isMyOwnHint) → return immédiat
+       - Animation shake-error (300ms secousse)
+       - Vibration haptique 50ms
+       - Appel showNoSelfVoteMessage()
+    
+    ✅ Message d'avertissement (vote.js ligne 14-47) :
+       - Création dynamique div#no-self-vote-msg
+       - Injection body avec styles inline
+       - Position fixed top 80px, z-index 2000
+       - Background rouge rgba(255, 96, 92, 0.95)
+       - Texte : "Tu ne peux pas voter contre toi-même !"
+       - Animation slideDown + disparition 2.5s
+    
+    ✅ Styles visuels (06-vote.css ligne 192-202) :
+       - .vote-card.is-me : opacity 0.5, cursor not-allowed
+       - .card-back/.card-front : opacity 0.6, grayscale(0.3)
+       - État grisé immédiatement visible
+    
+    ✅ Animation erreur (06-vote.css ligne 228-238) :
+       - @keyframes shake-error : translateX oscillation
+       - .shake-error : animation 0.3s ease-in-out
+       - Feedback visuel immédiat sur tentative interdite
+    
+    ✅ Flux complet multi-sensoriel :
+       1. Identification : Carte .is-me avec opacity + grayscale
+       2. Clic tenté : Blocage via return
+       3. Feedback : Shake + vibration + toast rouge
+       4. Tooltip : Au survol de la carte
+
+ Structure finale CSS optimisée :
+    /public/
+       css/
+          01-tokens.css        → Design tokens (14 fichiers légitimes)
+          02-base.css          → Reset + Lexend global
+          03-components.css    → Composants réutilisables
+          04-phase.css         → Phases de jeu
+          05-hints.css         → Phase indices
+          06-vote.css          → Phase vote + anti-auto-vote
+          07-scoreboard.css    → Bottom sheet HUD
+          08-home.css          → Accueil (nettoyé)
+          08-lobby-header.css  → Lobby + modal règles
+          09-spectator.css     → Mode spectateur
+          11-results-mobile.css → Résultats mobiles
+          98-responsive.css    → Media queries
+          99-pwa-update.css    → PWA
+          hud.css             → Assembly principal (@imports)
+
+ Fichiers modifiés session nettoyage :
+    ✅ public/index.html — Import unique CSS (hud.css seul)
+    ✅ public/css/hud.css — 13 @imports consolidés
+    ✅ public/js/features/home.js — Suppression listener btn-how obsolète
+    ✅ public/css/08-home.css — Suppression styles .rules-container, .btn-link, #how
+
+================================================================================
+ OPTIMISATIONS UX & TRANSITIONS [27 JANVIER 2026]
+================================================================================
+
+ AJUSTEMENT POSITIONNEMENT BOUTON RETOUR LOBBY :
+    Problématique : Bouton 🏠 (position: absolute top: 10px) chevauche le texte "Thème de la manche"
+    
+    ✅ Solution : Ajout padding-top au conteneur header
+       - public/css/04-phase.css — .screen-header { padding-top: 54px; position: relative; }
+       - Espace suffisant : 54px (44px bouton + 10px marge)
+       - Pas de modification des IDs/classes (règle d'or respectée)
+    
+    ✅ Impact : Décalage vertical de tout le contenu header pour éviter superposition
+
+ REFONTE BARRE SCOREBOARD AVEC DESIGN ARCADE :
+    Objectif : Barre verte en relief avec indication claire du comportement swipe
+    
+    ✅ Handle bar en relief (07-scoreboard.css) :
+       - Content ::before: "▼ TABLEAU DE SCORE"
+       - Dimensions : height: 50px, width: 100%
+       - Gradient vert arcade : rgba(0, 255, 136, 0.12) → rgba(0, 200, 100, 0.08)
+       - Relief embossé : box-shadow inset (white top, black bottom)
+       - Bordure : border-bottom rgba(0, 255, 136, 0.2)
+       - Typographie : Lexend 800, 0.75rem, letter-spacing 2px
+       - Animation : handlePullHint (pulse opacity + text-shadow vert)
+       - Cursor : grab/grabbing pour indiquer interaction
+    
+    ✅ État caché optimisé :
+       - .scoreboard-panel.is-hidden : translateY(calc(100% - 50px))
+       - Seule la barre verte reste visible (50px)
+       - Titre h3 masqué (display: none) car texte intégré dans ::before
+    
+    ✅ Logique visuelle claire :
+       - Ouvert : Barre verte + liste scores complète
+       - Caché : Barre verte seule (invitation au swipe up)
+       - Animation respiration continue pour guider l'utilisateur
+
+ OPTIMISATION TRANSITIONS ANTI-FLASH :
+    Problématique : Transition logo s'affichait lors de mise à jour état (joueur rejoint, bouton prêt)
+    
+    ✅ Logique conditionnelle intelligente (main.js) :
+       - Mapping états serveur → IDs écrans (lobby/hints/voting/reveal)
+       - Détection écran actuel : document.body.getAttribute('data-screen')
+       - Comparaison : targetScreen !== currentScreen
+       
+    ✅ Comportements différenciés :
+       - Changement d'écran réel → window.HOL.transitionTo() avec logo
+         * Exemple : lobby → hints, hints → vote, vote → result
+       - Même écran (mise à jour état) → window.HOL.show() sans transition
+         * Exemple : joueur rejoint lobby, joueur devient prêt
+       
+    ✅ Cas d'usage optimisés :
+       - Joueur A rejoint salon : Lui voit transition, autres non
+       - Joueur B clique "prêt" : Personne ne voit transition
+       - Phase hints démarre : TOUS voient transition (changement d'écran)
+       - Retour lobby depuis partie : Transition avec logo (retour contexte)
+    
+    ✅ Impact UX :
+       - Élimination transitions parasites
+       - Fluidité accrue pour actions locales
+       - Conservation effet dramatique pour phases de jeu
+
+ Fichiers modifiés optimisations :
+    ✅ public/css/04-phase.css — padding-top: 54px sur .screen-header
+    ✅ public/css/07-scoreboard.css — Refonte ::before avec barre verte relief (72 lignes)
+    ✅ public/js/main.js — Logique conditionnelle transitionTo vs show (15 lignes)
+
+================================================================================
+ IDENTITÉ VISUELLE & SYSTÈME DE RÉACTIONS [27 JANVIER 2026]
+================================================================================
+
+ CRÉATION ICÔNE APPLICATION SVG :
+    Objectif : Icône app cohérente avec le design Tactile Arcade Premium
+    
+    ✅ Fichier créé : public/assets/icon-hol.svg (512×512)
+       - Fond : #2F3542 (--bg-main) avec border-radius 20% (102.4px)
+       - Lettres bicolores : H en vert #48BB78, L en rouge #F56565
+       - Police : Lexend 800, taille 240px
+       - Safe zone : Contenu dans cercle 410px de diamètre (maskable Android)
+       
+    ✅ Effets relief embossé (filtres SVG) :
+       - Ombre externe : feGaussianBlur + feOffset + feFlood (rgba(0,0,0,0.3))
+       - Ombre interne sombre : feOffset dy="3", rgba(0,0,0,0.4)
+       - Ombre interne claire : feOffset dy="-2", rgba(255,255,255,0.2)
+       - Bordure subtile : stroke rgba(255,255,255,0.1)
+       - Gradient highlight : linearGradient top-to-bottom (white 15% → 0%)
+    
+    ✅ Optimisations :
+       - Filtres nommés : #outerShadow, #embossedText, #bgEmboss
+       - Lettres centrées : text-anchor="middle", coordonnées calculées
+       - Compatible PWA : purpose "any maskable" pour Android
+
+ INTÉGRATION PWA & IDENTITÉ :
+    ✅ public/index.html :
+       - meta theme-color : #0a0e14 → #2F3542 (harmonisé avec --bg-main)
+       - Icône SVG prioritaire : <link type="image/svg+xml" href="/assets/icon-hol.svg">
+       - Fallbacks PNG : 32×32, 192×192 pour compatibilité
+       - Apple touch icon : /icons/apple-touch-icon.png (conservé)
+    
+    ✅ public/manifest.json :
+       - name : "Hint or Lie" (inchangé)
+       - short_name : "Hint or Lie" → "HOL"
+       - background_color : #0f0b14 → #2F3542
+       - theme_color : #0f0b14 → #2F3542
+       - icons : Simplification avec purpose "any maskable" sur PNG 192/512
+       - Ajout : icon-hol.svg avec purpose "any" pour navigateurs modernes
+    
+    ✅ Architecture finale :
+       - Priorité au SVG (vectoriel, léger, évolutif)
+       - PNG maskables pour écrans d'accueil Android
+       - Cohérence chromatique totale (Matte Grey #2F3542)
+
+ RELOOKING LOGOS BICOLORES (H VERT + L ROUGE) :
+    Objectif : Uniformiser l'identité visuelle sur tous les écrans
+    
+    ✅ Logo transition (global-transition-overlay) :
+       HTML : <span class="logo-letter logo-h">H</span><span class="logo-letter logo-l">L</span>
+       CSS (hud.css) :
+       - .logo-loader : fond --bg-main, bordure rgba(255,255,255,0.1)
+       - .logo-letter : text-shadow multi-couches (highlight, ombre, profondeur)
+       - .logo-h : color: var(--color-crew) (#48BB78)
+       - .logo-l : color: var(--color-impostor) (#F56565)
+       - Gap : 2px, letter-spacing : -4px
+    
+    ✅ Logo page d'accueil (.logo-square dans home-header) :
+       HTML : Même structure <span> bicolore
+       CSS (08-home.css) :
+       - Fond : --bg-main + bordure rgba(255,255,255,0.1)
+       - Text-shadow adapté (taille 1.4rem)
+       - Gap : 1px, letter-spacing : -2px
+       - Relief embossé : box-shadow inset multi-couches
+    
+    ✅ Logo lobby (.logo-square dans lobby-header) :
+       HTML : Structure identique à home
+       CSS : Styles partagés avec .logo-square (08-home.css)
+       Cohérence : Même traitement visuel que page d'accueil
+    
+    ✅ Impact :
+       - Identité visuelle 100% cohérente
+       - Dualité crew/impostor immédiatement reconnaissable
+       - Relief embossé sur tous les logos (tactile arcade)
+
+ SYSTÈME ARCADE BUBBLES (RÉACTIONS LATÉRALES) [27 JANVIER 2026] :
+    Objectif : Réactions sociales ergonomiques droitier avec bulles flottantes arcade
+    
+    ✅ Structure HTML (public/index.html) :
+       - #reaction-triggers : 7 boutons verticaux à droite
+         * Emojis : 😂, 🤔, 🤨, 🔥, 💀, 😭, 😡
+         * Attributs : data-emoji, title pour accessibilité
+       - #reaction-display-area : Zone d'affichage gauche (150px width)
+       - Conteneurs persistants (hors screens) pour disponibilité permanente
+    
+    ✅ Design CSS (public/css/hud.css) :
+       Triggers à droite (Tiroir avec animation) :
+       - Position : fixed right: 20px, top: 50%, transform: translateY(-50%)
+       - État masqué par défaut : translateX(120%) (hors écran)
+       - Classe .is-active : translateX(0) avec transition 0.6s cubic-bezier
+       - Box-shadow quand actif : -4px 0 16px rgba(0,0,0,0.4) (effet profondeur)
+       - Dimensions boutons : 48×48px (taille tactile optimale)
+       - Fond : var(--relief-bg) avec relief embossé multi-couches
+       - Hover : translateX(-2px) + scale(1.05) + box-shadow intensifié
+       - Active : scale(0.95) + box-shadow réduit
+       - Disabled : opacity 0.4, cursor not-allowed
+       - z-index : 20000 (au-dessus de tout)
+       
+       Display à gauche :
+       - Position : fixed bottom: 0, left: 20px
+       - Dimensions : 150px largeur × 100vh hauteur
+       - Pointer-events : none (non-interactif)
+       - Overflow : visible pour permettre bulles de dépasser
+       - z-index : 20000 (même niveau que triggers)
+       
+       Bulles (.reaction-bubble) :
+       - Position : absolute bottom: 50px
+       - Structure : emoji (1.5rem) + nom joueur (Lexend 800, 0.75rem)
+       - Variation horizontale : left random 0-50px (JS)
+       - Fond : rgba(27,36,48,0.95) + backdrop-filter blur(10px)
+       - Relief : box-shadow inset + outer
+       - Animation : arcade-float-up 3s ease-out forwards
+       - Pointer-events : none (pas d'interaction)
+    
+    ✅ Animation physique arcade-float-up (3s, ease-out, forwards) :
+       - 0% : opacity 0, scale(0), translateY(0) — État initial invisible
+       - 10% : opacity 1, scale(1.2), translateY(-20px) — Pop d'entrée
+       - 90% : opacity 1 (maintien visibilité)
+       - 100% : opacity 0, scale(1), translateY(-80vh) — Montée complète jusqu'en haut
+       - Effet : Montée fluide jusqu'à 80% de la hauteur d'écran
+    
+    ✅ Logique JavaScript Client (public/js/main.js) :
+       initReactionSystem() :
+       - Cooldown global : 2 secondes après chaque clic
+       - Désactivation : Tous boutons disabled pendant cooldown
+       - Émission uniquement : socket.emit('player-reaction', { emoji, name })
+       - PLUS de création locale : supprimée pour éviter doublon
+       - Feedback : navigator.vibrate(30) sur clic
+       - Réception centralisée : socket.on('reaction-broadcast') → createReactionBubble()
+       - Single Source of Truth : Seul le broadcast crée les bulles (y compris expéditeur)
+       - Suppression : setTimeout 3200ms (animation complète)
+       
+       createReactionBubble() :
+       - Variation horizontale : left = Math.random() * 50 + 'px'
+       - Pas de styles inline bottom/position (gérés par CSS)
+       - Bulles empilées au même endroit (bottom: 50px fixe en CSS)
+       
+       Cinématique tiroir (updateUIFromState) :
+       - Lobby/Hints/Voting/Reveal : Ajoute classe .is-active → tiroir glisse depuis droite
+       - Home : Retire classe .is-active → tiroir glisse hors-champ
+       - Permanence : Classe conservée pendant toutes les phases de jeu
+       - Transition fluide : cubic-bezier(0.175, 0.885, 0.32, 1.275) sur 0.6s
+    
+    ✅ Logique Serveur (routes/sockets/index.js) :
+       - Listener : socket.on('player-reaction', ({ emoji, name }))
+       - Broadcast : io.to(code).emit('reaction-broadcast', { emoji, name })
+       - Diffusion synchronisée : Tous joueurs de la salle (y compris expéditeur) reçoivent au même moment
+    
+    ✅ Ergonomie optimisée :
+       - Triggers à droite : Accès pouce droit facile
+       - Tiroir animé : Apparition contextuelle (uniquement en jeu)
+       - Bulles à gauche : Pas de masquage des triggers ni du contenu principal
+       - Montée arcade : Trajectoire verticale fluide jusqu'en haut (80vh)
+       - Variation horizontale : left aléatoire 0-50px pour diversité
+       - Cooldown anti-spam : Préserve lisibilité et performances
+       - Synchronisation parfaite : Tous voient la même bulle au même moment
+
+ Fichiers modifiés session identité :
+    ✅ public/assets/icon-hol.svg — Icône app SVG avec filtres relief (71 lignes)
+    ✅ public/index.html — theme-color, icônes SVG/PNG, logo HTML bicolore (3 zones)
+    ✅ public/manifest.json — HOL short_name, #2F3542, icons simplifiés
+    ✅ public/css/hud.css — .logo-letter styles + Arcade Bubbles complet (190 lignes)
+    ✅ public/css/08-home.css — .logo-square bicolore avec relief (32 lignes)
+    ✅ public/js/main.js — initReactionSystem + createReactionBubble + cinématique tiroir (85 lignes)
+    ✅ routes/sockets/index.js — Listener player-reaction + broadcast (6 lignes)
+
+ Corrections finales Arcade Bubbles [27 JANVIER 2026] :
+    ✅ Animation "nuclear reset" : arcade-float-up avec translateY(-80vh)
+    ✅ Suppression doublon affichage : Seul broadcast crée bulles (single source of truth)
+    ✅ Cinématique tiroir : Apparition contextuelle avec .is-active (lobby→reveal)
+    ✅ Position bulles : absolute bottom: 50px, variation left random 0-50px
+    ✅ Container reset : bottom: 0, left: 20px, overflow: visible
+    ✅ Tous fichiers synchronisés et opérationnels
+
+================================================================================
+FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v5.5]
+================================================================================
+Dernière mise à jour : 27 janvier 2026 — Arcade Bubbles finalisé avec animation verticale
+Nouvelles fonctionnalités : Tiroir contextuel + Bulles montée arcade + Synchronisation parfaite
 
  ✅ MODIFICATIONS SESSION DENSIFICATION & OPTIMISATION [26 JANVIER 2026] :
 

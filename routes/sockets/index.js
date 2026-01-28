@@ -189,6 +189,13 @@ module.exports = function setupSockets(io, db){
         
         // Si c'est le même socket (connexion rapide), pas besoin de transférer
         if (oldSocketId !== socket.id) {
+          // Déconnecter l'ancien socket (multi-onglets)
+          const oldSocket = io.sockets.sockets.get(oldSocketId);
+          if (oldSocket) {
+            oldSocket.emit('toast', { message: 'Connexion depuis un autre onglet détectée', isError: true });
+            oldSocket.disconnect(true);
+          }
+          
           // Transférer le joueur vers le nouveau socket.id
           r.players.delete(oldSocketId);
           if (r.active?.has(oldSocketId)) {
@@ -404,7 +411,7 @@ module.exports = function setupSockets(io, db){
         }
 
         r.players.set(socket.id, {
-          name: displayName, hint:null, vote:null, isImpostor:false, score:0,
+          name: displayName, hint:null, vote:null, isImpostor:false, score: Math.max(0, 0),
           deviceId: profile.deviceId,
           persistentId: profile.persistentId,
           spectator: false,
@@ -625,10 +632,119 @@ module.exports = function setupSockets(io, db){
       }
     });
 
+    socket.on('requestReturnToLobby', () => {
+      const code = joined.code; if (!code) return;
+      const r = rooms.get(code); if (!r) return;
+      
+      const player = r.players.get(socket.id);
+      if (!player) return;
+      
+      const wasImpostor = player.isImpostor;
+      const wasInActive = r.active?.has(socket.id);
+      
+      // Retirer le joueur de la partie active
+      player.ready = false;
+      player.spectator = true;
+      if (r.active?.has(socket.id)) {
+        r.active.delete(socket.id);
+      }
+      if (r.lobbyReady?.has(socket.id)) {
+        r.lobbyReady.delete(socket.id);
+      }
+      
+      const playerName = player.name || 'Un joueur';
+      
+      // Si c'était l'imposteur, reset complet de la partie
+      if (wasImpostor && (r.state === 'hints' || r.state === 'voting')) {
+        clearRoomTimer(r);
+        
+        // Réinitialiser les drapeaux de phase SANS toucher aux scores
+        for (const p of r.players.values()) {
+          p.hint = null;
+          p.vote = null;
+          p.isImpostor = false;
+          p.spectator = false;
+          if (p.disconnectTimeout) {
+            clearTimeout(p.disconnectTimeout);
+            p.disconnectTimeout = null;
+          }
+        }
+        
+        r.state = 'lobby';
+        r.lobbyReady = new Set();
+        r.readyNext = new Set();
+        r.used = {};
+        r.impostor = null;
+        r.active = new Set();
+        r.liveCrewHints = [];
+        r.usedHints = new Set();
+        
+        io.to(code).emit('lobbyCountdownCancelled');
+        io.to(code).emit('system', { text: `⚠️ ${playerName} (imposteur) a quitté. Retour au lobby.` });
+        io.to(code).emit('toast', { message: 'Partie interrompue : imposteur a quitté', isError: true });
+        
+        broadcast(io, code);
+        return;
+      }
+      
+      // Si c'était un équipier actif
+      if (wasInActive && (r.state === 'hints' || r.state === 'voting')) {
+        io.to(code).emit('system', { text: `⏸️ ${playerName} est passé en spectateur.` });
+        
+        const activeConnected = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+        
+        // Phase HINTS : Vérifier si tous les actifs restants ont soumis
+        if (r.state === 'hints') {
+          const submitted = activeConnected.filter(id => typeof r.players.get(id)?.hint === 'string').length;
+          io.to(code).emit('phaseProgress', { phase: 'hints', submitted, total: activeConnected.length });
+          
+          if (submitted === activeConnected.length && activeConnected.length > 0) {
+            controller.maybeStartVoting(code);
+          }
+        }
+        
+        // Phase VOTING : Vérifier si tous les actifs restants ont voté
+        if (r.state === 'voting') {
+          const submitted = activeConnected.filter(id => !!r.players.get(id)?.vote).length;
+          io.to(code).emit('phaseProgress', { phase: 'voting', submitted, total: activeConnected.length });
+          
+          if (submitted === activeConnected.length && activeConnected.length > 0) {
+            controller.finishVoting(code);
+          }
+        }
+        
+        // Si moins de 3 joueurs actifs, reset vers lobby
+        if (activeConnected.length < 3) {
+          clearRoomTimer(r);
+          
+          for (const p of r.players.values()) {
+            p.hint = null;
+            p.vote = null;
+            p.isImpostor = false;
+            p.spectator = false;
+          }
+          
+          r.state = 'lobby';
+          r.lobbyReady = new Set();
+          r.readyNext = new Set();
+          r.used = {};
+          r.impostor = null;
+          r.active = new Set();
+          r.liveCrewHints = [];
+          r.usedHints = new Set();
+          
+          io.to(code).emit('lobbyCountdownCancelled');
+          io.to(code).emit('system', { text: 'Moins de 3 joueurs actifs. Retour au lobby.' });
+        }
+      }
+      
+      broadcast(io, code);
+    });
+
     socket.on('resetScores', ()=>{
       const r = rooms.get(joined.code); if(!r) return;
       if (r.hostId !== socket.id) return socket.emit('errorMsg',"Seul l'hôte peut réinitialiser");
-      for (const p of r.players.values()) p.score = 0;
+      for (const p of r.players.values()) p.score = Math.max(0, 0);
       r.round = 0; r.state='lobby'; r.used={}; r.lobbyReady = new Set(); r.readyNext = new Set();
       clearRoomTimer(r);
       io.to(joined.code).emit('lobbyCountdownCancelled');
@@ -832,6 +948,15 @@ module.exports = function setupSockets(io, db){
 
       broadcast(io, code);
       broadcastPublicRooms();
+    });
+
+    // ==================== ARCADE BUBBLES : Réactions ====================
+    socket.on('player-reaction', ({ emoji, name }) => {
+      const code = joined.code;
+      if (!code) return;
+
+      // Broadcast la réaction à tous les joueurs de la salle
+      io.to(code).emit('reaction-broadcast', { emoji, name });
     });
   });
 };

@@ -17,22 +17,38 @@
         scoreboardPanel.style.display = '';
       }
 
-      // Utiliser transitionTo() au lieu de show() pour éliminer les FOPC
-      switch (snap.state) {
-        case 'lobby':
-          window.HOL.transitionTo('screen-lobby');
-          break;
-        case 'hints':
-          window.HOL.transitionTo('screen-hint');
-          break;
-        case 'voting':
-          window.HOL.transitionTo('screen-vote');
-          break;
-        case 'reveal':
-          if (document.body.getAttribute('data-screen') !== 'screen-result') {
-            window.HOL.transitionTo('screen-result');
+      // Mapper les états serveur vers les IDs d'écrans
+      const stateToScreen = {
+        'lobby': 'screen-lobby',
+        'hints': 'screen-hint',
+        'voting': 'screen-vote',
+        'reveal': 'screen-result'
+      };
+
+      const targetScreen = stateToScreen[snap.state];
+      const currentScreen = document.body.getAttribute('data-screen');
+
+      // Gestion du tiroir de réactions
+      const reactionTriggers = document.getElementById('reaction-triggers');
+      if (reactionTriggers) {
+        // Afficher le tiroir uniquement pendant le jeu (lobby, hints, voting, reveal)
+        if (targetScreen) {
+          // Ajouter la classe is-active si pas déjà présente
+          if (!reactionTriggers.classList.contains('is-active')) {
+            reactionTriggers.classList.add('is-active');
           }
-          break;
+        } else {
+          // Retirer la classe is-active si on retourne à l'accueil
+          reactionTriggers.classList.remove('is-active');
+        }
+      }
+
+      // Transition SEULEMENT si on change réellement d'écran
+      if (targetScreen && targetScreen !== currentScreen) {
+        window.HOL.transitionTo(targetScreen);
+      } else if (targetScreen) {
+        // Déjà sur le bon écran, simple mise à jour sans transition
+        window.HOL.show(targetScreen);
       }
       
       const list = $('players');
@@ -182,6 +198,32 @@
   
   window.HOL.refreshHostControls = refreshHostControls;
   
+  function initLobbyQuitButtons() {
+    const buttons = document.querySelectorAll('.btn-quit-to-lobby');
+    
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const confirmed = confirm('Quitter la manche en cours et revenir au lobby ?');
+        
+        if (confirmed) {
+          // Vibration feedback
+          if (navigator.vibrate) {
+            navigator.vibrate([30, 50, 30]);
+          }
+          
+          // Émettre l'événement au serveur
+          socket.emit('requestReturnToLobby');
+          
+          // Transition vers le lobby
+          window.HOL.transitionTo('screen-lobby');
+          
+          // Toast de confirmation
+          window.HOL.toast('Mode spectateur : tu reviens au lobby');
+        }
+      });
+    });
+  }
+  
   function initTimersFromServer() {
     let lastDeadline = null;
     let localTimerRAF = null;
@@ -262,6 +304,8 @@
     window.HOL.features.results.init();
     window.HOL.features.leaderboard.init();
     initTimersFromServer();
+    initLobbyQuitButtons();
+    initReactionSystem();
     document.body.setAttribute('data-screen', 'screen-home');
     
     // Système de swipe pour le scoreboard (permanent par défaut)
@@ -349,6 +393,91 @@
         }
       });
     }
+  }
+
+  // ==================== ARCADE BUBBLES : Réactions ====================
+  function initReactionSystem() {
+    const { $, socket, state } = window.HOL;
+    let isOnCooldown = false;
+
+    const triggers = document.querySelectorAll('.btn-reaction');
+    const displayArea = document.getElementById('reaction-display-area');
+
+    if (!triggers.length || !displayArea) {
+      console.warn('Arcade Bubbles: éléments manquants', { triggers: triggers.length, displayArea: !!displayArea });
+      return;
+    }
+
+    console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
+
+    // Gestion des clics sur les boutons de réaction
+    triggers.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isOnCooldown) return;
+
+        const emoji = btn.getAttribute('data-emoji');
+        const playerName = state.me?.name || 'Joueur';
+
+        console.log('Réaction envoyée:', { emoji, playerName });
+
+        // Émettre la réaction au serveur (affichage centralisé via broadcast)
+        socket.emit('player-reaction', { emoji, name: playerName });
+
+        // Feedback haptique
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+
+        // Activer le cooldown (2 secondes)
+        isOnCooldown = true;
+        triggers.forEach(b => b.disabled = true);
+
+        setTimeout(() => {
+          isOnCooldown = false;
+          triggers.forEach(b => b.disabled = false);
+        }, 2000);
+      });
+    });
+
+    // Réception des réactions des autres joueurs
+    socket.on('reaction-broadcast', ({ emoji, name }) => {
+      createReactionBubble(emoji, name, displayArea);
+    });
+  }
+
+  function createReactionBubble(emoji, playerName, container) {
+    console.log('Création bulle:', { emoji, playerName, container: container?.id });
+    
+    if (!container) {
+      console.error('Container manquant pour bulle');
+      return;
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'reaction-bubble';
+    
+    // Variation horizontale aléatoire
+    bubble.style.left = Math.random() * 50 + 'px';
+
+    const emojiSpan = document.createElement('div');
+    emojiSpan.className = 'reaction-bubble-emoji';
+    emojiSpan.textContent = emoji;
+
+    const nameSpan = document.createElement('div');
+    nameSpan.className = 'reaction-bubble-name';
+    nameSpan.textContent = playerName;
+
+    bubble.appendChild(emojiSpan);
+    bubble.appendChild(nameSpan);
+    container.appendChild(bubble);
+
+    console.log('Bulle ajoutée au DOM:', bubble);
+
+    // Suppression automatique après l'animation (3.2s)
+    setTimeout(() => {
+      bubble.remove();
+      console.log('Bulle supprimée');
+    }, 3200);
   }
 
   if (document.readyState !== 'loading') init();

@@ -61,21 +61,6 @@
             };
         }
 
-        $('btn-how')?.addEventListener('click', () => {
-            const panel = $('how');
-            const btn = $('btn-how');
-            const visible = panel.style.display !== 'none';
-
-            if (visible) {
-                panel.style.display = 'none';
-                btn.textContent = 'Règles rapides';
-            } else {
-                panel.style.display = 'block';
-                btn.textContent = 'Masquer les règles';
-                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        });
-
         $('btn-refresh-leaderboard')?.addEventListener('click', () => {
             socket.emit('getLeaderboard');
             toast('Classement actualisé 📊');

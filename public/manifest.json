@@ -1,15 +1,14 @@
 {
   "name": "Hint or Lie",
-  "short_name": "Hint or Lie",
+  "short_name": "HOL",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0f0b14",
-  "theme_color": "#0f0b14",
+  "background_color": "#2F3542",
+  "theme_color": "#2F3542",
   "icons": [
-    { "src": "/icons/icon-192.png",      "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png",      "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/maskable-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/maskable-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/icons/icon-192.png",      "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png",      "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/assets/icon-hol.svg",     "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

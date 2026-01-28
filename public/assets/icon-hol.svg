@@ -1,0 +1,105 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Filtres pour effet relief embossé -->
+  <defs>
+    <!-- Filtre pour ombre externe (outer shadow) -->
+    <filter id="outerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.3"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Filtre pour relief embossé des lettres -->
+    <filter id="embossedText" x="-50%" y="-50%" width="200%" height="200%">
+      <!-- Ombre interne sombre (bas) -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feOffset in="blur" dx="0" dy="3" result="offsetBlur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.4" result="offsetColor"/>
+      <feComposite in="offsetColor" in2="offsetBlur" operator="in" result="innerShadowDark"/>
+      
+      <!-- Ombre interne claire (haut) -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur2"/>
+      <feOffset in="blur2" dx="0" dy="-2" result="offsetBlur2"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.2" result="offsetColor2"/>
+      <feComposite in="offsetColor2" in2="offsetBlur2" operator="in" result="innerShadowLight"/>
+      
+      <!-- Ombre externe pour profondeur -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur3"/>
+      <feOffset in="blur3" dx="0" dy="2" result="offsetBlur3"/>
+      <feFlood flood-color="#000000" flood-opacity="0.25" result="offsetColor3"/>
+      <feComposite in="offsetColor3" in2="offsetBlur3" operator="in" result="outerShadow"/>
+      
+      <!-- Fusion de tous les effets -->
+      <feMerge>
+        <feMergeNode in="outerShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="innerShadowLight"/>
+        <feMergeNode in="innerShadowDark"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Filtre pour le fond avec relief subtil -->
+    <filter id="bgEmboss" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+      <feOffset in="blur" dx="0" dy="1" result="offsetBlur"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.05" result="offsetColor"/>
+      <feComposite in="offsetColor" in2="offsetBlur" operator="in" result="innerHighlight"/>
+      
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur2"/>
+      <feOffset in="blur2" dx="0" dy="-1" result="offsetBlur2"/>
+      <feFlood flood-color="#000000" flood-opacity="0.1" result="offsetColor2"/>
+      <feComposite in="offsetColor2" in2="offsetBlur2" operator="in" result="innerShadow"/>
+      
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="innerHighlight"/>
+        <feMergeNode in="innerShadow"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Safe zone pour maskable icons (80% du canvas = 410px de rayon) -->
+  <!-- Le contenu principal doit rester dans un cercle de rayon 205px (410/2) centré -->
+  
+  <!-- Fond avec border-radius 20% et effet relief -->
+  <rect x="0" y="0" width="512" height="512" rx="102.4" ry="102.4" 
+        fill="#2F3542" filter="url(#bgEmboss)"/>
+  
+  <!-- Bordure subtile pour définition -->
+  <rect x="1" y="1" width="510" height="510" rx="102.4" ry="102.4" 
+        fill="none" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2"/>
+  
+  <!-- Groupe des lettres avec effet embossé -->
+  <g filter="url(#embossedText)">
+    <!-- Lettre H en vert crew -->
+    <text x="175" y="340" 
+          font-family="Lexend, sans-serif" 
+          font-weight="800" 
+          font-size="240" 
+          fill="#48BB78"
+          text-anchor="middle">H</text>
+    
+    <!-- Lettre L en rouge impostor -->
+    <text x="337" y="340" 
+          font-family="Lexend, sans-serif" 
+          font-weight="800" 
+          font-size="240" 
+          fill="#F56565"
+          text-anchor="middle">L</text>
+  </g>
+  
+  <!-- Highlight subtil sur le haut pour effet 3D global -->
+  <rect x="0" y="0" width="512" height="256" rx="102.4" ry="102.4" 
+        fill="url(#topHighlight)" opacity="0.4"/>
+  
+  <defs>
+    <linearGradient id="topHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.15);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -40,7 +40,7 @@ function createRoom(hostId, hostName) {
     hint: null,
     vote: null,
     isImpostor: false,
-    score: 0,
+    score: Math.max(0, 0),
   });
 
   rooms.set(code, r);

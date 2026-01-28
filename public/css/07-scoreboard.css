@@ -26,26 +26,64 @@
 
 /* État Caché (Masqué mais poignée visible) */
 .scoreboard-panel.is-hidden {
-    transform: translateX(-50%) translateY(calc(100% - 45px));
+    transform: translateX(-50%) translateY(calc(100% - 50px));
 }
 
-/* NOUVEL INDICATEUR : Chevron animé */
+/* BARRE HANDLE EN RELIEF — Inspirée des arcade bars */
 .scoreboard-panel::before {
-    content: '';
-    display: block;
-    width: 0;
-    height: 0;
-    /* Création du triangle pointant vers le bas */
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 12px solid var(--color-primary); /* Utilise le Jaune Arcade */
+    content: '▼ TABLEAU DE SCORE';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     
-    /* Centrage et espacement */
-    margin: 15px auto 10px auto;
+    /* Dimensions et couleur */
+    height: 50px;
+    width: 100%;
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 136, 0.12) 0%, 
+        rgba(0, 200, 100, 0.08) 100%);
     
-    /* Animation d'invite au swipe */
-    animation: handlePullHint 2s infinite ease-in-out;
+    /* Bordure supérieure arrondie */
+    border-radius: 20px 20px 0 0;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    
+    /* Effet relief embossé */
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+    
+    /* Typographie */
+    font-family: 'Lexend', sans-serif !important;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(0, 255, 136, 0.9);
+    text-transform: uppercase;
+    
+    /* Interaction */
     cursor: grab;
+    user-select: none;
+    
+    /* Animation chevron */
+    animation: handlePullHint 2s infinite ease-in-out;
+}
+
+/* Animation active lors du drag */
+.scoreboard-panel:active::before {
+    cursor: grabbing;
+}
+
+/* Animation du chevron : Respiration verticale */
+@keyframes handlePullHint {
+    0%, 100% { 
+        opacity: 0.8; 
+    }
+    50% { 
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+    }
 }
 
 /* Titre du panneau */
@@ -56,7 +94,8 @@
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 10px;
-    margin-top: 0;
+    margin-top: 5px;
+    display: none;
 }
 
 /* Liste interne avec scroll */
@@ -161,18 +200,6 @@
 
 .status-icon-waiting {
     animation: statusPulse 1.5s infinite;
-}
-
-/* Animation du chevron : Respiration verticale */
-@keyframes handlePullHint {
-    0%, 100% { 
-        transform: translateY(0); 
-        opacity: 0.5; 
-    }
-    50% { 
-        transform: translateY(5px); /* Petit mouvement vers le bas */
-        opacity: 1; 
-    }
 }
 
 /* Animation Game Juice : Entrée du panneau avec overshoot */

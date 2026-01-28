@@ -196,11 +196,11 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
     if (caught) {
       for (const id of activeConnected) {
         const p = r.players.get(id);
-        if (p && !p.isImpostor) p.score = (p.score || 0) + 1;
+        if (p && !p.isImpostor) p.score = Math.max(0, (p.score || 0) + 1);
       }
     } else {
       const imp = r.players.get(impId);
-      if (imp) imp.score = (imp.score || 0) + 2;
+      if (imp) imp.score = Math.max(0, (imp.score || 0) + 2);
     }
 
     const winners = new Set();
@@ -284,7 +284,7 @@ io.to(code).emit('roundResult', {
       });
 
       for (const p of r.players.values()) {
-        p.score = 0;
+        p.score = Math.max(0, 0);
         p.hint = null;
         p.vote = null;
         p.isImpostor = false;

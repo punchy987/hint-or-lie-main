@@ -50,7 +50,7 @@ function makePersistence(db) {
       await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
         const prev = snap.exists ? (snap.data() || {}) : {};
-        const rpBefore = Number(prev.rp || 0);
+        const rpBefore = Math.max(0, Number(prev.rp || 0));
         const rankBefore = getHlRank(rpBefore);
         const penalty = getPenaltyByRank(rankBefore);
         const rpAfter = Math.max(0, rpBefore - penalty);

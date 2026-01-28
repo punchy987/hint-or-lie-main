@@ -32,6 +32,8 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 12px;
+    padding-top: 54px;
+    position: relative;
 }
 
 /* Container pour le thème avec label */
