@@ -102,16 +102,17 @@
             if (roomState === 'lobby') {
                 state.myLobbyReady = !state.myLobbyReady;
                 
-                // Instant local feedback
-                const myId = window.HOL.state.me.id;
-                const myCard = document.querySelector(`.player-card[data-player-id="${myId}"]`);
-                if (myCard) {
-                    myCard.classList.toggle('is-ready', state.myLobbyReady);
-                }
-
+                // Retirer l'animation pulse quand on devient prêt
                 if (br) {
-                    br.textContent = state.myLobbyReady ? 'Annuler prêt' : 'Je suis prêt';
-                    br.classList.toggle('ready', state.myLobbyReady);
+                    if (state.myLobbyReady) {
+                        br.classList.remove('not-active');
+                        br.textContent = 'Annuler prêt';
+                        br.classList.toggle('ready', true);
+                    } else {
+                        br.classList.add('not-active');
+                        br.textContent = 'Je suis prêt';
+                        br.classList.toggle('ready', false);
+                    }
                 }
                 
                 socket.emit('playerReadyLobby', { ready: state.myLobbyReady });
@@ -190,7 +191,14 @@
             if (lobbyCode) lobbyCode.textContent = code;
             show('screen-lobby');
             state.myLobbyReady = false;
-            if ($('btn-ready')) $('btn-ready').textContent = 'Je suis prêt';
+            
+            // Réinitialiser le bouton ready avec l'animation pulse
+            const btnReady = $('btn-ready');
+            if (btnReady) {
+                btnReady.textContent = 'Je suis prêt';
+                btnReady.classList.add('not-active'); // Ajouter l'animation pulse
+                btnReady.classList.remove('ready');
+            }
         };
 
         socket.on('roomCreated', onRoomEntry);
@@ -252,6 +260,64 @@
                 btnReady.disabled = false;
             }
             window.HOL.show('screen-home');
+        });
+
+        // Listener pour la liste des salons publics
+        socket.on('publicRoomsList', (rooms) => {
+            const list = $('public-rooms-list');
+            if (!list) return;
+
+            // Vider la liste
+            list.innerHTML = '';
+
+            // Si aucune salle publique
+            if (!rooms || rooms.length === 0) {
+                const emptyMsg = document.createElement('li');
+                emptyMsg.className = 'public-rooms-empty';
+                emptyMsg.textContent = 'Aucun salon public disponible';
+                list.appendChild(emptyMsg);
+                return;
+            }
+
+            // Remplir la liste
+            rooms.forEach(room => {
+                const item = document.createElement('li');
+                item.className = 'public-room-item';
+                
+                const roomName = document.createElement('span');
+                roomName.textContent = `Salon ${room.code}`;
+                
+                const playersBadge = document.createElement('span');
+                playersBadge.className = 'public-room-players';
+                playersBadge.textContent = `${room.playerCount}/${room.maxPlayers || 8}`;
+                
+                item.appendChild(roomName);
+                item.appendChild(playersBadge);
+                
+                // Rendre l'élément cliquable
+                item.addEventListener('click', () => {
+                    // Remplir l'input code
+                    const codeInput = $('join-code');
+                    if (codeInput) {
+                        codeInput.value = room.code;
+                    }
+                    
+                    // Rejoindre automatiquement
+                    const nameInput = $('name-join');
+                    const name = nameInput?.value.trim() || '';
+                    const persistentId = window.HOL.getPersistentId();
+                    
+                    socket.emit('hello', { deviceId: getDeviceId(), pseudo: name, name, persistentId });
+                    socket.emit('joinRoom', { code: room.code, pseudo: name, name, deviceId: getDeviceId(), persistentId });
+                    
+                    // Feedback haptique
+                    if (navigator.vibrate) {
+                        navigator.vibrate([30, 50, 30]);
+                    }
+                });
+                
+                list.appendChild(item);
+            });
         });
     }
 

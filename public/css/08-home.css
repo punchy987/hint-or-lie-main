@@ -499,3 +499,89 @@
         min-height: 50px;
     }
 }
+
+/* ===== SALONS PUBLICS ===== */
+#public-rooms-container {
+    width: 100%;
+    margin: 1.5rem 0;
+    padding: 1.2rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+}
+
+#public-rooms-container h3 {
+    font-family: 'Lexend', sans-serif !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-crew);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+#public-rooms-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Item de salle publique - style arcade-bar */
+.public-room-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(72, 187, 120, 0.15);
+    border: 1px solid rgba(72, 187, 120, 0.3);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-family: 'Lexend', sans-serif !important;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.2), 
+                0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.public-room-item:hover {
+    background: rgba(72, 187, 120, 0.25);
+    border-color: rgba(72, 187, 120, 0.5);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.2), 
+                0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.public-room-item:active {
+    transform: translateY(0);
+}
+
+/* Badge joueurs */
+.public-room-players {
+    background: var(--relief-bg);
+    color: var(--accent-cyan);
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* État vide */
+.public-rooms-empty {
+    font-family: 'Lexend', sans-serif !important;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--muted);
+    opacity: 0.5;
+    text-align: center;
+    padding: 2rem 1rem;
+}

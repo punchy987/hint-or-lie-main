@@ -38,11 +38,50 @@ function normalizeLocal(s) {
 
 module.exports = function setupSockets(io, db){
   const { upsertRoundResult, getTop50, getMyStats, applyPenaltyIfNotWinner } = makePersistence(db);
-  const controller = createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS });
+  
+  function broadcastPublicRooms() {
+    const publicRooms = [];
+    for (const [code, room] of rooms.entries()) {
+      // Une salle est visible dans la liste publique si :
+      // - Elle est marquée comme publique
+      // - Elle est en état lobby
+      // - Il reste au moins un joueur connecté
+      // - La salle n'est pas vide (sécurité anti-zombies)
+      const activePlayers = Array.from(room.players.values()).filter(p => !p.disconnected);
+      if (room.isPublic && room.state === 'lobby' && room.players.size > 0 && activePlayers.length > 0) {
+        publicRooms.push({
+          code: code,
+          playerCount: activePlayers.length,
+          maxPlayers: 10,
+        });
+      }
+    }
+    // Émettre toujours la liste, même si vide (pour afficher "Aucun salon disponible")
+    io.emit('publicRoomsList', publicRooms);
+  }
+
+  const controller = createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS, broadcastPublicRooms });
 
   io.on('connection',(socket)=>{
     let joined  = { code:null };
     let profile = { deviceId:null, lastPseudo:null, persistentId:null };
+
+    socket.on('getPublicRooms', () => {
+      broadcastPublicRooms();
+    });
+
+    socket.on('togglePrivacy', ()=>{
+      const code = joined.code; if(!code) return;
+      const r = rooms.get(code); if(!r) return;
+      if (r.hostId !== socket.id) return socket.emit('errorMsg', "Seul l'hôte peut changer la visibilité.");
+      
+      r.isPublic = !r.isPublic;
+      
+      const privacyStatus = r.isPublic ? 'publique' : 'privée';
+      io.to(code).emit('system', { text: `La salle est maintenant ${privacyStatus}.` });
+      
+      broadcastPublicRooms();
+    });
 
     socket.on('hello', ({ deviceId, pseudo, persistentId } = {})=>{
       if (deviceId) profile.deviceId   = String(deviceId).slice(0,64);
@@ -94,14 +133,19 @@ module.exports = function setupSockets(io, db){
         profile.persistentId = String(persistentId || profile.persistentId || '').slice(0, 64) || null;
 
         const r = rooms.get(code);
-        if (r && r.players.has(socket.id)) {
-          const p = r.players.get(socket.id);
-          p.deviceId = profile.deviceId;
-          p.persistentId = profile.persistentId;
+        if (r) {
+          r.isPublic = true;
+          if (r.players.has(socket.id)) {
+            const p = r.players.get(socket.id);
+            p.deviceId = profile.deviceId;
+            p.persistentId = profile.persistentId;
+            p.ready = false;  // Le host doit aussi se marquer prêt
+          }
         }
 
         socket.emit('roomCreated', { code });
         broadcast(io, code);
+        broadcastPublicRooms();
       } catch (err) {
         socket.emit('errorMsg', 'Erreur lors de la création de la salle.');
       }
@@ -186,8 +230,8 @@ module.exports = function setupSockets(io, db){
             name: p.name,
             score: p.score || 0,
             disconnected: !!p.disconnected,
-            ready: r.lobbyReady?.has(id) || false,
-            isReady: r.lobbyReady?.has(id) || false
+            ready: p.ready || false,
+            isReady: p.ready || false
           })),
           scores: Object.fromEntries(
             Array.from(r.players.entries()).map(([id, p]) => [id, p.score || 0])
@@ -202,10 +246,12 @@ module.exports = function setupSockets(io, db){
         // Phase HINTS : Renvoyer le mot secret ou les indices des équipiers
         if (r.state === 'hints') {
           if (playerData.isImpostor) {
-            // L'imposteur doit d'abord recevoir roundStarted avec isImpostor: true
-            socket.emit('roundStarted', {
+            // L'imposteur reçoit roundInfo avec isImpostor: true
+            socket.emit('roundInfo', {
               round: r.round,
               domain: r.words?.domain || '',
+              word: null,
+              wordDisplay: 'Aucun mot — observe les indices',
               isImpostor: true
             });
             // Puis recevoir les indices des équipiers déjà envoyés
@@ -214,10 +260,12 @@ module.exports = function setupSockets(io, db){
             }
           } else if (r.active?.has(socket.id)) {
             // Les équipiers actifs reçoivent le mot secret
-            socket.emit('roundStarted', {
+            const myword = r.words?.common || '';
+            socket.emit('roundInfo', {
               round: r.round,
               domain: r.words?.domain || '',
-              common: r.words?.common || '',
+              word: myword,
+              wordDisplay: myword,
               isImpostor: false
             });
           } else if (playerData.spectator) {
@@ -359,7 +407,8 @@ module.exports = function setupSockets(io, db){
           name: displayName, hint:null, vote:null, isImpostor:false, score:0,
           deviceId: profile.deviceId,
           persistentId: profile.persistentId,
-          spectator: false
+          spectator: false,
+          ready: false  // Nouveau joueur toujours non-prêt par défaut
         });
       }
 
@@ -384,6 +433,7 @@ module.exports = function setupSockets(io, db){
 
       socket.emit('roomJoined', { code });
       broadcast(io, code);
+      broadcastPublicRooms();
 
       r.lobbyReady ||= new Set();
       const connectedCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
@@ -402,10 +452,23 @@ module.exports = function setupSockets(io, db){
       if (r.lobbyReady?.has(socket.id)) r.lobbyReady.delete(socket.id);
       if (r.readyNext?.has(socket.id)) r.readyNext.delete(socket.id);
 
+      // Nettoyage radical si la salle est vide
       if (r.players.size === 0) {
+        // Arrêter tous les timers actifs
+        clearRoomTimer(r);
+        
+        // Supprimer l'objet room de la Map globale
         rooms.delete(code);
+        
+        // Mettre à jour la liste publique immédiatement
+        broadcastPublicRooms();
+        
+        // Log de sécurité
+        console.log(`[Room Cleanup] Salon ${code} fermé (vide).`);
+        
         socket.leave(code);
         joined.code = null;
+        socket.emit('leftRoom');
         return;
       }
 
@@ -414,9 +477,20 @@ module.exports = function setupSockets(io, db){
         io.to(code).emit('lobbyCountdownCancelled');
       }
 
+      // Migration du host si c'est le host qui part
       if (r.hostId === socket.id) {
-        const first = r.players.keys().next().value;
-        if (first) r.hostId = first;
+        const remainingPlayers = Array.from(r.players.keys());
+        if (remainingPlayers.length > 0) {
+          const newHostId = remainingPlayers[0];
+          r.hostId = newHostId;
+          
+          // Émettre un événement pour notifier le changement de host
+          io.to(code).emit('newHost', { newHostId });
+          
+          const newHost = r.players.get(newHostId);
+          const newHostName = newHost?.name || 'Un joueur';
+          io.to(code).emit('system', { text: `👑 ${newHostName} est le nouveau leader de la salle.` });
+        }
       }
       
       io.to(code).emit('system', { text: `👋 ${name} a quitté la partie.` });
@@ -440,19 +514,31 @@ module.exports = function setupSockets(io, db){
       socket.leave(code);
       joined.code = null;
       broadcast(io, code);
+      broadcastPublicRooms();
       socket.emit('leftRoom');
     });
 
     socket.on('playerReadyLobby', ({ ready })=>{
       const r = rooms.get(joined.code); if(!r) return; if (r.state !== 'lobby') return;
 
+      // Mettre à jour le statut ready du joueur
+      const player = r.players.get(socket.id);
+      if (player) {
+        player.ready = ready;
+      }
+
       r.lobbyReady ||= new Set();
       if (ready) r.lobbyReady.add(socket.id); else r.lobbyReady.delete(socket.id);
 
-      const connectedCount = Array.from(r.players.values()).filter(p => !p.disconnected).length;
-      io.to(joined.code).emit('lobbyReadyProgress', { ready: r.lobbyReady.size, total: connectedCount });
+      // Ne compter que les joueurs connectés ET prêts
+      const connectedPlayers = Array.from(r.players.entries()).filter(([id, p]) => !p.disconnected);
+      const readyCount = r.lobbyReady.size;
+      const totalCount = connectedPlayers.length;
+      
+      io.to(joined.code).emit('lobbyReadyProgress', { ready: readyCount, total: totalCount });
 
-      if (r.lobbyReady.size === connectedCount && connectedCount >= 3){
+      // Lancer le compte à rebours seulement si TOUS les joueurs connectés sont prêts
+      if (readyCount === totalCount && totalCount >= 3){
         clearRoomTimer(r);
         startPhaseTimer(io, joined.code, LOBBY_READY_SECONDS, 'lobby', ()=> controller.startRound(joined.code));
         io.to(joined.code).emit('lobbyCountdownStarted', { seconds: LOBBY_READY_SECONDS });
@@ -460,6 +546,9 @@ module.exports = function setupSockets(io, db){
         clearRoomTimer(r);
         io.to(joined.code).emit('lobbyCountdownCancelled');
       }
+      
+      // Broadcast pour mettre à jour l'UI
+      broadcast(io, joined.code);
     });
 
     socket.on('startRound', ()=>{
@@ -563,14 +652,46 @@ module.exports = function setupSockets(io, db){
 
       const activePlayers = Array.from(r.players.values()).filter(p => !p.disconnected);
       if (activePlayers.length === 0) {
+        // Nettoyage radical si la salle est vide (tous déconnectés)
+        // Arrêter tous les timers actifs
+        clearRoomTimer(r);
+        
+        // Nettoyer les timeouts de déconnexion
+        for (const p of r.players.values()) {
+          if (p.disconnectTimeout) {
+            clearTimeout(p.disconnectTimeout);
+            p.disconnectTimeout = null;
+          }
+        }
+        
+        // Supprimer l'objet room de la Map globale
         rooms.delete(code);
+        
+        // Mettre à jour la liste publique immédiatement
+        broadcastPublicRooms();
+        
+        // Log de sécurité
+        console.log(`[Room Cleanup] Salon ${code} fermé (vide).`);
+        
         return;
       }
 
+      // Migration du host si c'est le host qui se déconnecte
       if (wasHost) {
         const firstActive = Array.from(r.players.entries()).find(([id, p]) => !p.disconnected);
         if (firstActive) {
-          r.hostId = firstActive[0];
+          const newHostId = firstActive[0];
+          r.hostId = newHostId;
+          
+          // Émettre un événement pour notifier le changement de host
+          io.to(code).emit('newHost', { newHostId });
+          
+          const newHost = r.players.get(newHostId);
+          const newHostName = newHost?.name || 'Un joueur';
+          io.to(code).emit('system', { text: `👑 ${newHostName} est le nouveau leader de la salle.` });
+          
+          // Mettre à jour la liste publique car le nouveau host pourrait changer les réglages
+          broadcastPublicRooms();
         }
       }
 
@@ -595,6 +716,10 @@ module.exports = function setupSockets(io, db){
         
         // Le délai a expiré, traiter la déconnexion définitive
         const activeInGame = Array.from(r.active || []).filter(id => !r.players.get(id)?.disconnected);
+        
+        // Compter tous les joueurs prêts dans le salon (actifs + en attente)
+        const allReadyPlayers = Array.from(r.players.entries()).filter(([id, p]) => !p.disconnected && p.ready);
+        const totalReady = allReadyPlayers.length;
         
         // Condition de rupture : < 3 joueurs OU l'imposteur a expiré
         const needsReset = (activeInGame.length < 3) || (wasImpostor && (r.state === 'hints' || r.state === 'voting'));
@@ -639,6 +764,27 @@ module.exports = function setupSockets(io, db){
           io.to(code).emit('system', { text: reason });
           io.to(code).emit('toast', { message: reason, isError: true });
           
+          // Si on a au moins 3 joueurs prêts au total (actifs restants + en attente), relancer automatiquement
+          if (totalReady >= 3) {
+            // Réactiver tous les joueurs prêts pour la nouvelle manche
+            for (const [id, p] of allReadyPlayers) {
+              p.ready = true; // S'assurer qu'ils restent prêts
+            }
+            
+            io.to(code).emit('system', { text: '🔄 Nouvelle manche lancée automatiquement...' });
+            
+            // Délai de 2 secondes pour que les joueurs voient les messages
+            setTimeout(() => {
+              const room = rooms.get(code);
+              if (room && room.state === 'lobby') {
+                controller.startRound(code);
+              }
+            }, 2000);
+          } else {
+            // Pas assez de joueurs prêts, rester au lobby
+            io.to(code).emit('system', { text: '⏳ En attente de joueurs prêts...' });
+          }
+          
           broadcast(io, code);
           return;
         }
@@ -682,7 +828,10 @@ module.exports = function setupSockets(io, db){
         }
       }
 
+      // ... (rest of the disconnect logic)
+
       broadcast(io, code);
+      broadcastPublicRooms();
     });
   });
 };

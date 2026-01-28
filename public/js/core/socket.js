@@ -69,5 +69,18 @@
     }
   });
 
+  // Listener pour la migration de host
+  socket.on('newHost', ({ newHostId }) => {
+    // Mettre à jour l'état local
+    if (window.HOL.state && window.HOL.state.room) {
+      window.HOL.state.room.hostId = newHostId;
+    }
+    
+    // Rafraîchir les contrôles de host si la fonction existe
+    if (window.HOL.refreshHostControls) {
+      window.HOL.refreshHostControls();
+    }
+  });
+
   window.HOL.socket = socket;
 })();

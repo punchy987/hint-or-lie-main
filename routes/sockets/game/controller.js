@@ -10,7 +10,7 @@ const { pickPair } =
 const { clearRoomTimer, startPhaseTimer } =
   require(path.join(__dirname, '..', 'timer.js'));
 
-function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS }) {
+function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT_SECONDS, VOTE_SECONDS, broadcastPublicRooms }) {
 
   function startRound(code) {
     const r = rooms.get(code); if (!r) return;
@@ -30,11 +30,13 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
     r.lobbyReady = new Set();
     r.readyNext  = new Set();
 
-    r.active = new Set(Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected).map(([id]) => id));
+    // Ne prendre que les joueurs connectés ET marqués prêts
+    r.active = new Set(Array.from(r.players.entries()).filter(([_, p]) => !p.disconnected && p.ready).map(([id]) => id));
 
     if (r.active.size < 3) {
-      io.to(code).emit('errorMsg', 'Minimum 3 joueurs');
+      io.to(code).emit('errorMsg', 'Minimum 3 joueurs prêts');
       r.state = 'lobby';
+      broadcastPublicRooms();
       return broadcast(io, code);
     }
 
@@ -102,6 +104,7 @@ function createController({ io, upsertRoundResult, applyPenaltyIfNotWinner, HINT
     });
 
     broadcast(io, code);
+    broadcastPublicRooms();
   }
 
   function maybeStartVoting(code) {
@@ -253,6 +256,7 @@ io.to(code).emit('roundResult', {
       io.to(code).emit('readyProgress', { ready: 0, total: activePlayers.length });
       
       broadcast(io, code);
+      broadcastPublicRooms();
 
     } else {
       const winnersArr = activePlayers
@@ -294,10 +298,10 @@ io.to(code).emit('roundResult', {
       r.impostor = null;
 
       broadcast(io, code);
+      broadcastPublicRooms();
     }
   }
-
+  
   return { startRound, maybeStartVoting, finishVoting, handleVote };
 }
-
 module.exports = { createController };

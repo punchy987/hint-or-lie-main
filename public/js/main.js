@@ -42,10 +42,30 @@
               const card = document.createElement('div');
               card.className = 'player-card';
               
+              // Déterminer si le joueur est prêt
+              const isReady = p.ready || false;
+              
+              // Ajouter les classes appropriées
+              if (isReady) {
+                  card.classList.add('is-ready');
+              } else {
+                  card.classList.add('not-ready');
+              }
+              
               // Determine status
               let statusText = '';
-              if (p.disconnected) statusText = 'Déconnecté';
-              else if (p.ready) statusText = 'Prêt ✓';
+              if (p.disconnected) {
+                  statusText = 'Déconnecté';
+              } else if (snap.state === 'lobby') {
+                  // En lobby, afficher le statut prêt/attente
+                  if (isReady) {
+                      statusText = 'PRÊT ✓';
+                  } else {
+                      statusText = 'ATTENTE ⏳';
+                  }
+              } else if (p.ready) {
+                  statusText = 'Prêt ✓';
+              }
 
               const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(p.name || 'default')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
               card.innerHTML = `
@@ -79,9 +99,89 @@
           btnReady.textContent = 'Je suis pret';
           btnReady.disabled = false;
         }
+        
+        // Gestion du bouton toggle privacy (visible uniquement pour le host)
+        const btnTogglePrivacy = $('btn-toggle-privacy');
+        if (btnTogglePrivacy) {
+          const isHost = socket.id === snap.hostId;
+          btnTogglePrivacy.style.display = isHost ? 'block' : 'none';
+          
+          // Mettre à jour l'état du bouton
+          const isPublic = snap.isPublic || false;
+          btnTogglePrivacy.textContent = isPublic ? '🌍 PUBLIC' : '🔒 PRIVÉ';
+          btnTogglePrivacy.className = isPublic ? 'btn btn-secondary public' : 'btn btn-secondary private';
+          
+          // Supprimer les anciens listeners pour éviter les doublons
+          const newBtn = btnTogglePrivacy.cloneNode(true);
+          btnTogglePrivacy.parentNode.replaceChild(newBtn, btnTogglePrivacy);
+          
+          // Ajouter le listener onclick
+          newBtn.addEventListener('click', () => {
+            socket.emit('togglePrivacy');
+            
+            // Feedback haptique
+            if (navigator.vibrate) {
+              navigator.vibrate([20, 40, 20]);
+            }
+          });
+        }
+        
+        // Rafraîchir les contrôles de host (badge, etc.)
+        if (window.HOL.refreshHostControls) {
+          window.HOL.refreshHostControls();
+        }
       }
     }
   window.HOL.updateUIFromState = updateUIFromState;
+  
+  function refreshHostControls() {
+    const { $, socket, state } = window.HOL;
+    
+    if (!state.room) return;
+    
+    const isHost = socket.id === state.room.hostId;
+    
+    // Afficher/masquer le bouton toggle privacy
+    const btnTogglePrivacy = $('btn-toggle-privacy');
+    if (btnTogglePrivacy) {
+      btnTogglePrivacy.style.display = isHost ? 'block' : 'none';
+      
+      if (isHost) {
+        // Mettre à jour l'état du bouton
+        const isPublic = state.room.isPublic || false;
+        btnTogglePrivacy.textContent = isPublic ? '🌍 PUBLIC' : '🔒 PRIVÉ';
+        btnTogglePrivacy.className = isPublic ? 'btn btn-secondary public' : 'btn btn-secondary private';
+      }
+    }
+    
+    // Ajouter un badge HOST dans la liste des joueurs
+    const list = $('players');
+    if (list && state.room.players) {
+      state.room.players.forEach(player => {
+        const cards = list.querySelectorAll('.player-card');
+        cards.forEach(card => {
+          const nameEl = card.querySelector('.player-name');
+          if (nameEl && nameEl.textContent === player.name) {
+            // Retirer l'ancien badge s'il existe
+            const oldBadge = card.querySelector('.host-badge');
+            if (oldBadge) oldBadge.remove();
+            
+            // Ajouter le badge si c'est le host
+            if (player.id === state.room.hostId) {
+              const badge = document.createElement('div');
+              badge.className = 'host-badge';
+              badge.textContent = '👑 HOST';
+              badge.style.cssText = 'font-size: 0.7rem; color: var(--color-crew); font-weight: 700; margin-top: 0.25rem;';
+              card.appendChild(badge);
+            }
+          }
+        });
+      });
+    }
+  }
+  
+  window.HOL.refreshHostControls = refreshHostControls;
+  
   function initTimersFromServer() {
     let lastDeadline = null;
     let localTimerRAF = null;
@@ -146,6 +246,12 @@
       }
       state.myLobbyReady = false;
       window.HOL.toast('Partie reinitalisee !', 1500);
+    });
+
+    // Listener pour la confirmation du toggle privacy
+    socket.on('privacyToggled', ({ isPublic }) => {
+      const message = isPublic ? 'Salon désormais PUBLIC 🌍' : 'Salon désormais PRIVÉ 🔒';
+      window.HOL.toast(message, 1500);
     });
   }
 

@@ -230,6 +230,36 @@
     min-height: 150px;
 }
 
+/* Carte joueur NON-PRÊT - grisée */
+.player-card.not-ready {
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.player-card.not-ready .player-name {
+    color: var(--muted);
+}
+
+.player-card.not-ready .player-status {
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Carte joueur PRÊT - mise en avant */
+.player-card.is-ready {
+    background: rgba(72, 187, 120, 0.08);
+    border: 2px solid var(--color-crew);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+                0 4px 8px rgba(72, 187, 120, 0.2);
+}
+
+.player-card.is-ready .player-status {
+    color: var(--color-crew);
+    background: rgba(72, 187, 120, 0.15);
+    font-weight: 800;
+}
+
 /* Halo de couleur désactivé pour Floating Matte */
 .player-card::before {
     display: none;
@@ -298,6 +328,53 @@
 /* Bouton "Je suis prêt" — imposant Matte Arcade */
 #btn-ready {
     width: 100%;
+    max-width: 450px;
+    padding: 1.2rem 2rem;
+    background: var(--color-crew);
+    color: var(--bg-main);
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation pulse pour attirer l'attention */
+#btn-ready.not-active {
+    animation: pulse-ready 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ready {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: inset 0 2px 3px var(--relief-light), 
+                    inset 0 -3px 4px var(--relief-dark), 
+                    0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: inset 0 2px 3px var(--relief-light), 
+                    inset 0 -3px 4px var(--relief-dark), 
+                    0 8px 16px rgba(72, 187, 120, 0.4);
+    }
+}
+
+#btn-ready:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 2px 3px var(--relief-light), 
+                inset 0 -3px 4px var(--relief-dark), 
+                0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+#btn-ready:active {
+    transform: translateY(0);
+}
     max-width: 450px;
     min-height: 56px;
     font-size: 1.2rem;
