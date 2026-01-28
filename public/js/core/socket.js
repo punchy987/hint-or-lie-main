@@ -5,10 +5,20 @@
   let serverUrl = '';
   if (typeof getServerUrl === 'function') {
     serverUrl = getServerUrl();
+  } else {
+    console.error('[Socket] ⚠️ ERREUR: getServerUrl() non disponible !');
+    console.error('[Socket] Vérifiez que server-config.js est bien chargé avant socket.js');
   }
   
   console.log('[GUARD] Socket logging active');
   console.log('[Socket] Connexion au serveur:', serverUrl || 'URL relative');
+  
+  // RÈGLE D'OR : Vérifier que l'URL n'est pas l'URL de placeholder
+  if (serverUrl && serverUrl.includes('ton-nom-de-projet.onrender.com')) {
+    console.error('[Socket] ⚠️ ERREUR: URL de production non configurée !');
+    console.error('[Socket] Le serveur utilise toujours l\'URL placeholder.');
+    console.error('[Socket] Videz le cache du navigateur (Ctrl+F5) ou vérifiez server-config.js');
+  }
   
   const socket = io(serverUrl, {
     transports: ['websocket', 'polling'],

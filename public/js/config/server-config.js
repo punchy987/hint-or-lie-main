@@ -23,6 +23,9 @@ const SERVER_CONFIG = {
 function getServerUrl() {
   const hostname = window.location.hostname;
   
+  // RÈGLE D'OR : Forcer le mode développement si l'URL de production n'est pas configurée
+  const isProductionConfigured = SERVER_CONFIG.production !== 'https://ton-nom-de-projet.onrender.com';
+  
   // Détection localhost : inclut localhost, 127.0.0.1 et adresses IPv4 locales
   const isLocalhost = hostname === 'localhost' || 
                       hostname === '127.0.0.1' ||
@@ -30,7 +33,18 @@ function getServerUrl() {
                       hostname.startsWith('10.') ||
                       hostname.startsWith('172.');
   
-  return isLocalhost ? SERVER_CONFIG.development : SERVER_CONFIG.production;
+  // Si production n'est pas configurée, toujours utiliser development
+  const serverUrl = (isLocalhost || !isProductionConfigured) 
+    ? SERVER_CONFIG.development 
+    : SERVER_CONFIG.production;
+  
+  // Debug : afficher l'URL utilisée
+  console.log('[ServerConfig] Hostname:', hostname);
+  console.log('[ServerConfig] Is Localhost:', isLocalhost);
+  console.log('[ServerConfig] Production configured:', isProductionConfigured);
+  console.log('[ServerConfig] Using URL:', serverUrl);
+  
+  return serverUrl;
 }
 
 /**

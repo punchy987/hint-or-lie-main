@@ -11,7 +11,8 @@
     <link rel="manifest" href="/manifest.json">
     
     <!-- Configuration du serveur pour mobile -->
-    <script src="/js/config/server-config.js"></script>
+    <!-- RÈGLE D'OR : Cache busting pour forcer le rechargement après modification -->
+    <script src="/js/config/server-config.js?v=2"></script>
     
     <link rel="stylesheet" href="/css/hud.css">
 

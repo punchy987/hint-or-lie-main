@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Configuration Serveur</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1b2430;
+            color: #e8e6e3;
+        }
+        .box {
+            background: #2f3542;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid #34a853;
+        }
+        .error {
+            border-color: #ff5277;
+            background: rgba(255, 82, 119, 0.1);
+        }
+        .success {
+            border-color: #34a853;
+            background: rgba(52, 168, 83, 0.1);
+        }
+        h1 { color: #e8c547; }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        button {
+            background: #34a853;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2d8f46;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Configuration Serveur</h1>
+    
+    <div class="box">
+        <h2>Configuration Actuelle</h2>
+        <p><strong>Hostname:</strong> <code id="hostname"></code></p>
+        <p><strong>URL Serveur:</strong> <code id="serverUrl"></code></p>
+        <p><strong>Port Attendu:</strong> <code>5500</code></p>
+    </div>
+
+    <div class="box" id="statusBox">
+        <h2>État de la Configuration</h2>
+        <p id="status">Vérification en cours...</p>
+    </div>
+
+    <div class="box">
+        <h2>Actions</h2>
+        <button onclick="location.reload(true)">🔄 Recharger (Force)</button>
+        <button onclick="clearCacheAndReload()">🗑️ Vider Cache et Recharger</button>
+        <button onclick="window.location.href='/'">🏠 Retour au Jeu</button>
+    </div>
+
+    <div class="box">
+        <h2>Instructions</h2>
+        <ol>
+            <li>Vérifiez que le serveur est démarré: <code>node server.js</code></li>
+            <li>L'URL serveur doit être <code>http://localhost:5500</code></li>
+            <li>Si ce n'est pas le cas, videz le cache du navigateur</li>
+            <li>Raccourci: <code>Ctrl + F5</code> ou <code>Ctrl + Shift + R</code></li>
+        </ol>
+    </div>
+
+    <script src="/js/config/server-config.js?v=2"></script>
+    <script>
+        // Afficher les informations
+        document.getElementById('hostname').textContent = window.location.hostname;
+        
+        const serverUrl = typeof getServerUrl === 'function' ? getServerUrl() : 'ERREUR: Fonction non disponible';
+        document.getElementById('serverUrl').textContent = serverUrl;
+
+        // Vérifier la configuration
+        const statusBox = document.getElementById('statusBox');
+        const statusText = document.getElementById('status');
+
+        if (serverUrl === 'ERREUR: Fonction non disponible') {
+            statusBox.className = 'box error';
+            statusText.innerHTML = '❌ <strong>ERREUR:</strong> server-config.js non chargé correctement.<br>Videz le cache et rechargez.';
+        } else if (serverUrl.includes('ton-nom-de-projet.onrender.com')) {
+            statusBox.className = 'box error';
+            statusText.innerHTML = '⚠️ <strong>ATTENTION:</strong> URL de production non configurée.<br>Le système utilise l\'URL placeholder.<br><strong>Solution:</strong> Videz le cache (Ctrl+F5).';
+        } else if (serverUrl === 'http://localhost:5500') {
+            statusBox.className = 'box success';
+            statusText.innerHTML = '✅ <strong>SUCCÈS:</strong> Configuration correcte !<br>Le serveur est configuré sur le bon port.';
+        } else {
+            statusBox.className = 'box error';
+            statusText.innerHTML = '⚠️ <strong>ATTENTION:</strong> URL inattendue.<br>Vérifiez que le serveur tourne sur le port 5500.';
+        }
+
+        function clearCacheAndReload() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                }).then(() => {
+                    alert('Cache vidé ! La page va se recharger.');
+                    location.reload(true);
+                });
+            } else {
+                alert('Utilisez Ctrl+F5 pour vider le cache');
+                location.reload(true);
+            }
+        }
+    </script>
+</body>
+</html>

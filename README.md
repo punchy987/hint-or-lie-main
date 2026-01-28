@@ -51,7 +51,7 @@ Les warnings Firebase en développement local sont **normaux** :
 **Solution** :
 1. Vérifiez que le serveur est démarré (`node server.js`)
 2. Vérifiez le port dans la console (doit afficher "port 5500")
-3. Actualisez la page du navigateur
+3. **Videz le cache du navigateur : Ctrl + F5** (Windows/Linux) ou **Cmd + Shift + R** (Mac)
 4. Ouvrez la console du navigateur (F12) pour voir les logs de connexion
 
 ### Connexion WebSocket échoue
@@ -60,7 +60,23 @@ Les warnings Firebase en développement local sont **normaux** :
 
 **Solution** :
 - Le fichier `public/js/config/server-config.js` a été corrigé pour utiliser `localhost:5500`
-- Actualisez la page avec **Ctrl + F5** (vider le cache)
+- **Videz OBLIGATOIREMENT le cache : Ctrl + F5**
+- Le navigateur garde l'ancien fichier en cache
+- **Page de test disponible** : http://localhost:5500/test-config.html
+
+### Page de test de configuration
+
+Accédez à **http://localhost:5500/test-config.html** pour :
+- ✅ Vérifier que la configuration est correcte
+- 🗑️ Vider le cache facilement
+- 🔍 Diagnostiquer les problèmes de connexion
+
+### Cache du navigateur
+
+**RÈGLE D'OR** : Après toute modification de `server-config.js`, videz le cache :
+- Windows/Linux : **Ctrl + F5** ou **Ctrl + Shift + R**
+- Mac : **Cmd + Shift + R**
+- Ou ouvrez les DevTools (F12) → Network → Cochez "Disable cache"
 
 ## 🏗️ Architecture
 
