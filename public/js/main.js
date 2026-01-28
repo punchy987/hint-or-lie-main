@@ -60,7 +60,7 @@
         }
       }
 
-      // Gestion du scoreboard (même logique de visibilité)
+      // Gestion du scoreboard (rendu permanent, contrôle utilisateur)
       const scoreboardPanel = document.querySelector('.scoreboard-panel');
       if (scoreboardPanel) {
         if (!targetScreen) {
@@ -68,7 +68,7 @@
           scoreboardPanel.style.display = 'none';
           scoreboardPanel.classList.add('is-hidden');
         } else {
-          // Sur tous les autres écrans : visible avec poignée
+          // Scoreboard toujours rendu, mais jamais forcer ouvert
           scoreboardPanel.style.display = '';
           scoreboardPanel.classList.remove('is-hidden');
         }
@@ -411,8 +411,14 @@
         touchState.locked = true;
       }
       if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        e.preventDefault();
-        scoreboardPanel.style.transform = `translateX(-50%) translateY(${Math.max(0, dy)}px)`;
+        // Pas de preventDefault ici pour laisser le geste se terminer naturellement
+        // Snap magnétique : deux points (ouvert/fermé)
+        const panelHeight = scoreboardPanel.offsetHeight;
+        let translateY = dy;
+        // Limiter le drag vers le haut (ouvert) à 0, vers le bas max à la poignée
+        if (translateY < 0) translateY = 0;
+        if (translateY > panelHeight - 50) translateY = panelHeight - 50;
+        scoreboardPanel.style.transform = `translateX(-50%) translateY(${translateY}px)`;
       } else if (touchState.axis === 'x' && touchState.zone === 'right') {
         reactionTriggers.style.transform = `translateY(-50%) translateX(${Math.min(0, dx)}px)`;
       }
@@ -426,14 +432,19 @@
       if (touchState.zone === 'bottom' && touchState.axis === 'y') {
         scoreboardPanel.style.transition = '';
         scoreboardPanel.style.transform = '';
-        const threshold = window.innerHeight * 0.3;
-        if (dy < -threshold || (Math.abs(dy) > 40 && e.timeStamp - touchState.startTime < 220)) {
-          scoreboardPanel.classList.remove('is-hidden');
-          snap = true;
-        } else if (dy > threshold) {
+        const panelHeight = scoreboardPanel.offsetHeight;
+        const snapThreshold = panelHeight * 0.2; // 20% du panneau
+        let targetState = null;
+        if (dy > snapThreshold) {
           scoreboardPanel.classList.add('is-hidden');
+          targetState = 'closed';
+          snap = true;
+        } else {
+          scoreboardPanel.classList.remove('is-hidden');
+          targetState = 'open';
           snap = true;
         }
+        console.log('[HOL] Snap vertical : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
       }
       // Réactions (horizontal)
       if (touchState.zone === 'right' && touchState.axis === 'x') {
