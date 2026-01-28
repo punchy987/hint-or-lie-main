@@ -140,10 +140,8 @@ body.keyboard-open .scoreboard-handle {
     opacity: 0.3;
 }
 
-/* RÈGLE D'OR : Cacher quand scoreboard est masqué */
-.scoreboard-panel.is-hidden .scoreboard-handle {
-    bottom: -120px;
-}
+/* RÈGLE D'OR v6.5 : Poignée toujours visible (collée au-dessus du panneau) */
+/* Pas de modification de position quand panneau fermé */
 
 /* RÈGLE D'OR : Activer pointer-events sur desktop pour clic */
 @media (hover: hover) and (pointer: fine) {
@@ -163,45 +161,22 @@ body.keyboard-open .scoreboard-handle {
         /* Zone tactile visible mais discrète */
         border: 2px solid rgba(52, 168, 83, 0.3);
     }
-    
-    /* Cacher plus bas sur mobile quand masqué */
-    .scoreboard-panel.is-hidden .scoreboard-handle {
-        bottom: -120px;
-    }
 }
 
-/* RÈGLE D'OR : Apparition au hover (desktop) - déjà visible par défaut */
+/* RÈGLE D'OR : Intensification au hover (desktop) */
 @media (hover: hover) and (pointer: fine) {
-    #scoreboard-touch-zone:hover ~ .scoreboard-panel .scoreboard-handle,
-    .scoreboard-panel:hover .scoreboard-handle {
-        bottom: -30px; /* Légèrement plus visible au hover */
+    .scoreboard-handle:hover {
+        background: linear-gradient(135deg, 
+            rgba(52, 168, 83, 0.20) 0%, 
+            rgba(52, 168, 83, 0.15) 100%);
+        box-shadow: 
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+            0 2px 12px rgba(52, 168, 83, 0.4);
     }
 }
 
-/* RÈGLE D'OR : Animation peek périodique quand fermé */
-.scoreboard-panel.is-hidden .scoreboard-handle {
-    animation: scoreboardPeek 8s infinite ease-in-out;
-}
-
-@keyframes scoreboardPeek {
-    0%, 90%, 100% {
-        bottom: -120px;
-    }
-    5%, 10% {
-        bottom: -30px; /* Montre la barre de 30px */
-    }
-}
-
-@media (max-width: 640px) {
-    @keyframes scoreboardPeek {
-        0%, 90%, 100% {
-            bottom: -120px;
-        }
-        5%, 10% {
-            bottom: -44px; /* Montre la barre de 44px sur mobile */
-        }
-    }
-}
+/* RÈGLE D'OR v6.5 : Pas d'animation peek, poignée toujours visible */
 
 /* Titre du panneau */
 .scoreboard-panel h3 {
