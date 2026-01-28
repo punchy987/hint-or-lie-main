@@ -19,13 +19,18 @@
       const led = document.createElement('div');
       led.className = 'status-led';
       
-      // Logique de couleur LED
+      // Nouvelle logique LED :
+      // Vert = actif en jeu ; Orange = lobby prêt ; Rouge = lobby non prêt ; Gris = déconnecté
       if (p.disconnected) {
         led.classList.add('status-offline');
-      } else if (p.spectator || p.phase === 'lobby' || !p.active) {
-        led.classList.add('status-lobby');
+      } else if (p.phase === 'lobby') {
+        if (p.isReady || p.ready) {
+          led.classList.add('status-lobby-ready'); // orange
+        } else {
+          led.classList.add('status-lobby-notready'); // rouge
+        }
       } else {
-        led.classList.add('status-online');
+        led.classList.add('status-online'); // vert
       }
       
       li.appendChild(led);

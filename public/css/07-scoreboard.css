@@ -123,9 +123,11 @@ body.keyboard-open .scoreboard-handle {
     
     /* Position absolute collée au panel */
     position: absolute;
-    /* RÈGLE D'OR : Collée au panel (pas de gap) */
-    bottom: -30px;
+    top: 0;
     left: 0;
+    right: 0;
+    bottom: auto;
+    transform: none !important;
     
     /* Dimensions fines et discrètes */
     height: 30px;
@@ -339,25 +341,54 @@ body.keyboard-open .scoreboard-handle {
 
 /* LED de statut */
 .status-led {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: #333;
+    box-shadow: 0 0 0 0 #000;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
+
+/* LED verte lumineuse : prêt ou en jeu */
 .status-led.status-online,
 .status-led.is-active {
-    background: #00ff88;
+    background: #34ff6d;
+    box-shadow: 0 0 8px 2px #34ff6d, 0 0 2px 0 #fff;
 }
 
+/* LED orange lumineuse : dans le lobby et prêt */
+.status-led.status-lobby-ready {
+    background: #ffb300;
+    box-shadow: 0 0 8px 2px #ffb300, 0 0 2px 0 #fff2;
+}
+
+/* LED rouge lumineuse : dans le lobby non prêt */
+.status-led.status-lobby-notready {
+    background: #ff3b3b;
+    box-shadow: 0 0 8px 2px #ff3b3b, 0 0 2px 0 #fff2;
+}
+
+/* LED orange lumineuse : attente */
 .status-led.status-lobby,
 .status-led.is-ready {
-    background: #ff5277;
+    background: #ffb300;
+    box-shadow: 0 0 8px 2px #ffb300, 0 0 2px 0 #fff2;
 }
 
+/* LED rouge lumineuse : présent lobby mais pas prêt */
+.status-led.status-waiting,
+.status-led.is-waiting {
+    background: #ff3b3b;
+    box-shadow: 0 0 8px 2px #ff3b3b, 0 0 2px 0 #fff2;
+}
+
+/* LED éteinte : déconnecté */
 .status-led.status-offline,
 .status-led.is-disconnected {
-    background: #333;
+    background: #444;
+    box-shadow: 0 0 2px 0 #222;
+    opacity: 0.5;
 }
 
 /* Emoji de statut */
@@ -399,10 +430,8 @@ body.keyboard-open .scoreboard-handle {
 }
 .scoreboard-label-text {
     display: block;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
+    position: static;
+    transform: none;
     font-size: 0.8rem;
     font-weight: 700;
     color: rgba(52, 168, 83, 0.9);
@@ -412,10 +441,8 @@ body.keyboard-open .scoreboard-handle {
 }
 .scoreboard-close-text {
     display: none;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
+    position: static;
+    transform: none;
     font-size: 0.8rem;
     font-weight: 700;
     color: #e24545;
