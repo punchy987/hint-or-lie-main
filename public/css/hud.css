@@ -21,6 +21,15 @@
     --hud-enabled: 1;
 }
 
+body {
+    overflow-x: hidden !important;
+}
+
+#game-container {
+    overflow-x: hidden !important;
+}
+}
+
 .hud-container {
     display: flex;
     flex-direction: column;
@@ -67,6 +76,9 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 #toast { display: none; }
+#toast {
+    pointer-events: none !important;
+}
 #toast:not(:empty) { display: block; }
 
 #screen-lobby {
@@ -144,7 +156,7 @@
     bottom: 0;
     width: 150px;
     height: 100vh;
-    pointer-events: none;
+    pointer-events: none !important;
     overflow: visible;
     z-index: 20000;
 }

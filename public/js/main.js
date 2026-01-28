@@ -391,115 +391,85 @@
       target: null
     };
 
-    document.addEventListener('touchstart', (e) => {
+    document.addEventListener('touchstart', function(e) {
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
       const modal = $('modal');
       const modalRules = $('modal-rules-lobby');
-
-      if ((modal && modal.style.display === 'flex') || (modalRules && modalRules.classList.contains('active'))) {
-        console.log('[HUD-Swipe] Bloqué par modal');
-        return;
-      }
-      
-      let zone = null;
-      let target = null;
-      // Détection de zone
-      if (startX > SCREEN_W * 0.75) { // Zone de réaction (droite)
-        zone = 'right';
-        target = reactionTriggers;
-      } else if (startY > SCREEN_H * 0.5) { // Zone du scoreboard (moitié inférieure)
-        zone = 'bottom';
-        target = scoreboardPanel;
-      }
-      
-      if(target) {
+      if ((modal && modal.style.display === 'flex') || (modalRules && modalRules.classList.contains('active'))) return;
+      let zone = null, target = null;
+      if (startX > SCREEN_W * 0.5) { zone = 'right'; target = reactionTriggers; }
+      else if (startY > SCREEN_H * 0.6) { zone = 'bottom'; target = scoreboardPanel; }
+      if (target) {
         touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone, axis: null, locked: false, target };
         target.classList.add('is-dragging');
-        console.log(`[HUD-Swipe] Detecté sur zone ${zone}`);
+        target.style.transition = 'none';
       }
-      
     }, { passive: false });
 
-    document.addEventListener('touchmove', (e) => {
+    document.addEventListener('touchmove', function(e) {
       if (!touchState.isTracking) return;
-      
+      e.preventDefault();
       const touch = e.touches[0];
       touchState.currentX = touch.clientX;
       touchState.currentY = touch.clientY;
       const dx = touchState.currentX - touchState.startX;
       const dy = touchState.currentY - touchState.startY;
-
-      // Verrouillage de l'axe après 5px de mouvement
       if (!touchState.locked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
         touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         touchState.locked = true;
       }
-      
-      // Mouvement sur l'axe Y pour le scoreboard
       if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        let translateY = dy > 0 ? dy : 0; // Bloquer le mouvement vers le haut
-        touchState.target.style.transform = `translateX(-50%) translateY(${translateY}px)`;
-      } 
-      // Mouvement sur l'axe X pour les réactions
-      else if (touchState.axis === 'x' && touchState.zone === 'right') {
-        let translateX = dx < 0 ? dx : 0; // Bloquer le mouvement vers la gauche
-        touchState.target.style.transform = `translateY(-50%) translateX(${translateX}px)`;
+        touchState.target.style.transform = `translateX(-50%) translateY(${dy > 0 ? dy : 0}px)`;
+      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
+        touchState.target.style.transform = `translateY(-50%) translateX(${dx < 0 ? dx : 0}px)`;
       }
-
     }, { passive: false });
 
-    document.addEventListener('touchend', (e) => {
+    document.addEventListener('touchend', function(e) {
       if (!touchState.isTracking || !touchState.locked) {
-        if(touchState.target) touchState.target.classList.remove('is-dragging');
+        if (touchState.target) touchState.target.classList.remove('is-dragging');
         touchState.isTracking = false;
         return;
       }
-      
+      const dx = touchState.currentX - touchState.startX;
+      const dy = touchState.currentY - touchState.startY;
       const endX = touchState.currentX;
       const endY = touchState.currentY;
-      
-      // Nettoyage initial
       touchState.target.classList.remove('is-dragging');
-      touchState.target.style.transition = ''; // Laisser les transitions CSS reprendre le contrôle
-
+      touchState.target.style.transition = '';
       // Scoreboard (Vertical)
       if (touchState.zone === 'bottom' && touchState.axis === 'y') {
-        const isClosing = endY > (SCREEN_H * 0.9) || endY > (SCREEN_H - SAFETY_MARGIN);
-        
-        if (isClosing) {
+        const velocity = dy / (e.timeStamp || 1);
+        const snap = (endY > SCREEN_H * 0.7) || (velocity > 0.3) || (endY > SCREEN_H - SAFETY_MARGIN);
+        if (snap) {
           scoreboardPanel.classList.add('is-hidden');
           scoreboardPanel.dataset.manuallyClosed = '1';
         } else {
           scoreboardPanel.classList.remove('is-hidden');
           delete scoreboardPanel.dataset.manuallyClosed;
         }
-        // La transition CSS gère l'animation de snap
-        scoreboardPanel.style.transform = ''; // Reset pour que la classe CSS prenne effet
+        scoreboardPanel.style.transform = '';
       }
-      
       // Réactions (Horizontal)
       if (touchState.zone === 'right' && touchState.axis === 'x') {
-        const isClosing = endX > (SCREEN_W * 0.9) || endX > (SCREEN_W - SAFETY_MARGIN);
-        
-        if (isClosing) {
+        const velocity = dx / (e.timeStamp || 1);
+        const snap = (endX > SCREEN_W * 0.7) || (velocity > 0.3) || (endX > SCREEN_W - SAFETY_MARGIN);
+        if (snap) {
           reactionTriggers.classList.remove('is-open');
-           if (navigator.vibrate) navigator.vibrate(15);
+          if (navigator.vibrate) navigator.vibrate(15);
         } else {
           reactionTriggers.classList.add('is-open');
           if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         }
-         // La transition CSS gère l'animation de snap
-        reactionTriggers.style.transform = ''; // Reset pour que la classe CSS prenne effet
+        reactionTriggers.style.transform = '';
       }
-
-      // Réinitialisation de l'état
       touchState.isTracking = false;
       touchState.target = null;
     }, { passive: false });
 
-    console.log('[HOL] Système tactile initialisé sans erreur');
+    console.log('[HOL-System] v7.3 : Syntaxe réparée et Swipe activé');
   }
 
 // ...existing code...
