@@ -2,7 +2,31 @@
 
 Jeu multijoueur de déduction sociale - trouvez l'imposteur parmi vous !
 
-## 🚀 Démarrage rapide
+## � Installation depuis GitHub
+
+### RÈGLE D'OR : 3 commandes suffisent pour jouer !
+
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/[votre-username]/hint-or-lie.git
+cd hint-or-lie
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Démarrer le serveur
+npm start
+```
+
+Puis ouvrez votre navigateur à : **http://localhost:5500**
+
+### Prérequis
+
+- **Node.js** version 16 ou supérieure ([Télécharger Node.js](https://nodejs.org/))
+- Un navigateur web moderne (Chrome, Firefox, Safari, Edge)
+- Port 5500 disponible (ou modifiable dans `server.js`)
+
+## 🚀 Démarrage rapide (si déjà installé)
 
 ### RÈGLE D'OR : Le serveur doit être démarré AVANT d'accéder au jeu
 
@@ -100,7 +124,25 @@ hint-or-lie-main/
 ## 📱 Version mobile
 
 Le projet supporte Capacitor pour Android/iOS.
-Voir `CAPACITOR_SETUP.md` pour les instructions.
+Voir [CAPACITOR_SETUP.md](CAPACITOR_SETUP.md) pour les instructions.
+
+## 🚀 Déploiement en production
+
+Pour déployer sur Render, Heroku ou autre plateforme :
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour le guide complet.
+
+**Résumé rapide** :
+1. Déployez sur Render (gratuit)
+2. Render vous donnera une URL : `https://hint-or-lie-xxxx.onrender.com`
+3. Mettez à jour cette URL dans `public/js/config/server-config.js`
+4. Commitez et poussez → Render redéploie automatiquement ✅
+
+## 🔒 Sécurité et Configuration
+
+- ✅ Les clés Firebase sont dans `.gitignore` (ne seront jamais sur GitHub)
+- ✅ Le mode développement est automatique sur `localhost`
+- ✅ Le mode production nécessite de configurer l'URL dans `server-config.js`
+- ✅ Variables d'environnement documentées dans `.env.example`
 
 ---
 

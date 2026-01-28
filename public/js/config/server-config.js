@@ -11,8 +11,10 @@
  */
 
 const SERVER_CONFIG = {
-  production: 'https://ton-nom-de-projet.onrender.com', // Remplace par ton URL Render
-  development: 'http://localhost:5500'  // Port correspondant au server.js
+  // RÈGLE D'OR : Si vous déployez sur Render/Heroku, remplacez l'URL ci-dessous
+  // Sinon, le jeu fonctionnera automatiquement en local après 'npm install && npm start'
+  production: 'https://ton-nom-de-projet.onrender.com',
+  development: 'http://localhost:5500'  // Port par défaut du server.js
 };
 
 /**
