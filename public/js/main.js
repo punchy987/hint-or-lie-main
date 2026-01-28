@@ -391,7 +391,6 @@
       const modalRules = $('modal-rules-lobby');
       if ((modal && modal.style.display === 'flex') || 
           (modalRules && modalRules.classList.contains('active'))) {
-        console.log('🚫 Swipe désactivé : modal ouvert');
         return;
       }
       
@@ -406,7 +405,6 @@
           isTracking: true,
           zone: 'right'
         };
-        console.log('👆 Zone droite détectée', { x: startX, threshold: screenWidth * 0.75 });
       } else if (startY > screenHeight * 0.75) {
         // Zone basse : scoreboard
         touchState = {
@@ -417,7 +415,6 @@
           isTracking: true,
           zone: 'bottom'
         };
-        console.log('👆 Zone basse détectée', { y: startY, threshold: screenHeight * 0.75 });
       }
     }, { passive: true });
     
@@ -440,7 +437,6 @@
       
       // RÈGLE D'OR : Si mouvement < 10px, c'est un tap -> laisser passer
       if (distance < tapThreshold) {
-        console.log('👆 Tap détecté (< 10px) : événement laissé au navigateur');
         touchState.isTracking = false;
         return;
       }
@@ -448,47 +444,33 @@
       if (touchState.zone === 'right') {
         // Zone réactions : vérifier vecteur horizontal
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-          console.log('👆 Swipe horizontal réactions', { deltaX, deltaY });
-          
           if (deltaX < 0) {
             // Swipe gauche : ouvrir
             reactionTriggers.classList.add('is-open');
             if (navigator.vibrate) navigator.vibrate(10);
-            console.log('✅ Réactions ouvertes');
           } else {
             // Swipe droite : fermer
             reactionTriggers.classList.remove('is-open');
             if (navigator.vibrate) navigator.vibrate(10);
-            console.log('✅ Réactions fermées');
           }
-        } else {
-          console.log('👆 Mouvement vertical ignoré (scroll préservé)');
         }
       } else if (touchState.zone === 'bottom') {
         // Zone scoreboard : vérifier vecteur vertical
         if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
-          console.log('👆 Swipe vertical scoreboard', { deltaY, deltaX });
-          
           if (deltaY < 0) {
             // Swipe haut : ouvrir
             scoreboardPanel.classList.remove('is-hidden');
             if (navigator.vibrate) navigator.vibrate(10);
-            console.log('✅ Scoreboard ouvert');
           } else {
             // Swipe bas : fermer
             scoreboardPanel.classList.add('is-hidden');
             if (navigator.vibrate) navigator.vibrate(10);
-            console.log('✅ Scoreboard fermé');
           }
-        } else {
-          console.log('👆 Mouvement horizontal ignoré (scroll préservé)');
         }
       }
       
       touchState.isTracking = false;
     }, { passive: true });
-    
-    console.log('✅ Système de swipe global initialisé (pass-through)');
   }
   
   // ========== DÉTECTION INTELLIGENTE DU CLAVIER ==========
@@ -501,7 +483,6 @@
         if (navigator.vibrate) {
           navigator.vibrate(10);
         }
-        console.log('⌨️ Clavier détecté : HUD adapté');
       }
     });
     
@@ -513,7 +494,6 @@
           const activeElement = document.activeElement;
           if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
             document.body.classList.remove('keyboard-open');
-            console.log('⌨️ Clavier fermé : HUD restauré');
           }
         }, 100);
       }
@@ -525,12 +505,7 @@
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
     const scoreboardHandle = document.querySelector('.scoreboard-handle');
     
-    if (!scoreboardPanel) {
-      console.warn('Scoreboard: panneau manquant');
-      return;
-    }
-
-    console.log('Scoreboard initialisé');
+    if (!scoreboardPanel) return;
 
     // ========== DESKTOP : Clic sur handle pour toggle ==========
     if (scoreboardHandle) {
@@ -554,12 +529,7 @@
     const reactionTriggers = document.getElementById('reaction-triggers');
     const reactionHandle = document.querySelector('.reaction-handle');
 
-    if (!triggers.length || !displayArea) {
-      console.warn('Arcade Bubbles: éléments manquants', { triggers: triggers.length, displayArea: !!displayArea });
-      return;
-    }
-
-    console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
+    if (!triggers.length || !displayArea) return;
 
     // ========== DESKTOP : Clic sur handle pour toggle ==========
     if (reactionHandle) {
@@ -579,8 +549,6 @@
 
         const emoji = btn.getAttribute('data-emoji');
         const playerName = state.me?.name || 'Joueur';
-
-        console.log('Réaction envoyée:', { emoji, playerName });
 
         // Émettre la réaction au serveur (affichage centralisé via broadcast)
         socket.emit('player-reaction', { emoji, name: playerName });
@@ -608,33 +576,13 @@
 
     // Réception des réactions des autres joueurs
     socket.on('reaction-broadcast', ({ emoji, name }) => {
-      console.log('[REACTION] 📨 Broadcast reçu:', { emoji, name });
       createReactionBubble(emoji, name, displayArea);
     });
-    
-    // DEBUG : Test automatique au chargement (à supprimer en production)
-    if (displayArea) {
-      setTimeout(() => {
-        console.log('[REACTION] 🧪 Test automatique de bulle...');
-        createReactionBubble('🎉', 'Test Auto', displayArea);
-      }, 2000);
-    }
   }
 
   function createReactionBubble(emoji, playerName, container) {
-    console.log('[REACTION] Création bulle:', { emoji, playerName, container: container?.id });
-    console.log('[REACTION] Container display:', container ? window.getComputedStyle(container).display : 'N/A');
-    console.log('[REACTION] Container z-index:', container ? window.getComputedStyle(container).zIndex : 'N/A');
-    
-    if (!container) {
-      console.error('[REACTION] ❌ Container manquant pour bulle');
-      return;
-    }
-    
-    if (window.getComputedStyle(container).display === 'none') {
-      console.error('[REACTION] ❌ Container est display:none!');
-      return;
-    }
+    if (!container) return;
+    if (window.getComputedStyle(container).display === 'none') return;
 
     const bubble = document.createElement('div');
     bubble.className = 'reaction-bubble';
@@ -654,19 +602,8 @@
     bubble.appendChild(nameSpan);
     container.appendChild(bubble);
 
-    console.log('[REACTION] ✅ Bulle ajoutée au DOM:', bubble);
-    console.log('[REACTION] Position bulle:', {
-      bottom: bubble.style.bottom || window.getComputedStyle(bubble).bottom,
-      left: bubble.style.left,
-      zIndex: window.getComputedStyle(bubble).zIndex,
-      animation: window.getComputedStyle(bubble).animation
-    });
-
     // Suppression automatique après l'animation (3.2s)
-    setTimeout(() => {
-      bubble.remove();
-      console.log('[REACTION] 🗑️ Bulle supprimée:', emoji);
-    }, 3200);
+    setTimeout(() => bubble.remove(), 3200);
   }
 
   if (document.readyState !== 'loading') init();

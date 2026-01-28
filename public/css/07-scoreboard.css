@@ -135,11 +135,6 @@ body.keyboard-open .scoreboard-handle {
     touch-action: none;
 }
 
-/* RÈGLE D'OR : Réduire l'opacité du handle quand clavier ouvert */
-body.keyboard-open .scoreboard-handle {
-    opacity: 0.3;
-}
-
 /* RÈGLE D'OR v6.5 : Poignée toujours visible (collée au-dessus du panneau) */
 /* Pas de modification de position quand panneau fermé */
 
