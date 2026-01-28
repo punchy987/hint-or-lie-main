@@ -71,6 +71,12 @@
           // Scoreboard toujours rendu, mais jamais forcer ouvert
           scoreboardPanel.style.display = '';
           scoreboardPanel.classList.remove('is-hidden');
+          // Contrôle manuel : ne forcer ouvert que si pas fermé manuellement
+          if (targetScreen === 'screen-lobby') {
+            if (!scoreboardPanel.dataset.manuallyClosed) {
+              scoreboardPanel.classList.add('is-open');
+            }
+          }
         }
       }
 
@@ -399,6 +405,8 @@
         console.log('[HUD-Swipe] Detecté sur zone scoreboard');
       }
     }, { passive: false });
+    let lastMoveTime = 0;
+    let lastMoveY = 0;
     document.addEventListener('touchmove', (e) => {
       if (!touchState.isTracking) return;
       const touch = e.touches[0];
@@ -411,14 +419,13 @@
         touchState.locked = true;
       }
       if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        // Pas de preventDefault ici pour laisser le geste se terminer naturellement
-        // Snap magnétique : deux points (ouvert/fermé)
         const panelHeight = scoreboardPanel.offsetHeight;
         let translateY = dy;
-        // Limiter le drag vers le haut (ouvert) à 0, vers le bas max à la poignée
         if (translateY < 0) translateY = 0;
         if (translateY > panelHeight - 50) translateY = panelHeight - 50;
         scoreboardPanel.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+        lastMoveTime = e.timeStamp;
+        lastMoveY = touchState.currentY;
       } else if (touchState.axis === 'x' && touchState.zone === 'right') {
         reactionTriggers.style.transform = `translateY(-50%) translateX(${Math.min(0, dx)}px)`;
       }
@@ -433,17 +440,24 @@
         scoreboardPanel.style.transition = '';
         scoreboardPanel.style.transform = '';
         const panelHeight = scoreboardPanel.offsetHeight;
+        const ySnapPoints = [0, panelHeight - 50];
         const snapThreshold = panelHeight * 0.2; // 20% du panneau
+        // Calcul de la vélocité
+        const dt = e.timeStamp - lastMoveTime;
+        const dyMove = touchState.currentY - lastMoveY;
+        const velocity = dt > 0 ? dyMove / dt : 0;
         let targetState = null;
-        if (dy > snapThreshold) {
+        // Snap logique : seuil de distance OU vélocité
+        if (dy > snapThreshold || velocity > 0.5) {
           scoreboardPanel.classList.add('is-hidden');
+          scoreboardPanel.dataset.manuallyClosed = '1';
           targetState = 'closed';
-          snap = true;
         } else {
           scoreboardPanel.classList.remove('is-hidden');
+          delete scoreboardPanel.dataset.manuallyClosed;
           targetState = 'open';
-          snap = true;
         }
+        console.log('[HOL] Scoreboard Snap configuré : Ouvert=0 / Fermé=' + (panelHeight - 50));
         console.log('[HOL] Snap vertical : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
       }
       // Réactions (horizontal)
