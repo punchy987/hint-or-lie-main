@@ -60,8 +60,6 @@
         max-width: 500px;
     }
 }
-    pointer-events: auto !important;
-}
 
 /* BARRE HANDLE EN RELIEF : cachée par défaut */
 .scoreboard-handle {
