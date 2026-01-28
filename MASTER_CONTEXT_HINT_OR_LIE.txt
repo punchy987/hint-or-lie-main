@@ -19,6 +19,43 @@ points d'ancrage CRITIQUES pour :
  MISE À JOUR — 28 JANVIER 2026 (v6.8)
 ================================================================================
 
+[================================================================================
+ MISE À JOUR — 28 JANVIER 2026 (v6.9 & v7.0)
+================================================================================
+
+OPTIMISATION TACTILE & PHYSIQUE HUD (v7.0) — PANNEAUX TOUJOURS RENDUS, SWIPE AIMANTÉ
+
+1. Règle d'or : Tous les panneaux (scoreboard, réactions) sont TOUJOURS présents dans le DOM (jamais display:none, sauf sur l'accueil). La visibilité est gérée UNIQUEMENT par des classes (.is-hidden, .is-open, etc.)
+
+2. Système de swipe/friction refondu (v6.9) :
+   ✅ Swipe horizontal (réactions) et vertical (scoreboard) avec friction aimantée, rubber-banding, et snap fluide
+   ✅ Verrouillage d'axe automatique (lock axis)
+   ✅ Snap magnétique sur poignée ou panel complet
+   ✅ Rubber-banding en fin de course (rebond visuel)
+   ✅ Touch-action optimisé, will-change sur panneaux
+   ✅ Zones tactiles élargies, pointer-events: none sur touch-zones
+   ✅ Feedback haptique sur swipe réussi
+   ✅ Debug log "[HOL] JS chargé (v6.9+)" au chargement
+
+3. Z-index et pointer-events :
+   ✅ Z-index panels/touch-zones vérifiés (cf. Z_INDEX_HIERARCHY.md)
+   ✅ pointer-events: none sur zones tactiles pour ne jamais bloquer les clics
+
+4. Code et fichiers concernés :
+   - public/js/main.js (initGlobalSwipeSystem, friction/snap, debug)
+   - public/js/core/helpers.js (HOL.show : panels toujours rendus)
+   - public/css/hud.css, public/css/07-scoreboard.css (z-index, pointer-events)
+
+5. Règle d'or : Jamais de display:none sur les panneaux, sauf sur l'accueil (screen-home)
+
+6. Validation :
+   ✅ JS sans erreur de syntaxe, log de confirmation au chargement
+   ✅ Swipe fluide, friction/snap robustes, panels toujours présents
+
+COMMITS GITHUB :
+   - <dernier commit> : feat(swipe): friction aimantée, rubber-banding, snap fluide, optim touch-action/will-change (v6.9)
+
+================================================================================
 
  MASTER CLEANUP & FLUID HUD - PRODUCTION-READY :
 
