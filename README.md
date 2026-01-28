@@ -137,6 +137,44 @@ Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour le guide complet.
 3. Mettez à jour cette URL dans `public/js/config/server-config.js`
 4. Commitez et poussez → Render redéploie automatiquement ✅
 
+⚠️ **Important** : Les pushs sur `main` redémarrent le serveur et déconnectent les joueurs.  
+Voir [VERSION_MANAGEMENT.md](VERSION_MANAGEMENT.md) pour gérer les mises à jour sans interrompre les parties.
+
+## 🔄 Gestion des versions
+
+**Question importante** : "Si je push du code, est-ce que ça coupe les parties en cours ?"
+
+Réponse détaillée dans [VERSION_MANAGEMENT.md](VERSION_MANAGEMENT.md) :
+- ✅ Serveurs locaux : Jamais affectés par vos pushs
+- ⚠️ Production (auto-deploy ON) : Redémarrage à chaque push sur `main`
+- ✅ Production (auto-deploy OFF) : Push sans impact, déploiement manuel
+
+**Recommandation** : Utilisez une branche `dev` pour le développement, mergez vers `main` pendant les heures creuses.
+
+### 📦 Mises à jour pour développeurs locaux
+
+Les installations locales **ne se mettent PAS à jour automatiquement**. Voir [LOCAL_UPDATES.md](LOCAL_UPDATES.md).
+
+**🔔 NOUVEAU : Système de notification automatique**
+- Les utilisateurs locaux sont **automatiquement notifiés** quand une nouvelle version est disponible
+- Notification avec bouton de mise à jour en un clic
+- Vérification de compatibilité automatique
+- Voir [VERSION_SYSTEM.md](VERSION_SYSTEM.md) pour les détails
+
+**Pour mettre à jour votre installation locale** :
+```bash
+npm run update
+# Ou manuellement :
+# git pull origin main && npm install && npm start
+```
+
+**Vérifier si des mises à jour sont disponibles** :
+```bash
+npm run version:check
+```
+
+**Historique des versions** : Voir [CHANGELOG.md](CHANGELOG.md)
+
 ## 🔒 Sécurité et Configuration
 
 - ✅ Les clés Firebase sont dans `.gitignore` (ne seront jamais sur GitHub)

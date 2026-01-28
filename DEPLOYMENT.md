@@ -128,17 +128,103 @@ Puis modifiez `config/firebase.js` pour lire depuis la variable d'environnement 
 
 Voir le fichier `CAPACITOR_SETUP.md` pour les instructions de build Android/iOS.
 
-## 🔄 Mise à jour
+## 🔄 Mise à jour et Gestion des Parties en Cours
 
-Pour mettre à jour votre déploiement :
+### ⚠️ RÈGLE D'OR : Comprendre l'impact des mises à jour
 
+Quand vous poussez du code sur GitHub avec Render configuré en **auto-deploy** :
+
+1. **Render détecte le push** → Lance un nouveau build
+2. **Le serveur redémarre** → **TOUTES les parties en cours sont interrompues** ❌
+3. **Les joueurs sont déconnectés** → Doivent se reconnecter
+
+### 🎯 Stratégies selon le contexte
+
+#### Développement / Tests (peu de joueurs)
 ```bash
 git add .
 git commit -m "Mise à jour du jeu"
 git push origin main
 ```
+Render redéploiera automatiquement (délai ~2-3 min).
 
-Render redéploiera automatiquement ! 🎉
+#### Production (beaucoup de joueurs actifs)
+
+**Option 1 : Désactiver l'auto-deploy** (recommandé)
+1. Dans le dashboard Render → Settings
+2. Désactivez "Auto-Deploy"
+3. Poussez vos modifications sur GitHub
+4. Déployez manuellement quand c'est calme (nuit, maintenance programmée)
+
+**Option 2 : Utiliser les branches**
+```bash
+# Développement sur branche dev
+git checkout -b dev
+git add .
+git commit -m "Nouvelles fonctionnalités"
+git push origin dev
+
+# Merge vers main uniquement pendant les heures creuses
+git checkout main
+git merge dev
+git push origin main  # ← Redéploiement ici
+```
+
+**Option 3 : Message de maintenance**
+Avant de push, ajoutez un système d'alerte :
+```javascript
+// Dans server.js, avant le redémarrage
+io.emit('serverMaintenance', { 
+  message: 'Mise à jour dans 2 minutes. Terminez vos parties !',
+  countdown: 120 
+});
+```
+
+### 📊 Impact sur les joueurs
+
+| Scénario | Impact |
+|----------|--------|
+| **Push GitHub (auto-deploy ON)** | ❌ Parties coupées, déconnexion immédiate |
+| **Push GitHub (auto-deploy OFF)** | ✅ Aucun impact, joueurs continuent |
+| **Deploy manuel Render** | ❌ Parties coupées lors du déploiement |
+| **Serveur en veille (15 min inactivité)** | ⚠️ Premier joueur attend 30s le réveil |
+
+### 🛡️ Protection des parties en cours
+
+**Ce qui est préservé** :
+- ❌ État du jeu (perdu au redémarrage)
+- ❌ Parties en cours (interrompues)
+- ✅ Scores persistés dans Firebase (si configuré)
+- ✅ Statistiques joueurs dans Firebase
+
+**Solution recommandée** : 
+- Utilisez Firebase pour la persistance des scores
+- Déployez pendant les heures creuses (2h-6h du matin)
+- Prévenez les joueurs réguliers (Discord, Twitter, etc.)
+
+### 🔔 Bonne pratique de mise à jour
+
+```bash
+# 1. Testez localement
+npm start  # Vérifiez que tout fonctionne
+
+# 2. Créez une branche
+git checkout -b hotfix-v1.2
+
+# 3. Commitez
+git add .
+git commit -m "Fix: Correction bug scoreboard"
+
+# 4. Poussez sur la branche
+git push origin hotfix-v1.2
+
+# 5. Testez sur un environnement de staging (optionnel)
+
+# 6. Merge vers main pendant heures creuses
+git checkout main
+git merge hotfix-v1.2
+git push origin main  # ← Redéploiement production ici
+```
 
 ---
 

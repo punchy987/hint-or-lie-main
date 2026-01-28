@@ -13,6 +13,9 @@ const { clearRoomTimer, startPhaseTimer } =
 const { isHintAllowed } =
   require(path.join(__dirname, 'game', 'validate.js'));
 
+const { setupVersionCheck } =
+  require(path.join(__dirname, 'version.js'));
+
 let makePersistence = () => ({
   upsertRoundResult: async () => {},
   getTop50:          async () => [],
@@ -65,6 +68,9 @@ module.exports = function setupSockets(io, db){
   io.on('connection',(socket)=>{
     let joined  = { code:null };
     let profile = { deviceId:null, lastPseudo:null, persistentId:null };
+
+    // RÈGLE D'OR : Vérifier la version du client à la connexion
+    setupVersionCheck(socket);
 
     socket.on('getPublicRooms', () => {
       broadcastPublicRooms();

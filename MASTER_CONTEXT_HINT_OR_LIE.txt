@@ -9,13 +9,93 @@ points d'ancrage CRITIQUES pour :
    Le JavaScript (sélection DOM, événements)
    Les Sockets (communication temps réel)
    Firebase (persistance des données)
+   Le système de vérification de version
 
  Toute modification d'un ID ou d'une classe peut CASSER le jeu.
  Toujours vérifier les usages dans main.js, socket.js, et persistence.js
    avant toute modification.
 
 ================================================================================
- DESIGN & FORMAT — CONTRAINTES VALIDÉES [26 JANVIER 2026]
+ MISE À JOUR — 27 JANVIER 2026
+================================================================================
+
+ NOUVELLES FONCTIONNALITÉS IMPLÉMENTÉES :
+
+ 1. Système de Vérification de Version Automatique
+    ✅ Notification automatique des mises à jour disponibles
+    ✅ Vérification de compatibilité client/serveur
+    ✅ Blocage des versions incompatibles
+    ✅ Instructions de mise à jour intégrées
+    Fichiers :
+       - public/js/core/version-check.js (système client)
+       - routes/sockets/version.js (système serveur)
+       - public/css/10-version-update.css (styles modaux)
+    
+ 2. Règles de Masquage Interface (RÈGLE D'OR)
+    ✅ Scoreboard masqué sur page d'accueil (display: none)
+    ✅ Panneau réactions masqué sur page d'accueil (display: none)
+    ✅ Protection triple couche : CSS + HTML + JavaScript
+    Implémentation :
+       - [data-screen="screen-home"] .scoreboard-panel { display: none !important; }
+       - [data-screen="screen-home"] #reaction-triggers { display: none !important; }
+       - body[data-screen="screen-home"] ajouté au chargement initial
+    
+ 3. Configuration Serveur Corrigée
+    ✅ Port 5500 (au lieu de 3000) pour correspondre à server.js
+    ✅ Détection environnement améliorée (support IPv4 locales)
+    ✅ Force mode développement si URL production non configurée
+    ✅ Cache busting avec ?v=2 dans index.html
+    Fichiers :
+       - public/js/config/server-config.js (port 5500)
+       - server.js (commentaires RÈGLE D'OR ajoutés)
+    
+ 4. Documentation Complète Créée
+    ✅ README.md enrichi (installation, scripts npm)
+    ✅ DEPLOYMENT.md (guide déploiement Render avec gestion parties en cours)
+    ✅ VERSION_MANAGEMENT.md (impact pushs GitHub, stratégies mises à jour)
+    ✅ LOCAL_UPDATES.md (mises à jour développeurs locaux)
+    ✅ VERSION_SYSTEM.md (système notifications automatiques)
+    ✅ CHANGELOG.md (historique versions v1.0.0)
+    ✅ .env.example (variables d'environnement documentées)
+    
+ 5. Scripts NPM Ajoutés
+    ✅ npm run update : Met à jour l'installation (git pull + npm install)
+    ✅ npm run version:check : Vérifie disponibilité mises à jour
+    ✅ npm run check : Vérifie configuration projet
+    ✅ npm run precommit : Validation avant commit
+    
+ 6. Outils de Diagnostic
+    ✅ check-deployment.js : Vérification automatique configuration
+    ✅ public/test-config.html : Page test configuration serveur
+    ✅ utils/maintenance.js : Script notification maintenance
+    
+ 7. Badge de Version
+    ✅ Affichage version sur page d'accueil (v1.0.0)
+    ✅ Style : .version-badge dans 08-home.css
+    ✅ Position : Sous tagline dans title-group
+
+ ARCHITECTURE VERSION :
+    Version actuelle : 1.0.0 (synchronisée dans package.json, version-check.js, index.html)
+    Version minimum : 1.0.0 (définie dans routes/sockets/version.js)
+    
+    Workflow mise à jour version :
+       1. Modifier package.json : "version": "1.1.0"
+       2. Modifier version-check.js : CLIENT_VERSION = '1.1.0'
+       3. Modifier version.js : VERSION_CONFIG.current/latest = "1.1.0"
+       4. Modifier index.html : <span class="version-badge">v1.1.0</span>
+       5. Commit + Push (branche dev recommandée)
+       6. Deploy manuel sur Render (auto-deploy désactivé recommandé)
+    
+    Types de notifications :
+       - 🆕 RECOMMANDÉE : Nouvelle version disponible, jeu fonctionnel
+       - 🚨 REQUISE : Version incompatible, blocage création/rejoindre salons
+    
+    Compatibilité :
+       - Versions même majeure (1.x.x) : Compatibles
+       - Versions majeures différentes (1.x.x vs 2.x.x) : Incompatibles
+
+================================================================================
+ DESIGN & FORMAT — CONTRAINTES VALIDÉES [27 JANVIER 2026]
 ================================================================================
 
 Design : Matte Grey Arcade (Relief Embossé + Typography Lexend)
@@ -59,6 +139,18 @@ Format : Mobile-First (Largeur 95%, cibles tactiles 48px+)
  SCOREBOARD HUD  BOTTOM SHEET COULISSANT
 ================================================================================
 
+ RÈGLE D'OR : MASQUAGE SUR PAGE D'ACCUEIL (27 JANVIER 2026)
+   ⚠️ Le scoreboard doit être INVISIBLE sur screen-home
+   Protection triple couche :
+      1. CSS : [data-screen="screen-home"] .scoreboard-panel { display: none !important; }
+      2. HTML : <div id="scoreboard" style="display: none;">
+      3. JS : helpers.js gère display selon l'écran actif
+   
+   État initial :
+      - Page d'accueil : display: none (complètement masqué)
+      - Lobby/Jeu : display: block (visible avec poignée)
+      - Classe .is-hidden : translateY(100%) pour coulissement
+
  ARCHITECTURE TECHNIQUE :
    Position fixée : bottom: 0, centered, transform-based sliding
    État fermé : translateY(calc(100% - 50px)) — seul le handle est visible
@@ -93,9 +185,10 @@ Format : Mobile-First (Largeur 95%, cibles tactiles 48px+)
  RÉFÉRENCES CRITIQUES :
    ID principal : #score-list (conteneur des lignes)
    Classe de ligne : .player-row (chaque joueur)
-   Fichier CSS : public/css/07-scoreboard.css (171 lignes)
+   Fichier CSS : public/css/07-scoreboard.css (251 lignes - includes masquage home)
    Fichier JS : public/js/features/leaderboard.js (logique emoji + LED)
    Toggle handler : public/js/main.js init() fonction
+   Gestion écrans : public/js/core/helpers.js (HOL.show fonction)
 
 ================================================================================
  STRUCTURE DES ÉCRANS  RÉFÉRENCE VALIDÉE [2026-01-25]
@@ -1510,6 +1603,28 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  SYSTÈME ARCADE BUBBLES (RÉACTIONS LATÉRALES) [27 JANVIER 2026] :
     Objectif : Réactions sociales ergonomiques droitier avec bulles flottantes arcade
+    
+    ⚠️ RÈGLE D'OR : MASQUAGE SUR PAGE D'ACCUEIL (Voir Scoreboard pour contexte complet)
+    
+    🔒 Protection Triple-Couche (Identique au Scoreboard) :
+       1️⃣ CSS [data-screen] (public/css/hud.css - ~ligne 1) :
+          [data-screen="screen-home"] #reaction-triggers { display: none !important; }
+          [data-screen="screen-home"] #reaction-display-area { display: none !important; }
+       
+       2️⃣ HTML inline (public/index.html - lignes 232 et 249) :
+          <div id="reaction-triggers" style="display: none;">
+          <div id="reaction-display-area" style="display: none;">
+       
+       3️⃣ JS Gestion états (public/js/main.js - fonction showScreen) :
+          if (screen === 'screen-home') {
+              reactionTriggers.style.display = 'none';
+          }
+       
+       ℹ️ JUSTIFICATION TRIPLE-COUCHE :
+       - CSS [data-screen] : Priorité absolue (média queries)
+       - HTML inline : Sécurité cache/désynchronisation
+       - JS style.display : Contrôle runtime états dynamiques
+       → LES TROIS DOIVENT ÊTRE MODIFIÉS ENSEMBLE si changement de logique
     
     ✅ Structure HTML (public/index.html) :
        - #reaction-triggers : 7 boutons verticaux à droite avec poignée
