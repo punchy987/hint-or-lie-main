@@ -35,8 +35,24 @@
     display: none !important;
 }
 
-/* BARRE HANDLE EN RELIEF — Inspirée des arcade bars */
-.scoreboard-panel::before {
+/* Zone tactile invisible en bas de l'écran pour ouvrir/fermer */
+#scoreboard-touch-zone {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 500px;
+    height: 40px;
+    z-index: 1199 !important;
+    cursor: pointer;
+    /* Zone invisible */
+    background: transparent;
+    pointer-events: auto !important;
+}
+
+/* BARRE HANDLE EN RELIEF : cachée par défaut */
+.scoreboard-handle {
     content: '▼ TABLEAU DE SCORE';
     display: flex;
     align-items: center;
@@ -45,7 +61,8 @@
     
     /* Position absolute pour dépasser */
     position: absolute;
-    top: -50px;
+    /* RÈGLE D'OR : Cachée sous l'écran par défaut */
+    bottom: -120px;
     left: 0;
     
     /* Dimensions et couleur */
@@ -74,59 +91,64 @@
     text-transform: uppercase;
     
     /* Interaction */
-    cursor: grab;
     user-select: none;
+    pointer-events: none;
+    transition: bottom 0.3s ease-out;
     
     /* RÈGLE D'OR : Feedback tactile mobile */
     -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
-    touch-action: pan-y;
-    
-    /* Animation chevron + breathe */
-    animation: handlePullHint 2s infinite ease-in-out, breathe 3s infinite ease-in-out;
-    
-    /* RÈGLE D'OR : Zone tactile invisible étendue */
-    padding: 15px 0;
-    margin: -15px 0;
+    touch-action: none;
 }
 
 /* RÈGLE D'OR : Handle BEAUCOUP plus haut sur mobile (80px) pour meilleur grip au pouce */
 @media (max-width: 640px) {
-    .scoreboard-panel::before {
-        top: -80px;
+    .scoreboard-handle {
+        bottom: -130px;
         height: 80px;
         font-size: 0.85rem;
         letter-spacing: 1.5px;
         /* Zone tactile encore plus visible */
         border: 2px solid rgba(52, 168, 83, 0.3);
-        /* RÈGLE D'OR : Zone tactile ENCORE plus grande sur mobile */
-        padding: 25px 0;
-        margin: -25px 0;
     }
 }
 
-/* Animation active lors du drag */
-.scoreboard-panel:active::before {
-    cursor: grabbing;
+/* RÈGLE D'OR : Apparition au hover (desktop) */
+@media (hover: hover) and (pointer: fine) {
+    #scoreboard-touch-zone:hover ~ .scoreboard-panel .scoreboard-handle,
+    .scoreboard-panel:hover .scoreboard-handle {
+        bottom: -50px;
+    }
+    
+    @media (max-width: 640px) {
+        #scoreboard-touch-zone:hover ~ .scoreboard-panel .scoreboard-handle,
+        .scoreboard-panel:hover .scoreboard-handle {
+            bottom: -80px;
+        }
+    }
 }
 
-/* Animation du chevron : Respiration verticale */
-@keyframes handlePullHint {
-    0%, 100% { 
-        opacity: 0.8; 
+/* RÈGLE D'OR : Animation peek périodique quand fermé */
+.scoreboard-panel.is-hidden .scoreboard-handle {
+    animation: scoreboardPeek 8s infinite ease-in-out;
+}
+
+@keyframes scoreboardPeek {
+    0%, 90%, 100% {
+        bottom: -120px;
     }
-    50% { 
-        opacity: 1;
-        text-shadow: 0 0 10px rgba(52, 168, 83, 0.4);
+    5%, 10% {
+        bottom: -50px;
     }
 }
 
-/* Animation breathe : Respiration scale subtile */
-@keyframes breathe {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
+@media (max-width: 640px) {
+    @keyframes scoreboardPeek {
+        0%, 90%, 100% {
+            bottom: -130px;
+        }
+        5%, 10% {
+            bottom: -80px;
+        }
     }
 }
 

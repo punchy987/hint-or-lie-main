@@ -235,9 +235,13 @@
         <!-- Système de Toast -->
         <div id="toast"></div>
 
+        <!-- ZONE TACTILE INVISIBLE : bord bas pour swipe mobile et clic desktop -->
+        <div id="scoreboard-touch-zone"></div>
+
         <!-- Scoreboard (Injecté dynamiquement par helpers.js) -->
         <!-- RÈGLE D'OR : Masqué par défaut sur la page d'accueil -->
         <div id="scoreboard" class="panel scoreboard-panel is-hidden" style="display: none;">
+            <div class="scoreboard-handle">▼ TABLEAU DE SCORE</div>
             <h3 class="label-secondary">Tableau de Score</h3>
             <ul id="score-list"></ul>
         </div>

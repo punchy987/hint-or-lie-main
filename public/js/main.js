@@ -335,92 +335,73 @@
     initTimersFromServer();
     initLobbyQuitButtons();
     initReactionSystem();
+    initScoreboardSystem();
     document.body.setAttribute('data-screen', 'screen-home');
+  }
+
+  // ========== SYSTÈME DE SCOREBOARD ==========
+  function initScoreboardSystem() {
+    const scoreboardTouchZone = document.getElementById('scoreboard-touch-zone');
+    const scoreboardPanel = document.querySelector('.scoreboard-panel');
     
-    // Système de swipe pour le scoreboard (permanent par défaut)
-    const sheet = document.querySelector('.scoreboard-panel');
-    if (sheet) {
+    if (scoreboardTouchZone && scoreboardPanel) {
+      // ========== DESKTOP : Clic pour toggle ==========
+      scoreboardTouchZone.addEventListener('click', (e) => {
+        // Seulement sur desktop (pas mobile)
+        if (e.pointerType === 'mouse') {
+          scoreboardPanel.classList.toggle('is-hidden');
+        }
+      });
+
+      // ========== MOBILE : Swipe vertical pour ouvrir/fermer ==========
       let startY = 0;
       let currentY = 0;
       let isDragging = false;
-      
-      // Détection du début du touch/drag
+
       const handleStart = (e) => {
-        // Vérifier si le touch commence sur la poignée (zone haute du panel)
-        const rect = sheet.getBoundingClientRect();
-        const touchY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        // Zone de la poignée : 30px depuis le haut du panel visible
-        if (touchY >= rect.top && touchY <= rect.top + 30) {
-          isDragging = true;
-          startY = touchY;
-          currentY = touchY;
-          e.preventDefault();
-        }
+        isDragging = true;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        currentY = startY;
+        e.preventDefault();
       };
-      
+
       const handleMove = (e) => {
         if (!isDragging) return;
         currentY = e.touches ? e.touches[0].clientY : e.clientY;
         e.preventDefault();
       };
-      
+
       const handleEnd = () => {
         if (!isDragging) return;
         isDragging = false;
-        
+
         const deltaY = currentY - startY;
-        const threshold = 30; // Seuil minimum pour valider le swipe
-        
+        const threshold = 50; // Seuil minimum pour valider le swipe
+
         if (deltaY > threshold) {
-          // Swipe vers le bas -> masquer
-          sheet.classList.add('is-hidden');
-          // Retour haptique subtil de rangement
+          // Swipe vers le bas -> fermer
+          scoreboardPanel.classList.add('is-hidden');
           if (navigator.vibrate) {
             navigator.vibrate(15);
           }
         } else if (deltaY < -threshold) {
-          // Swipe vers le haut -> afficher
-          sheet.classList.remove('is-hidden');
-          // Retour haptique de déploiement
+          // Swipe vers le haut -> ouvrir
+          scoreboardPanel.classList.remove('is-hidden');
           if (navigator.vibrate) {
             navigator.vibrate([10, 30, 10]);
           }
         }
       };
-      
+
       // Touch events (mobile)
-      sheet.addEventListener('touchstart', handleStart, { passive: false });
-      sheet.addEventListener('touchmove', handleMove, { passive: false });
-      sheet.addEventListener('touchend', handleEnd);
-      
-      // Mouse events (desktop)
-      sheet.addEventListener('mousedown', handleStart);
+      scoreboardTouchZone.addEventListener('touchstart', handleStart, { passive: false });
+      scoreboardTouchZone.addEventListener('touchmove', handleMove, { passive: false });
+      scoreboardTouchZone.addEventListener('touchend', handleEnd);
+
+      // Mouse events (desktop) - seulement pour le drag
+      scoreboardTouchZone.addEventListener('mousedown', handleStart);
       document.addEventListener('mousemove', handleMove);
       document.addEventListener('mouseup', handleEnd);
-      
-      // Clic simple sur la poignée pour toggle (accessibilité)
-      sheet.addEventListener('click', (e) => {
-        const rect = sheet.getBoundingClientRect();
-        const clickY = e.clientY;
-        
-        // Si clic dans la zone de la poignée
-        if (clickY >= rect.top && clickY <= rect.top + 30) {
-          const wasHidden = sheet.classList.contains('is-hidden');
-          sheet.classList.toggle('is-hidden');
-          
-          // Retour haptique selon l'action
-          if (navigator.vibrate) {
-            if (wasHidden) {
-              // Ouverture -> vibration de déploiement
-              navigator.vibrate([10, 30, 10]);
-            } else {
-              // Fermeture -> vibration de rangement
-              navigator.vibrate(15);
-            }
-          }
-        }
-      });
     }
   }
 

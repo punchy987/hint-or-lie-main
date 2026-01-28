@@ -16,6 +16,53 @@ points d'ancrage CRITIQUES pour :
    avant toute modification.
 
 ================================================================================
+ MISE À JOUR — 28 JANVIER 2026
+================================================================================
+
+ OPTIMISATIONS MOBILE-FIRST & UX TACTILE :
+
+ 1. Zones Tactiles Invisibles (Edge-Based Interaction)
+    ✅ Panneau Réactions : Zone tactile 40px sur bord droit de l'écran
+       - Mobile : Swipe gauche = ouvrir, swipe droite = fermer
+       - Desktop : Clic = toggle, hover = révéler poignée
+       - Poignée cachée par défaut (left: -100px)
+       - Animation peek périodique (toutes les 8s) quand fermé
+    
+    ✅ Scoreboard : Zone tactile 40px sur bord bas de l'écran
+       - Mobile : Swipe haut = ouvrir, swipe bas = fermer
+       - Desktop : Clic = toggle, hover = révéler poignée
+       - Poignée cachée par défaut (bottom: -120px mobile, -130px)
+       - Animation peek périodique (toutes les 8s) quand fermé
+    
+    Fichiers :
+       - public/css/hud.css (#reaction-touch-zone, .reaction-handle)
+       - public/css/07-scoreboard.css (#scoreboard-touch-zone, .scoreboard-handle)
+       - public/index.html (zones tactiles ajoutées)
+       - public/js/main.js (initReactionSystem, initScoreboardSystem)
+    
+    Z-index hiérarchie :
+       - Zone tactile : 19999 (réactions), 1199 (scoreboard)
+       - Panneau : 20000 (réactions), 1200 (scoreboard)
+       - Boutons emoji : 21000 (au-dessus de tout)
+    
+ 2. Touch Targets Optimisés (48-56px minimum)
+    ✅ Boutons emoji : 56px avec emoji 1.8rem
+    ✅ Gap entre boutons : 12px (anti-clics accidentels)
+    ✅ Poignées : 70-120px mobile (grip pouce optimisé)
+    ✅ Feedback haptique : vibration sur swipe/clic
+    
+ 3. Android Chrome Optimisations
+    ✅ Viewport dynamique : 100dvh (corrige problème barre d'adresse)
+    ✅ Input font-size : 16px minimum (empêche zoom automatique)
+    ✅ Performance : translate3d, backface-visibility, will-change
+    ✅ Keyboard handling : masquage auto scoreboard si hauteur < 500px
+    Fichier : public/css/12-android-fixes.css
+
+ 4. Documentation Mobile
+    ✅ MOBILE_OPTIMIZATIONS.md (guide complet mobile-first)
+    ✅ Z_INDEX_HIERARCHY.md (21 couches, -1 à 21000)
+
+================================================================================
  MISE À JOUR — 27 JANVIER 2026
 ================================================================================
 
