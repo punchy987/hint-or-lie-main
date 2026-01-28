@@ -83,6 +83,10 @@
     
     /* Animation chevron + breathe */
     animation: handlePullHint 2s infinite ease-in-out, breathe 3s infinite ease-in-out;
+    
+    /* RÈGLE D'OR : Zone tactile invisible étendue */
+    padding: 15px 0;
+    margin: -15px 0;
 }
 
 /* RÈGLE D'OR : Handle BEAUCOUP plus haut sur mobile (80px) pour meilleur grip au pouce */
@@ -94,6 +98,9 @@
         letter-spacing: 1.5px;
         /* Zone tactile encore plus visible */
         border: 2px solid rgba(52, 168, 83, 0.3);
+        /* RÈGLE D'OR : Zone tactile ENCORE plus grande sur mobile */
+        padding: 25px 0;
+        margin: -25px 0;
     }
 }
 

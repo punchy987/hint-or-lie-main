@@ -178,12 +178,12 @@ select {
 /* Ajouter un effet visuel au touch */
 .reaction-handle:active {
     background: linear-gradient(180deg, 
-        rgba(52, 168, 83, 1) 0%, 
-        rgba(52, 168, 83, 0.9) 100%);
+        rgba(52, 168, 83, 0.2) 0%, 
+        rgba(52, 168, 83, 0.15) 100%);
     box-shadow: 
-        inset 1px 0 1px rgba(255, 255, 255, 0.4),
-        inset -1px 0 1px rgba(0, 0, 0, 0.4),
-        -2px 0 12px rgba(52, 168, 83, 0.6);
+        inset 1px 0 1px rgba(255, 255, 255, 0.25),
+        inset -1px 0 1px rgba(0, 0, 0, 0.3),
+        -2px 0 12px rgba(52, 168, 83, 0.5);
 }
 
 /* RÈGLE D'OR : Rendre le drag plus évident visuellement */
