@@ -2,6 +2,11 @@
 #scoreboard-touch-zone {
     pointer-events: none !important;
 }
+
+.scoreboard-handle,
+.btn-reaction {
+    pointer-events: auto !important;
+}
 @import './01-tokens.css';
 @import './02-base.css';
 @import './03-components.css';

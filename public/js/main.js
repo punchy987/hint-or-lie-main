@@ -391,9 +391,7 @@
       target: null
     };
 
-    let swipeDetection = false;
     document.addEventListener('touchstart', function(e) {
-      swipeDetection = false;
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
@@ -407,7 +405,6 @@
         touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone, axis: null, locked: false, target };
         target.classList.add('is-dragging');
         target.style.transition = 'none';
-        swipeDetection = true;
       }
     }, { passive: true });
 
@@ -418,35 +415,19 @@
       touchState.currentY = touch.clientY;
       const dx = touchState.currentX - touchState.startX;
       const dy = touchState.currentY - touchState.startY;
-      if (!touchState.locked && (Math.abs(dx) > 30 || Math.abs(dy) > 30)) {
-        // On bloque le scroll natif uniquement si un vrai swipe est détecté
+      // Seuil de 10px pour activer le swipe (sinon scroll natif)
+      if (!touchState.locked && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
         e.preventDefault();
         touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         touchState.locked = true;
       }
-      if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        touchState.target.style.transform = `translateX(-50%) translateY(${dy > 0 ? dy : 0}px)`;
-      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
-        touchState.target.style.transform = `translateY(-50%) translateX(${dx < 0 ? dx : 0}px)`;
-      }
-    }, { passive: false });
-
-    document.addEventListener('touchmove', function(e) {
-      if (!touchState.isTracking) return;
-      e.preventDefault();
-      const touch = e.touches[0];
-      touchState.currentX = touch.clientX;
-      touchState.currentY = touch.clientY;
-      const dx = touchState.currentX - touchState.startX;
-      const dy = touchState.currentY - touchState.startY;
-      if (!touchState.locked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-        touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-        touchState.locked = true;
-      }
-      if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        touchState.target.style.transform = `translateX(-50%) translateY(${dy > 0 ? dy : 0}px)`;
-      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
-        touchState.target.style.transform = `translateY(-50%) translateX(${dx < 0 ? dx : 0}px)`;
+      if (touchState.locked) {
+        if (touchState.axis === 'y' && touchState.zone === 'bottom') {
+          // Toujours centré horizontalement
+          touchState.target.style.transform = `translateX(-50%) translateY(${dy > 0 ? dy : 0}px)`;
+        } else if (touchState.axis === 'x' && touchState.zone === 'right') {
+          touchState.target.style.transform = `translateY(-50%) translateX(${dx < 0 ? dx : 0}px)`;
+        }
       }
     }, { passive: false });
 
