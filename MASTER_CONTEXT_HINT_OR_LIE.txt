@@ -16,8 +16,31 @@ points d'ancrage CRITIQUES pour :
    avant toute modification.
 
 ================================================================================
- MISE À JOUR — 28 JANVIER 2026 (v6.5 - v6.6)
+ MISE À JOUR — 28 JANVIER 2026 (v6.8)
 ================================================================================
+
+ MASTER CLEANUP & FLUID HUD - PRODUCTION-READY :
+
+ 0. Nettoyage Radical (v6.8) - Zero Technical Debt
+    ✅ Fichiers orphelins supprimés :
+       - 04-phase.css à la racine (doublon de public/css/04-phase.css)
+       - 05-hints.css à la racine (doublon de public/css/05-hints.css)
+    
+    ✅ Code obsolète éliminé :
+       - Console.logs DEBUG : -73 lignes supprimées (main.js, hints.js)
+       - Système "Règles rapides" btn-how : déjà supprimé
+       - Animations peek contradictoires : supprimées
+    
+    ✅ Zero-Leak validé :
+       - Scoreboard : translateY(calc(100% - 30px)) quand fermé
+       - Réactions : translateX(calc(100% - 2px)) quand fermé
+       - Panneaux 100% invisibles sauf poignées (30px / 2px visible)
+    
+    ✅ Structure CSS optimale :
+       - Point d'entrée unique : public/css/hud.css
+       - 13 @imports modulaires cohérents
+       - 01-tokens.css : redondance bénigne (dédupliqué navigateur)
+       - Aucun fichier orphelin résiduel
 
  SYSTÈME DE GESTES NON-BLOQUANTS & HUD INTELLIGENT :
 
