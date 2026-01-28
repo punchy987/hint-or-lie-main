@@ -16,12 +16,43 @@ points d'ancrage CRITIQUES pour :
    avant toute modification.
 
 ================================================================================
- MISE À JOUR — 28 JANVIER 2026
+ MISE À JOUR — 28 JANVIER 2026 (v6.1)
 ================================================================================
 
  OPTIMISATIONS MOBILE-FIRST & UX TACTILE :
 
- 1. Zones Tactiles Invisibles (Edge-Based Interaction)
+ 1. Full-Screen Immersif Mobile-First (v6.1)
+    ✅ Suppression effet cadre "enfermé" : 100% largeur sur mobile
+    ✅ Conteneurs (#game-container, .hud-container, .screen) :
+       - Mobile : width: 100%, padding: 0.5rem, margin: 0
+       - Desktop : max-width: 500px, margin: 0 auto (centré)
+    
+    ✅ Composants (.panel, .arcade-bar, .vote-grid) :
+       - width: 100%, max-width: 100%
+       - Suppression marges/restrictions latérales
+    
+    ✅ Scoreboard & Zone tactile :
+       - Mobile : width: 100% (bord à bord)
+       - Desktop : max-width: 500px (centré)
+    
+    ✅ Home panel :
+       - Mobile : width: 100%, padding: 2rem 0.5rem
+       - Desktop : max-width: 450px, padding: 2rem 1.5rem
+    
+    ✅ Vote grid : padding latéral réduit (0.5rem) pour étalement max
+    
+    Fichiers modifiés :
+       - public/css/02-base.css (conteneur principal)
+       - public/css/hud.css (.hud-container, .screen, .panel, .hud-card)
+       - public/css/03-components.css (.arcade-bar)
+       - public/css/06-vote.css (.vote-grid)
+       - public/css/07-scoreboard.css (.scoreboard-panel, #scoreboard-touch-zone)
+       - public/css/08-home.css (.home-panel)
+    
+    Résultat : Interface edge-to-edge immersive sur mobile, 
+               expérience nappe uniforme sans limites visuelles
+
+ 2. Zones Tactiles Invisibles (Edge-Based Interaction)
     ✅ Panneau Réactions : Zone tactile 40px sur bord droit de l'écran
        - Mobile : Swipe gauche = ouvrir, swipe droite = fermer
        - Desktop : Clic = toggle, hover = révéler poignée
@@ -45,20 +76,20 @@ points d'ancrage CRITIQUES pour :
        - Panneau : 20000 (réactions), 1200 (scoreboard)
        - Boutons emoji : 21000 (au-dessus de tout)
     
- 2. Touch Targets Optimisés (48-56px minimum)
+ 3. Touch Targets Optimisés (48-56px minimum)
     ✅ Boutons emoji : 56px avec emoji 1.8rem
     ✅ Gap entre boutons : 12px (anti-clics accidentels)
     ✅ Poignées : 70-120px mobile (grip pouce optimisé)
     ✅ Feedback haptique : vibration sur swipe/clic
     
- 3. Android Chrome Optimisations
+ 4. Android Chrome Optimisations
     ✅ Viewport dynamique : 100dvh (corrige problème barre d'adresse)
     ✅ Input font-size : 16px minimum (empêche zoom automatique)
     ✅ Performance : translate3d, backface-visibility, will-change
     ✅ Keyboard handling : masquage auto scoreboard si hauteur < 500px
     Fichier : public/css/12-android-fixes.css
 
- 4. Documentation Mobile
+ 5. Documentation Mobile
     ✅ MOBILE_OPTIMIZATIONS.md (guide complet mobile-first)
     ✅ Z_INDEX_HIERARCHY.md (21 couches, -1 à 21000)
 

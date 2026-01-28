@@ -8,7 +8,9 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "npx cap": true
+        "npx cap": true,
+        "git commit": true,
+        "git push": true
     },
     "geminicodeassist.agentYoloMode": true,
     "github.copilot.chat.agent.autoFix": true
