@@ -55,6 +55,7 @@
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
+    /* RÈGLE D'OR : Ne pas interférer avec les boutons au-dessus */
     pointer-events: auto !important;
 }
 
@@ -127,20 +128,20 @@
     }
 }
 
-/* RÈGLE D'OR : Handle BEAUCOUP plus haut sur mobile (80px) pour meilleur grip au pouce */
+/* RÈGLE D'OR : Handle optimisé sur mobile (44px) pour ne pas bloquer les boutons */
 @media (max-width: 640px) {
     .scoreboard-handle {
-        bottom: -80px;
-        height: 80px;
-        font-size: 0.85rem;
+        bottom: -44px;
+        height: 44px;
+        font-size: 0.75rem;
         letter-spacing: 1.5px;
-        /* Zone tactile encore plus visible */
+        /* Zone tactile visible mais discrète */
         border: 2px solid rgba(52, 168, 83, 0.3);
     }
     
     /* Cacher plus bas sur mobile quand masqué */
     .scoreboard-panel.is-hidden .scoreboard-handle {
-        bottom: -130px;
+        bottom: -120px;
     }
 }
 

@@ -211,7 +211,9 @@
         socket.on('lobbyReadyProgress', ({ ready, total }) => {
             const pill = $('lobby-ready-pill');
             if (pill) {
-                pill.textContent = `${ready}/${total} prêts`;
+                // Sécurité : Si total = 0, afficher au moins 0/1 pour éviter 0/0
+                const displayTotal = total > 0 ? total : 1;
+                pill.textContent = `${ready}/${displayTotal} prêts`;
                 const allReady = ready === total && total > 0;
                 pill.classList.toggle('pulse-slow', !allReady);
                 pill.classList.toggle('pulse-fast', allReady);

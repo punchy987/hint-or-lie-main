@@ -103,6 +103,8 @@
     margin: 0 auto 1.5rem;
     display: block;
     width: fit-content;
+    z-index: 10;
+    position: relative;
 }
 
 /* Responsive mobile */
