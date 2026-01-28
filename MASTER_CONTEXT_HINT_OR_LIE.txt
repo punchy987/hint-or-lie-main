@@ -1053,6 +1053,65 @@ Nouvelles fonctionnalités : Layout vertical équilibré + Transitions globales 
     ✅ public/js/main.js — Scoreboard visible en lobby (updateUIFromState + transitionTo scoresReset)
     ✅ public/js/core/helpers.js — 'screen-lobby' ajouté à SCORE_SCREENS Set
 
+ ✅ SÉCURISATION FIN DE PARTIE EN CAS DE DÉCONNEXION CRITIQUE [27 JANVIER 2026] :
+    ✅ Logique de timeout différencié : 15s pour imposteur, 45s pour équipiers
+    ✅ Détection déconnexion imposteur : Si l'imposteur expire pendant hints/voting → reset lobby immédiat
+    ✅ Détection manque de joueurs : Si <3 joueurs actifs après expiration → reset lobby immédiat
+    ✅ Reset conditionnel vers lobby :
+       - Annulation timer de phase en cours (clearRoomTimer)
+       - Réinitialisation flags de jeu (hint, vote, isImpostor, spectator) pour tous les joueurs
+       - Conservation TOTALE des scores (p.score n'est PAS touché)
+       - Passage room.state à 'lobby'
+       - Nettoyage Sets (lobbyReady, readyNext, active, usedHints)
+       - Réinitialisation impostor, liveCrewHints, used
+    ✅ Notifications serveur :
+       - Event 'lobbyCountdownCancelled' pour annuler countdown
+       - Event 'system' avec texte explicatif
+       - Event 'toast' avec { message, isError: true } pour notification rouge
+       - Messages différenciés : "Partie interrompue : l'imposteur a quitté" ou "Partie interrompue : manque de joueurs"
+    ✅ Écoute client (socket.js) :
+       - Event 'toast' capturé et affiché via window.HOL.toast(message, isError)
+       - Transition automatique vers screen-lobby après 2.5s pour laisser temps de lecture
+       - Utilise transitionTo() pour animation fluide
+    ✅ Mise à jour progressive : Recalcul phaseProgress après déconnexion pour refléter le bon nombre de joueurs actifs
+    ✅ Auto-avancement : Si tous les joueurs connectés ont soumis, passage automatique à la phase suivante
+
+ Fichiers modifiés pour sécurisation déconnexion critique :
+    ✅ routes/sockets/index.js — Logique reset lobby dans timeout, conservation scores, notifications multi-canal
+    ✅ public/js/core/socket.js — Écoute event 'toast', affichage + transition automatique vers lobby
+
+ ✅ RECONNEXION COMPLÈTE TOUS JOUEURS TOUTES PHASES [27 JANVIER 2026] :
+    ✅ Correction bug imposteur F5 : Ordre des événements corrigé (roundStarted AVANT crewLiveHints)
+    ✅ Phase HINTS - Imposteur :
+       - Envoi roundStarted avec isImpostor: true en premier
+       - Envoi crewLiveHints avec tous les indices déjà envoyés ensuite
+       - Restauration complète du terminal imposteur avec indices visibles
+    ✅ Phase HINTS - Équipiers actifs :
+       - Envoi roundStarted avec isImpostor: false
+       - Envoi du mot secret (common) complet
+       - Possibilité de continuer à envoyer leur indice
+    ✅ Phase HINTS - Spectateurs :
+       - Envoi spectatorMode avec message d'attente
+       - Aucune interaction possible (attente prochaine manche)
+    ✅ Phase VOTING - Joueurs actifs :
+       - Envoi votingStarted avec toutes les cartes d'indices
+       - Reconstruction complète de la grille de vote
+       - Votes déjà émis préservés côté serveur
+    ✅ Phase VOTING - Spectateurs :
+       - Envoi spectatorMode avec message d'attente vote
+    ✅ Phase REVEAL - Tous joueurs :
+       - Envoi roundResult avec mot secret (common)
+       - Identité complète de l'imposteur (id + name)
+       - Liste complète des votes (voterId, voterName, votedForId, votedForName)
+       - Compteurs de votes (voteCounts) pour affichage résultats
+       - Écran de résultat entièrement fonctionnel après reconnexion
+    ✅ Gestion spectateurs : Modal spectateur affiché automatiquement si jointure en cours de partie
+    ✅ Conservation états : Tous flags (isImpostor, hint, vote) préservés durant reconnexion
+    ✅ Vérifications sécurité : Conditions r.words?.domain, r.words?.common pour éviter crashes
+
+ Fichiers modifiés pour reconnexion complète :
+    ✅ routes/sockets/index.js — Logique complète reconnexion toutes phases (hints/voting/reveal)
+
  Bugs connus à corriger ultérieurement :
     ⚠️ Reconnexion rapide (<1s) : Quelques cas edge où le joueur n'est pas immédiatement restauré
     ⚠️ Condition reconnexion : Logique `oldSocketId !== socket.id` fonctionne presque parfaitement mais nécessite tests supplémentaires

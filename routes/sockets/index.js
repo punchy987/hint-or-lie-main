@@ -123,8 +123,10 @@ module.exports = function setupSockets(io, db){
       let reconnectedPlayer = null;
       if (profile.persistentId) {
         for (const [oldSocketId, p] of r.players.entries()) {
-          // Chercher un joueur avec le même persistentId (déconnecté OU avec un socket différent)
-          if (p.persistentId === profile.persistentId && oldSocketId !== socket.id) {
+          // Chercher un joueur avec le même persistentId
+          // Conditions : même persistentId ET (socket différent OU joueur marqué déconnecté)
+          if (p.persistentId === profile.persistentId && 
+              (oldSocketId !== socket.id || p.disconnected)) {
             reconnectedPlayer = { oldSocketId, playerData: p };
             break;
           }
@@ -132,7 +134,7 @@ module.exports = function setupSockets(io, db){
       }
 
       if (reconnectedPlayer) {
-        // RECONNEXION DÉTECÉE
+        // RECONNEXION DÉTECTÉE
         const { oldSocketId, playerData } = reconnectedPlayer;
         
         // Annuler le timeout de déconnexion
@@ -141,28 +143,31 @@ module.exports = function setupSockets(io, db){
           playerData.disconnectTimeout = null;
         }
         
-        // Transférer le joueur vers le nouveau socket.id
-        r.players.delete(oldSocketId);
-        if (r.active?.has(oldSocketId)) {
-          r.active.delete(oldSocketId);
-          r.active.add(socket.id);
-        }
-        if (r.lobbyReady?.has(oldSocketId)) {
-          r.lobbyReady.delete(oldSocketId);
-          r.lobbyReady.add(socket.id);
-        }
-        if (r.readyNext?.has(oldSocketId)) {
-          r.readyNext.delete(oldSocketId);
-          r.readyNext.add(socket.id);
+        // Si c'est le même socket (connexion rapide), pas besoin de transférer
+        if (oldSocketId !== socket.id) {
+          // Transférer le joueur vers le nouveau socket.id
+          r.players.delete(oldSocketId);
+          if (r.active?.has(oldSocketId)) {
+            r.active.delete(oldSocketId);
+            r.active.add(socket.id);
+          }
+          if (r.lobbyReady?.has(oldSocketId)) {
+            r.lobbyReady.delete(oldSocketId);
+            r.lobbyReady.add(socket.id);
+          }
+          if (r.readyNext?.has(oldSocketId)) {
+            r.readyNext.delete(oldSocketId);
+            r.readyNext.add(socket.id);
+          }
+          r.players.set(socket.id, playerData);
         }
         
         // Mettre à jour les données du joueur
         playerData.disconnected = false;
         playerData.disconnectedSince = undefined;
-        r.players.set(socket.id, playerData);
         
-        // Conserver le nom si le joueur reconnecté n'a pas fourni de nouveau nom
-        if (!displayName) {
+        // Conserver le nom existant si aucun nouveau nom n'est fourni
+        if (!displayName || !displayName.trim()) {
           displayName = playerData.name || 'Joueur';
         } else {
           playerData.name = displayName;
@@ -192,23 +197,96 @@ module.exports = function setupSockets(io, db){
         // Envoyer l'état de synchronisation
         socket.emit('roomState', gameState);
         
-        // Si en cours de partie, renvoyer les données de la manche
-        if (r.state === 'hints' && playerData.isImpostor && r.liveCrewHints) {
-          socket.emit('crewLiveHints', r.liveCrewHints);
+        // RECONNEXION : Restaurer l'état de jeu complet selon la phase
+        
+        // Phase HINTS : Renvoyer le mot secret ou les indices des équipiers
+        if (r.state === 'hints') {
+          if (playerData.isImpostor) {
+            // L'imposteur doit d'abord recevoir roundStarted avec isImpostor: true
+            socket.emit('roundStarted', {
+              round: r.round,
+              domain: r.words?.domain || '',
+              isImpostor: true
+            });
+            // Puis recevoir les indices des équipiers déjà envoyés
+            if (r.liveCrewHints && r.liveCrewHints.length > 0) {
+              socket.emit('crewLiveHints', r.liveCrewHints);
+            }
+          } else if (r.active?.has(socket.id)) {
+            // Les équipiers actifs reçoivent le mot secret
+            socket.emit('roundStarted', {
+              round: r.round,
+              domain: r.words?.domain || '',
+              common: r.words?.common || '',
+              isImpostor: false
+            });
+          } else if (playerData.spectator) {
+            // Les spectateurs reçoivent le mode spectateur
+            socket.emit('spectatorMode', { 
+              phase: r.state, 
+              message: 'Manche en cours. Vous rejoindrez la prochaine manche.' 
+            });
+          }
         }
-        if (r.state === 'hints' && !playerData.isImpostor && r.words?.common) {
-          socket.emit('roundStarted', {
-            round: r.round,
-            domain: r.words.domain,
-            common: r.words.common,
-            isImpostor: false
-          });
+        
+        // Phase VOTING : Renvoyer toutes les cartes de vote
+        if (r.state === 'voting') {
+          const allHints = [];
+          for (const [id, p] of r.players.entries()) {
+            if (p.hint && r.active?.has(id)) {
+              allHints.push({
+                id: id,
+                hintId: id,
+                name: p.name,
+                hint: p.hint
+              });
+            }
+          }
+          if (r.active?.has(socket.id)) {
+            socket.emit('votingStarted', { hints: allHints });
+          } else if (playerData.spectator) {
+            socket.emit('spectatorMode', { 
+              phase: r.state, 
+              message: 'Vote en cours. Vous rejoindrez la prochaine manche.' 
+            });
+          }
         }
-        if (r.state === 'hints' && playerData.isImpostor && r.words?.domain) {
-          socket.emit('roundStarted', {
-            round: r.round,
-            domain: r.words.domain,
-            isImpostor: true
+        
+        // Phase REVEAL : Renvoyer les résultats si disponibles
+        if (r.state === 'reveal') {
+          // Rechercher l'imposteur de la manche
+          let impostorId = null;
+          let impostorName = 'Inconnu';
+          for (const [id, p] of r.players.entries()) {
+            if (p.isImpostor) {
+              impostorId = id;
+              impostorName = p.name;
+              break;
+            }
+          }
+          
+          // Calculer les résultats des votes
+          const voteResults = [];
+          const voteCounts = {};
+          
+          for (const [id, p] of r.players.entries()) {
+            if (p.vote && r.active?.has(id)) {
+              voteCounts[p.vote] = (voteCounts[p.vote] || 0) + 1;
+              voteResults.push({
+                voterId: id,
+                voterName: p.name,
+                votedForId: p.vote,
+                votedForName: r.players.get(p.vote)?.name || 'Inconnu'
+              });
+            }
+          }
+          
+          socket.emit('roundResult', {
+            common: r.words?.common || '',
+            impostorId: impostorId,
+            impostorName: impostorName,
+            votes: voteResults,
+            voteCounts: voteCounts
           });
         }
         

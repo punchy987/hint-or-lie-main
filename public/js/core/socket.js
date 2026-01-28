@@ -55,5 +55,19 @@
     }
   });
 
+  // Écoute des notifications toast d'erreur critique (déconnexion imposteur, manque de joueurs)
+  socket.on('toast', ({ message, isError }) => {
+    if (window.HOL.toast) {
+      window.HOL.toast(message, isError);
+    }
+    
+    // Si c'est une erreur et qu'on est dans une phase de jeu, retour au lobby
+    if (isError && window.HOL.transitionTo) {
+      setTimeout(() => {
+        window.HOL.transitionTo('screen-lobby');
+      }, 2500); // Délai pour laisser le temps de lire le message
+    }
+  });
+
   window.HOL.socket = socket;
 })();
