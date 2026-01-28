@@ -799,6 +799,7 @@
     gap: 4px;
     padding: 8px 16px;
     min-width: 60px;
+    min-height: 60px;
     text-align: center;
     background: rgba(27, 36, 48, 0.95) !important;
     backdrop-filter: blur(10px);
@@ -814,11 +815,14 @@
     pointer-events: none !important;
     /* Debug : Assurer la visibilité */
     z-index: 21000 !important;
+    /* RÈGLE D'OR : S'assurer que le contenu est visible */
+    overflow: visible !important;
 }
 
 .reaction-bubble-emoji {
     font-size: 1.5rem;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .reaction-bubble-name {
@@ -831,6 +835,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+    flex-shrink: 0;
+    /* RÈGLE D'OR : Assurer la visibilité */
+    display: block !important;
+    opacity: 1 !important;
 }
 
 /* Animation : Montée Arcade */
