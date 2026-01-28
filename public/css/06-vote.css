@@ -341,3 +341,71 @@
 .shake-error {
     animation: shake-error 0.3s ease-in-out;
 }
+
+/* ==================== */
+/* RÈGLE D'OR : OPTIMISATIONS MOBILE */
+/* ==================== */
+
+@media (max-width: 640px) {
+    /* Cartes plus grandes sur mobile pour meilleure lisibilité */
+    .vote-card {
+        width: 130px !important;
+        height: 180px !important;
+        flex: 0 0 130px;
+    }
+    
+    /* Padding réduit pour maximiser l'espace */
+    .vote-grid, #hints {
+        gap: 12px;
+        padding: 15px 10px 20px 10px;
+    }
+    
+    /* Preview plus visible */
+    .vote-card.in-preview {
+        transform: scale(1.4);
+    }
+    
+    /* Emoji dos de carte plus grand */
+    .card-back {
+        font-size: 4.5rem;
+    }
+    
+    /* Texte indice plus lisible */
+    .card-front .hint-text {
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+    
+    .card-front .player-name-hint {
+        font-size: 0.85rem;
+    }
+    
+    /* Bouton de confirmation plus accessible */
+    #btn-confirm-vote {
+        min-height: 60px;
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+        bottom: 15px;
+    }
+    
+    /* Message d'interdiction plus lisible */
+    #vote-message {
+        font-size: 1rem;
+        padding: 0.75rem 1.25rem;
+        top: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Très petits écrans : cartes encore plus grandes */
+    .vote-card {
+        width: 140px !important;
+        height: 190px !important;
+        flex: 0 0 140px;
+    }
+    
+    .card-back {
+        font-size: 5rem;
+    }
+}

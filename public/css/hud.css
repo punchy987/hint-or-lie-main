@@ -363,6 +363,10 @@
     box-shadow: inset 0 2px 3px var(--relief-light), 
                 inset 0 -3px 4px var(--relief-dark), 
                 0 6px 12px rgba(0, 0, 0, 0.3);
+    /* RÈGLE D'OR : Feedback tactile mobile */
+    -webkit-tap-highlight-color: rgba(72, 187, 120, 0.4);
+    touch-action: manipulation;
+    user-select: none;
 }
 
 /* Animation pulse pour attirer l'attention */
@@ -453,26 +457,37 @@
     }
     
     #players, .player-grid {
-        gap: 0.75rem;
+        gap: 0.6rem;
     }
     
+    /* RÈGLE D'OR : Cartes plus compactes pour réduire le scroll sur petits écrans */
     .player-card {
-        padding: 1rem;
-        min-height: 140px;
+        padding: 0.75rem;
+        min-height: 120px;
+        gap: 0.5rem;
     }
     
+    /* Avatar un peu plus petit mais toujours reconnaissable */
     .player-card img {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
     }
     
     .player-name {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        font-weight: 700;
     }
     
+    .player-status {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    /* Bouton prêt avec touch target suffisant */
     #btn-ready {
-        font-size: 1rem;
-        min-height: 52px;
+        font-size: 1.1rem;
+        min-height: 56px;
+        padding: 0.9rem 1.5rem;
     }
 }
 
@@ -570,6 +585,10 @@
         inset -1px 0 1px rgba(0, 0, 0, 0.3),
         -2px 0 4px rgba(0, 0, 0, 0.3);
     transition: all var(--transition-fast);
+    /* RÈGLE D'OR : Feedback tactile mobile */
+    -webkit-tap-highlight-color: rgba(52, 168, 83, 0.4);
+    touch-action: manipulation;
+    user-select: none;
 }
 
 .reaction-handle:hover {
@@ -629,6 +648,10 @@
         inset 0 1px 2px rgba(255,255,255,0.1), 
         inset 0 -1px 2px rgba(0,0,0,0.2),
         0 2px 4px rgba(0,0,0,0.2);
+    /* RÈGLE D'OR : Feedback tactile instantané sur mobile */
+    -webkit-tap-highlight-color: rgba(232, 197, 71, 0.3);
+    touch-action: manipulation;
+    user-select: none;
 }
 
 .btn-reaction:hover:not(:disabled) {
@@ -738,10 +761,30 @@
         padding: 1.25rem;
     }
 
-    /* Réactions : Boutons plus petits sur mobile */
+    /* RÈGLE D'OR : Touch targets 48px minimum (Guidelines iOS/Android) */
     .btn-reaction {
-        width: 40px;
-        height: 40px;
-        font-size: 1.25rem;
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    /* Poignée plus accessible sur mobile */
+    .reaction-handle {
+        width: 60px;
+        height: 60px;
+        left: -60px;
+        border-radius: 10px 0 0 10px;
+    }
+    
+    /* Gap réduit pour optimiser l'espace vertical */
+    #reaction-triggers {
+        gap: 6px;
+    }
+    
+    /* Zone display plus compacte */
+    #reaction-display-area {
+        width: 120px !important;
+        left: 10px !important;
     }
 }

@@ -236,3 +236,63 @@
     font-weight: 600;
     margin-top: 1rem;
 }
+
+/* ==================== */
+/* RÈGLE D'OR : OPTIMISATIONS MOBILE */
+/* ==================== */
+
+@media (max-width: 640px) {
+    /* Rôle plus visible sur mobile */
+    #my-role-container {
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+    }
+    
+    #my-role {
+        font-size: 1.3rem;
+        padding: 12px 28px;
+    }
+    
+    /* Mot secret bien visible */
+    .word-card, #crew-word-chip {
+        padding: 1.25rem 0.75rem;
+        margin: 0.5rem 0;
+    }
+    
+    .word-card strong, #crew-word-chip strong {
+        font-size: clamp(1.8rem, 8vw, 3rem);
+    }
+    
+    /* Input plus confortable au pouce */
+    #hint-input {
+        height: 56px;
+        min-height: 56px;
+        font-size: 1.1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 14px;
+    }
+    
+    /* Bouton submit plus accessible */
+    #btn-submit-hint {
+        min-height: 56px;
+        font-size: 1.1rem;
+        padding: 1rem 1.5rem;
+        /* Feedback tactile */
+        -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
+        touch-action: manipulation;
+        user-select: none;
+    }
+    
+    /* Tip imposteur plus compact */
+    #impostor-tip {
+        font-size: 0.85rem;
+        padding: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Très petits écrans : texte du mot encore plus grand */
+    .word-card strong, #crew-word-chip strong {
+        font-size: clamp(2rem, 10vw, 3.5rem);
+    }
+}

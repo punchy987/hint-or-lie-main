@@ -37,6 +37,10 @@
   cursor: pointer;
   transition: all 0.2s ease-out;
   box-shadow: inset 0 2px 3px var(--relief-light), inset 0 -3px 4px var(--relief-dark), 0 4px 6px rgba(0,0,0,0.2);
+  /* RÈGLE D'OR : Feedback tactile mobile */
+  -webkit-tap-highlight-color: rgba(232, 197, 71, 0.3);
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .btn:focus {
@@ -196,6 +200,44 @@
 
 .btn-quit-to-lobby:active {
   transform: translateY(0);
+}
+
+/* ==================== */
+/* RÈGLE D'OR : OPTIMISATIONS MOBILE */
+/* ==================== */
+
+@media (max-width: 640px) {
+  /* Tous les boutons minimum 48px de hauteur */
+  .btn {
+    min-height: 56px;
+    height: auto;
+    font-size: 1.1rem;
+    padding: 14px 28px;
+  }
+  
+  /* Inputs plus confortables */
+  .input {
+    min-height: 56px;
+    font-size: 1.05rem;
+    padding: 14px 18px;
+  }
+  
+  /* Bouton quit plus accessible */
+  .btn-quit-to-lobby {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    /* Feedback tactile */
+    -webkit-tap-highlight-color: rgba(245, 101, 101, 0.3);
+    touch-action: manipulation;
+    user-select: none;
+  }
+  
+  /* Arcade bars plus hautes */
+  .arcade-bar {
+    padding: 16px 22px;
+    font-size: 1.1rem;
+  }
 }
 
 /* Tiny helpers */

@@ -77,8 +77,22 @@
     cursor: grab;
     user-select: none;
     
+    /* RÈGLE D'OR : Feedback tactile mobile */
+    -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
+    touch-action: manipulation;
+    
     /* Animation chevron + breathe */
     animation: handlePullHint 2s infinite ease-in-out, breathe 3s infinite ease-in-out;
+}
+
+/* RÈGLE D'OR : Handle plus haut sur mobile (60px) pour meilleur grip au pouce */
+@media (max-width: 640px) {
+    .scoreboard-panel::before {
+        top: -60px;
+        height: 60px;
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
+    }
 }
 
 /* Animation active lors du drag */
@@ -130,6 +144,13 @@
     scrollbar-width: none;
 }
 
+/* RÈGLE D'OR : Scoreboard plus bas sur mobile pour ne pas masquer trop de contenu */
+@media (max-width: 640px) {
+    #score-list, #players {
+        max-height: 30vh;
+    }
+}
+
 #score-list::-webkit-scrollbar,
 #players::-webkit-scrollbar {
     display: none;
@@ -147,6 +168,16 @@
     margin: 0;
 }
 
+/* RÈGLE D'OR : Touch targets 48px minimum sur mobile */
+@media (max-width: 640px) {
+    .player-row {
+        grid-template-columns: 12px 40px 1fr 60px 40px !important;
+        gap: 8px;
+        height: 56px;
+        padding: 0 12px;
+    }
+}
+
 .player-row:hover {
     background: rgba(232, 197, 71, 0.05);
 }
@@ -160,6 +191,14 @@
     border: 1px solid rgba(232, 197, 71, 0.3);
     flex-shrink: 0;
     display: block;
+}
+
+/* RÈGLE D'OR : Avatar plus grand sur mobile pour meilleure reconnaissance */
+@media (max-width: 640px) {
+    .player-avatar-small {
+        width: 40px !important;
+        height: 40px !important;
+    }
 }
 
 /* Nom du joueur */
@@ -180,6 +219,19 @@
     text-align: right;
     font-size: 0.9rem;
     white-space: nowrap;
+}
+
+/* RÈGLE D'OR : Texte plus lisible sur mobile */
+@media (max-width: 640px) {
+    .player-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+    
+    .player-score {
+        font-size: 0.95rem;
+        font-weight: 800;
+    }
 }
 
 /* LED de statut */
@@ -210,6 +262,13 @@
     font-size: 1.1rem;
     text-align: center;
     line-height: 1;
+}
+
+/* RÈGLE D'OR : Emoji plus grand sur mobile */
+@media (max-width: 640px) {
+    .status-icon {
+        font-size: 1.4rem;
+    }
 }
 
 /* Animation Emoji */
