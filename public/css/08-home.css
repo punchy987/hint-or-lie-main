@@ -322,12 +322,10 @@
 /* ===== PANES D'ONGLETS ===== */
 .tab-pane {
     display: none;
-    pointer-events: none;
 }
 
 .tab-pane.active {
     display: block;
-    pointer-events: auto;
 }
 
 /* ===== FOOTER DU PANEL ===== */
