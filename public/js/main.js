@@ -441,19 +441,24 @@
 
     console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
 
-    // Toggle du tiroir au clic sur la poignée
-    if (reactionHandle && reactionTriggers) {
-      reactionHandle.addEventListener('click', () => {
-        reactionTriggers.classList.toggle('is-open');
+    // ========== GESTION DE LA ZONE TACTILE INVISIBLE ==========
+    const reactionTouchZone = document.getElementById('reaction-touch-zone');
+    
+    if (reactionTouchZone && reactionTriggers) {
+      // ========== DESKTOP : Clic pour toggle ==========
+      reactionTouchZone.addEventListener('click', (e) => {
+        // Seulement sur desktop (pas mobile)
+        if (e.pointerType === 'mouse') {
+          reactionTriggers.classList.toggle('is-open');
+        }
       });
 
-      // ========== DRAG/SWIPE HORIZONTAL POUR LES RÉACTIONS ==========
+      // ========== MOBILE : Swipe horizontal pour ouvrir/fermer ==========
       let startX = 0;
       let currentX = 0;
       let isDragging = false;
 
       const handleStart = (e) => {
-        // Démarrer le drag depuis n'importe où sur le tiroir
         isDragging = true;
         startX = e.touches ? e.touches[0].clientX : e.clientX;
         currentX = startX;
@@ -489,12 +494,12 @@
       };
 
       // Touch events (mobile)
-      reactionTriggers.addEventListener('touchstart', handleStart, { passive: false });
-      reactionTriggers.addEventListener('touchmove', handleMove, { passive: false });
-      reactionTriggers.addEventListener('touchend', handleEnd);
+      reactionTouchZone.addEventListener('touchstart', handleStart, { passive: false });
+      reactionTouchZone.addEventListener('touchmove', handleMove, { passive: false });
+      reactionTouchZone.addEventListener('touchend', handleEnd);
 
-      // Mouse events (desktop)
-      reactionTriggers.addEventListener('mousedown', handleStart);
+      // Mouse events (desktop) - seulement pour le drag
+      reactionTouchZone.addEventListener('mousedown', handleStart);
       document.addEventListener('mousemove', handleMove);
       document.addEventListener('mouseup', handleEnd);
     }

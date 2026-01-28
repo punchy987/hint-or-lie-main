@@ -533,6 +533,22 @@
 /* ARCADE BUBBLES : Système de Réactions Latérales */
 /* ==================== */
 
+/* Zone tactile invisible sur le bord droit pour ouvrir/fermer */
+#reaction-touch-zone {
+    position: fixed !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+    width: 40px;
+    /* Hauteur = celle du panneau de réactions */
+    height: calc(7 * 56px + 8 * 12px + 24px);
+    z-index: 19999 !important;
+    cursor: pointer;
+    /* Zone invisible */
+    background: transparent;
+    pointer-events: auto !important;
+}
+
 /* Triggers à droite (ergonomie droitier) */
 #reaction-triggers {
     position: fixed !important;
@@ -572,11 +588,11 @@
     transform: translateY(-50%) translateX(0) !important;
 }
 
-/* Poignée (Handle) : Barre verticale subtile comme le scoreboard */
+/* Poignée (Handle) : Indicateur visuel seulement, cachée par défaut */
 .reaction-handle {
     position: absolute;
-    /* RÈGLE D'OR : Zone tactile agrandie pour mobile */
-    left: -70px;
+    /* RÈGLE D'OR : Cachée en dehors de l'écran par défaut */
+    left: -100px;
     width: 70px;
     height: 120px;
     /* Style subtil comme le scoreboard */
@@ -592,11 +608,12 @@
         inset 1px 0 1px rgba(255, 255, 255, 0.15),
         inset -1px 0 1px rgba(0, 0, 0, 0.2),
         -2px 0 8px rgba(0, 0, 0, 0.2);
-    transition: all var(--transition-fast);
+    transition: left 0.3s ease-out;
     /* RÈGLE D'OR : Feedback tactile mobile */
     -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
-    touch-action: pan-x;
+    touch-action: none;
     user-select: none;
+    pointer-events: none;
     /* Afficher un indicateur visuel */
     display: flex;
     flex-direction: column;
@@ -608,11 +625,7 @@
     letter-spacing: 1px;
     color: rgba(52, 168, 83, 0.9);
     text-transform: uppercase;
-    /* Animation subtile */
-    animation: handleGlowPulse 3s infinite ease-in-out;
-    /* RÈGLE D'OR : Zone tactile invisible étendue */
-    padding: 20px 10px;
-    margin: -20px -10px;
+    /* Pas d'animation par défaut */
 }
 
 /* Ajouter un indicateur visuel sur la poignée */
@@ -634,6 +647,28 @@
     content: '▶';
 }
 
+/* RÈGLE D'OR : Apparition au hover (desktop) */
+@media (hover: hover) and (pointer: fine) {
+    #reaction-touch-zone:hover ~ #reaction-triggers .reaction-handle,
+    #reaction-triggers:hover .reaction-handle {
+        left: -70px;
+    }
+}
+
+/* RÈGLE D'OR : Animation peek périodique */
+#reaction-triggers.is-persistent:not(.is-open) .reaction-handle {
+    animation: handlePeek 8s infinite ease-in-out;
+}
+
+@keyframes handlePeek {
+    0%, 90%, 100% {
+        left: -100px;
+    }
+    5%, 10% {
+        left: -70px;
+    }
+}
+
 .reaction-handle:hover {
     background: linear-gradient(180deg, 
         rgba(52, 168, 83, 0.18) 0%, 
@@ -642,27 +677,6 @@
         inset 1px 0 1px rgba(255, 255, 255, 0.2),
         inset -1px 0 1px rgba(0, 0, 0, 0.25),
         -2px 0 12px rgba(52, 168, 83, 0.3);
-}
-
-/* Animation "saut" pour poignée quand tiroir fermé mais visible */
-#reaction-triggers.is-persistent:not(.is-open) .reaction-handle {
-    animation: handleGlowPulse 3s infinite ease-in-out, breathe 3s infinite ease-in-out;
-}
-
-@keyframes handleGlowPulse {
-    0%, 100% {
-        box-shadow: 
-            inset 1px 0 1px rgba(255, 255, 255, 0.15),
-            inset -1px 0 1px rgba(0, 0, 0, 0.2),
-            -2px 0 8px rgba(0, 0, 0, 0.2);
-    }
-    50% {
-        box-shadow: 
-            inset 1px 0 1px rgba(255, 255, 255, 0.2),
-            inset -1px 0 1px rgba(0, 0, 0, 0.25),
-            -2px 0 16px rgba(52, 168, 83, 0.4),
-            -4px 0 24px rgba(52, 168, 83, 0.2);
-    }
 }
 
 /* Animation breathe : Respiration scale subtile */
