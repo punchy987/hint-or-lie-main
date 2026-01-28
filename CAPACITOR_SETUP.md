@@ -25,7 +25,7 @@
 
 ```javascript
 const SERVER_CONFIG = {
-  development: 'http://localhost:3000',
+  development: 'http://localhost:5500',
   production: 'https://votre-serveur.com', // ⚠️ À modifier
   environment: 'development' // Changez à 'production' lors du déploiement
 };
