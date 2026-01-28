@@ -354,6 +354,38 @@
     if (scoreboardPanel) {
       scoreboardPanel.style.display = 'none';
     }
+    
+    // ========== DÉTECTION DU CLAVIER (Keyboard-Aware HUD) ==========
+    initKeyboardDetection();
+  }
+  
+  // ========== DÉTECTION INTELLIGENTE DU CLAVIER ==========
+  function initKeyboardDetection() {
+    // Détecte l'ouverture du clavier via focus sur input/textarea
+    document.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        document.body.classList.add('keyboard-open');
+        // Game Juice : vibration confirmation focus
+        if (navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+        console.log('⌨️ Clavier détecté : HUD adapté');
+      }
+    });
+    
+    // Détecte la fermeture du clavier via perte de focus
+    document.addEventListener('focusout', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        // Petit délai pour éviter le flicker si on passe d'un input à un autre
+        setTimeout(() => {
+          const activeElement = document.activeElement;
+          if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+            document.body.classList.remove('keyboard-open');
+            console.log('⌨️ Clavier fermé : HUD restauré');
+          }
+        }, 100);
+      }
+    });
   }
 
   // ========== SYSTÈME DE SCOREBOARD ==========

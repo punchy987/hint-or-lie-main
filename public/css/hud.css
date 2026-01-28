@@ -614,6 +614,15 @@
     transform: translateY(-50%) translateX(0) !important;
 }
 
+/* RÈGLE D'OR : Réduire opacité et désactiver clics quand clavier ouvert */
+body.keyboard-open #reaction-triggers {
+    opacity: 0.5;
+}
+
+body.keyboard-open #reaction-triggers .btn-reaction {
+    pointer-events: none;
+}
+
 /* RÈGLE D'OR : Cacher complètement quand panneau fermé (pas .is-open) */
 #reaction-triggers:not(.is-open) .reaction-handle {
     left: -20px; /* Complètement hors vue */
