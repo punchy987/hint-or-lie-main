@@ -10,12 +10,6 @@
       if (window.HOL.updateScoreboard) {
         window.HOL.updateScoreboard(snap.players);
       }
-      
-      // S'assurer que le scoreboard est visible (pas de display:none)
-      const scoreboardPanel = document.querySelector('.scoreboard-panel');
-      if (scoreboardPanel && scoreboardPanel.style.display === 'none') {
-        scoreboardPanel.style.display = '';
-      }
 
       // Mapper les états serveur vers les IDs d'écrans
       const stateToScreen = {

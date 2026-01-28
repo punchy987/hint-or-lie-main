@@ -265,7 +265,7 @@
           instruction.classList.add('voted');
           
           voteConfirmTimer = setTimeout(() => {
-            instruction.textContent = instruction.dataset.originalText || 'Touche une carte pour l\\'inspecter';
+            instruction.textContent = instruction.dataset.originalText || "Touche une carte pour l'inspecter";
             instruction.classList.remove('voted');
           }, 2500);
         }
