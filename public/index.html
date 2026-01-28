@@ -2,7 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- RÈGLE D'OR : Viewport optimisé pour mobile avec touch-action et zoom désactivé -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Hint or Lie · by Mits</title>
 
     <link rel="prefetch" href="/images/background-hero.svg?v=1" as="image" type="image/svg+xml">
@@ -25,6 +29,9 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 </head>
 <body class="hud-root" data-screen="screen-home">
+
+    <!-- RÈGLE D'OR : Import des optimisations Android en dernier -->
+    <link rel="stylesheet" href="/css/12-android-fixes.css">
 
     <!-- Global Transition Overlay (anti-FOPC) -->
     <div id="global-transition-overlay">

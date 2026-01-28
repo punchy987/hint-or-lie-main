@@ -1,0 +1,203 @@
+/* 12-android-fixes.css — Corrections spécifiques Android/Chrome mobile */
+
+/* RÈGLE D'OR : Support du viewport dynamique (barre d'adresse) */
+:root {
+    /* Hauteur réelle du viewport sans la barre d'adresse */
+    --app-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --app-height: 100dvh;
+    }
+}
+
+/* Fix pour la hauteur du body sur Android */
+html {
+    height: -webkit-fill-available;
+}
+
+body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+}
+
+/* Fix pour les écrans de jeu */
+#screen-vote,
+#screen-hint,
+#screen-result,
+#screen-lobby {
+    min-height: var(--app-height);
+}
+
+/* RÈGLE D'OR : Éviter le zoom sur les inputs (Android Chrome zoom à 16px minimum) */
+input,
+textarea,
+select {
+    font-size: 16px !important;
+}
+
+/* Optimisations de performance pour Android */
+* {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+}
+
+/* Améliorer le scroll sur Android */
+* {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Fix pour les animations saccadées sur Android */
+.vote-card,
+.player-card,
+.reaction-bubble,
+.btn-reaction {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+/* RÈGLE D'OR : Améliorer les performances des animations */
+@media (prefers-reduced-motion: no-preference) {
+    .vote-card,
+    .vote-card-inner,
+    .player-card {
+        will-change: transform;
+    }
+}
+
+/* Fix pour le scoreboard qui peut cacher du contenu sur petits écrans */
+@media (max-width: 640px) and (max-height: 700px) {
+    .scoreboard-panel {
+        max-height: 25vh !important;
+    }
+    
+    #score-list, #players {
+        max-height: 20vh !important;
+    }
+}
+
+/* Fix pour les très petits écrans (Galaxy Fold, etc.) */
+@media (max-width: 360px) {
+    /* Réduire encore plus les marges */
+    .home-panel,
+    .panel {
+        padding: 1rem 0.75rem !important;
+    }
+    
+    /* Boutons plus compacts */
+    .btn {
+        font-size: 1rem !important;
+        padding: 12px 20px !important;
+    }
+    
+    /* Cartes de vote encore plus petites */
+    .vote-card {
+        width: 120px !important;
+        height: 170px !important;
+    }
+}
+
+/* Fix pour Android qui peut avoir des problèmes avec backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+    .scoreboard-panel,
+    .glass-panel,
+    .reaction-bubble {
+        background: rgba(27, 36, 48, 0.98) !important;
+    }
+}
+
+/* RÈGLE D'OR : Améliorer la visibilité des boutons sur Android */
+.btn,
+.btn-primary,
+.btn-action,
+#btn-ready,
+#btn-submit-hint,
+#btn-confirm-vote {
+    /* Force un recalcul pour éviter les bugs de rendu Android */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+/* Fix pour les transitions qui peuvent être saccadées */
+@media (hover: none) and (pointer: coarse) {
+    /* Désactiver certaines transitions sur mobile si nécessaire */
+    .vote-card:not(.in-preview) {
+        transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    }
+}
+
+/* RÈGLE D'OR : S'assurer que le contenu est accessible même avec le clavier virtuel */
+@media (max-height: 500px) {
+    /* Quand le clavier est ouvert */
+    .scoreboard-panel {
+        display: none !important;
+    }
+    
+    #hint-input,
+    input[type="text"],
+    input[type="number"] {
+        margin-bottom: 0 !important;
+    }
+}
+
+/* Fix pour les emojis qui peuvent être mal rendus sur Android */
+.reaction-bubble-emoji,
+.status-icon,
+.btn-reaction {
+    font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
+}
+
+/* RÈGLE D'OR : Agrandir la zone cliquable avec pseudo-élément */
+.btn-reaction::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 16px;
+}
+
+/* Faciliter le drag des poignées sur Android */
+.reaction-handle,
+.scoreboard-panel::before {
+    /* Augmenter la sensibilité tactile */
+    touch-action: pan-y pan-x;
+    /* RÈGLE D'OR : Améliorer la zone de préhension */
+    min-width: 60px;
+    min-height: 60px;
+}
+
+/* Ajouter un effet visuel au touch */
+.reaction-handle:active {
+    background: linear-gradient(180deg, 
+        rgba(52, 168, 83, 1) 0%, 
+        rgba(52, 168, 83, 0.9) 100%);
+    box-shadow: 
+        inset 1px 0 1px rgba(255, 255, 255, 0.4),
+        inset -1px 0 1px rgba(0, 0, 0, 0.4),
+        -2px 0 12px rgba(52, 168, 83, 0.6);
+}
+
+/* RÈGLE D'OR : Rendre le drag plus évident visuellement */
+.scoreboard-panel:active::before {
+    background: linear-gradient(135deg, 
+        rgba(52, 168, 83, 0.2) 0%, 
+        rgba(52, 168, 83, 0.15) 100%);
+    border-color: rgba(52, 168, 83, 0.4);
+}
+
+/* Améliorer le feedback visuel lors du drag */
+@media (hover: none) and (pointer: coarse) {
+    .btn-reaction:active {
+        transform: scale(0.9);
+        background: rgba(255, 255, 255, 0.15);
+    }
+}

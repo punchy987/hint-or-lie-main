@@ -62,9 +62,16 @@ body::after {
 }
 
 body {
-    min-height: 100vh;
+    /* RÈGLE D'OR : dvh pour mobile (dynamic viewport height) */
+    min-height: 100dvh;
+    min-height: 100vh; /* Fallback */
+    min-height: -webkit-fill-available;
     line-height: 1.45;
     -webkit-tap-highlight-color: transparent;
+    /* RÈGLE D'OR : Optimisations mobile Android/Chrome */
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    overflow-x: hidden;
 }
 
 /* Sécurité : garantir que tous les overlays sont désactivés par défaut */
