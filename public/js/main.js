@@ -22,29 +22,41 @@
       const targetScreen = stateToScreen[snap.state];
       const currentScreen = document.body.getAttribute('data-screen');
 
-      // Gestion du tiroir de réactions
+      // RÈGLE D'OR : Gestion du tiroir de réactions
       const reactionTriggers = document.getElementById('reaction-triggers');
+      const reactionDisplayArea = document.getElementById('reaction-display-area');
+      
       if (reactionTriggers) {
         // Masquage total sur l'écran d'accueil
         if (!targetScreen) {
-          // Retour à l'accueil : retirer TOUTES les classes pour masquer complètement
+          // Retour à l'accueil : masquer complètement (y compris le bouton)
+          reactionTriggers.style.display = 'none';
+          if (reactionDisplayArea) reactionDisplayArea.style.display = 'none';
           reactionTriggers.classList.remove('is-persistent', 'is-open');
         } else if (targetScreen === 'screen-lobby') {
-          // Au lobby : ajouter .is-persistent pour montrer la poignée + ouvrir auto
+          // Au lobby : afficher et ouvrir automatiquement
+          reactionTriggers.style.display = 'flex';
+          if (reactionDisplayArea) reactionDisplayArea.style.display = 'block';
           if (!reactionTriggers.classList.contains('is-persistent')) {
             reactionTriggers.classList.add('is-persistent');
           }
           // Ouverture automatique au lobby
           reactionTriggers.classList.add('is-open');
         } else if (targetScreen === 'screen-hint') {
-          // Phase hints : fermer automatiquement mais garder poignée visible
+          // Phase hints : afficher, fermer automatiquement mais garder poignée visible
+          reactionTriggers.style.display = 'flex';
+          if (reactionDisplayArea) reactionDisplayArea.style.display = 'block';
           reactionTriggers.classList.remove('is-open');
           if (!reactionTriggers.classList.contains('is-persistent')) {
             reactionTriggers.classList.add('is-persistent');
           }
-        } else if (targetScreen && !reactionTriggers.classList.contains('is-persistent')) {
-          // Autres écrans de jeu : s'assurer que .is-persistent est présent
-          reactionTriggers.classList.add('is-persistent');
+        } else if (targetScreen) {
+          // Autres écrans de jeu : afficher et s'assurer que .is-persistent est présent
+          reactionTriggers.style.display = 'flex';
+          if (reactionDisplayArea) reactionDisplayArea.style.display = 'block';
+          if (!reactionTriggers.classList.contains('is-persistent')) {
+            reactionTriggers.classList.add('is-persistent');
+          }
         }
       }
 

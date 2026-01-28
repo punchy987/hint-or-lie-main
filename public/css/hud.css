@@ -535,6 +535,15 @@
     overflow: visible;
 }
 
+/* RÈGLE D'OR : Masquer complètement sur page d'accueil (y compris le bouton) */
+[data-screen="screen-home"] #reaction-triggers {
+    display: none !important;
+}
+
+[data-screen="screen-home"] #reaction-display-area {
+    display: none !important;
+}
+
 /* État persistant (LOBBY/JEU) : tiroir caché mais poignée visible */
 #reaction-triggers.is-persistent {
     transform: translateY(-50%) translateX(100%) !important;

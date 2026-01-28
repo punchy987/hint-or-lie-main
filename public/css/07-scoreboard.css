@@ -30,6 +30,11 @@
     transform: translateX(-50%) translateY(100%);
 }
 
+/* RÈGLE D'OR : Masquer complètement sur page d'accueil */
+[data-screen="screen-home"] .scoreboard-panel {
+    display: none !important;
+}
+
 /* BARRE HANDLE EN RELIEF — Inspirée des arcade bars */
 .scoreboard-panel::before {
     content: '▼ TABLEAU DE SCORE';

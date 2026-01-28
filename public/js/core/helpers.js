@@ -34,13 +34,15 @@
       if (el) el.style.display = (id === screenId) ? '' : 'none';
     }
     document.body.setAttribute('data-screen', screenId);
-    // On déplace le scoreboard si besoin
+    // RÈGLE D'OR : Gérer l'affichage du scoreboard selon l'écran
     const sb = document.getElementById('scoreboard');
     if (sb) {
       if (HOL.SCORE_SCREENS.has(screenId)) {
+        // Visible dans les écrans de jeu
         sb.style.display = 'block';
         document.getElementById(screenId).appendChild(sb);
       } else {
+        // Masqué sur la page d'accueil
         sb.style.display = 'none';
       }
     }
