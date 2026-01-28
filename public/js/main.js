@@ -425,6 +425,7 @@
     const displayArea = document.getElementById('reaction-display-area');
     const reactionTriggers = document.getElementById('reaction-triggers');
     const reactionHandle = document.querySelector('.reaction-handle');
+    const reactionTouchZone = document.getElementById('reaction-touch-zone');
 
     if (!triggers.length || !displayArea) {
       console.warn('Arcade Bubbles: éléments manquants', { triggers: triggers.length, displayArea: !!displayArea });
@@ -434,8 +435,6 @@
     console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
 
     // ========== GESTION DE LA ZONE TACTILE INVISIBLE ==========
-    const reactionTouchZone = document.getElementById('reaction-touch-zone');
-    const reactionHandle = document.querySelector('.reaction-handle');
     
     if (reactionTouchZone && reactionTriggers) {
       // ========== DESKTOP : Clic sur zone ou poignée pour toggle ==========
