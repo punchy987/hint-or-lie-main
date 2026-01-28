@@ -8,7 +8,7 @@
 (function() {
   window.HOL = window.HOL || {};
   
-  const CLIENT_VERSION = '1.0.0'; // Version du client (à synchroniser avec package.json)
+  const CLIENT_VERSION = '1.0.1'; // Version du client (à synchroniser avec package.json)
   
   /**
    * Compare deux versions (format semver: x.y.z)

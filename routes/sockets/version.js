@@ -8,7 +8,7 @@ const packageJson = require('../../package.json');
 
 const VERSION_CONFIG = {
   current: packageJson.version,      // Version actuelle du serveur
-  minimum: '1.0.0',                   // Version minimum requise pour se connecter
+  minimum: '1.0.0',                   // Version minimum requise pour se connecter (v1.0.0 acceptée)
   latest: packageJson.version         // Dernière version disponible
 };
 

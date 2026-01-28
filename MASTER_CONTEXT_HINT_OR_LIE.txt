@@ -2304,10 +2304,71 @@ Nouvelles fonctionnalités : Drag/Swipe + Logique contextuelle + Animations hand
     ✅ MASTER_CONTEXT_HINT_OR_LIE.txt — Ajout section corrections cohérence
 
 ================================================================================
-FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v5.7]
+ RELEASE v1.0.1 — CONFIGURATION PRODUCTION RENDER [27 JANVIER 2026]
 ================================================================================
-Dernière mise à jour : 27 janvier 2026 — Corrections cohérence complètes
-Améliorations : Port 5500 unifié + Scripts npm validés + Documentation complète
+
+ 🔧 CORRECTIF CRITIQUE : URL PRODUCTION CONFIGURÉE
+
+ Problème détecté :
+    ❌ URL production : 'https://ton-nom-de-projet.onrender.com' (placeholder)
+    ❌ Logique détection : isProductionConfigured = false
+    ❌ Comportement : Force localhost:5500 même sur Render
+    ❌ Résultat : WebSocket connection failed sur production
+
+ Solution implémentée :
+    ✅ public/js/config/server-config.js :
+       - production: 'https://hint-or-lie.onrender.com' (URL réelle configurée)
+       - Condition isProductionConfigured: !== 'hint-or-lie.onrender.com'
+    ✅ Détection environnement corrigée pour Render
+    ✅ Connexion WebSocket fonctionnelle sur production
+
+ ✅ MISE À JOUR VERSION 1.0.0 → 1.0.1 :
+    ✅ package.json : "version": "1.0.1"
+    ✅ public/js/core/version-check.js : CLIENT_VERSION = '1.0.1'
+    ✅ routes/sockets/version.js : VERSION_CONFIG compatible v1.0.0
+    ✅ public/index.html : Badge <span class="version-badge">v1.0.1</span>
+    ✅ CHANGELOG.md : Section [1.0.1] ajoutée avec détails correctif
+
+ 🎯 IMPACT UTILISATEURS :
+    Utilisateurs v1.0.0 (ancienne) :
+       - Connexion au serveur
+       - Détection version serveur : 1.0.1
+       - 🆕 Modal "Mise à jour disponible v1.0.1"
+       - Clic "Mettre à jour" → Reload page (cache vidé)
+       - Nouveau server-config.js chargé
+       - Connexion WebSocket fonctionnelle ✅
+
+    Nouveaux utilisateurs :
+       - Téléchargent directement v1.0.1
+       - Connexion immédiate à hint-or-lie.onrender.com ✅
+
+ ✅ ARCHITECTURE VERSION :
+    Version actuelle : 1.0.1
+    Version minimum acceptée : 1.0.0 (rétro-compatible)
+    Type de notification : 🆕 RECOMMANDÉE (non bloquante)
+    Compatibilité : v1.0.0 peut se connecter, mais reçoit notification
+
+ 📊 COHÉRENCE FINALE :
+    ✅ Port 5500 : Unifié partout (config/index.js, server.js, docs)
+    ✅ URL production : Configurée (hint-or-lie.onrender.com)
+    ✅ Versioning : Synchronisé (4 fichiers + CHANGELOG)
+    ✅ Documentation : Complète et à jour
+    ✅ Système notification : Fonctionnel pour alerter v1.0.0
+
+ Fichiers modifiés release v1.0.1 :
+    ✅ public/js/config/server-config.js — URL production configurée
+    ✅ package.json — Version 1.0.1
+    ✅ public/js/core/version-check.js — CLIENT_VERSION 1.0.1
+    ✅ routes/sockets/version.js — Commentaire minimum version
+    ✅ public/index.html — Badge v1.0.1
+    ✅ CHANGELOG.md — Section v1.0.1 ajoutée
+    ✅ MASTER_CONTEXT_HINT_OR_LIE.txt — Section release v1.0.1
+
+================================================================================
+FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v5.8]
+================================================================================
+Dernière mise à jour : 27 janvier 2026 — Release v1.0.1 (Fix production)
+Version app : 1.0.1 | URL production : hint-or-lie.onrender.com | Port : 5500
 
  Ce fichier est la SOURCE DE VÉRITÉ pour :
     ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)

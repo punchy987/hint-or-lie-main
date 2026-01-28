@@ -13,7 +13,7 @@
 const SERVER_CONFIG = {
   // RÈGLE D'OR : Si vous déployez sur Render/Heroku, remplacez l'URL ci-dessous
   // Sinon, le jeu fonctionnera automatiquement en local après 'npm install && npm start'
-  production: 'https://ton-nom-de-projet.onrender.com',
+  production: 'https://hint-or-lie.onrender.com',
   development: 'http://localhost:5500'  // Port par défaut du server.js
 };
 
@@ -26,7 +26,7 @@ function getServerUrl() {
   const hostname = window.location.hostname;
   
   // RÈGLE D'OR : Forcer le mode développement si l'URL de production n'est pas configurée
-  const isProductionConfigured = SERVER_CONFIG.production !== 'https://ton-nom-de-projet.onrender.com';
+  const isProductionConfigured = SERVER_CONFIG.production !== 'https://hint-or-lie.onrender.com';
   
   // Détection localhost : inclut localhost, 127.0.0.1 et adresses IPv4 locales
   const isLocalhost = hostname === 'localhost' || 

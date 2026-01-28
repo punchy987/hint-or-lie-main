@@ -9,6 +9,19 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 
 ---
 
+## [1.0.1] - 2026-01-27
+
+### 🔧 Correctifs
+
+#### Configuration production
+- ✅ **Fix critique** : URL de production Render configurée (`hint-or-lie.onrender.com`)
+- ✅ Port 5500 unifié dans tous les fichiers de configuration
+- ✅ Correction détection environnement pour déploiement Render
+
+**Impact** : Ce correctif permet la connexion WebSocket sur le serveur de production. Les utilisateurs en v1.0.0 recevront une notification de mise à jour recommandée.
+
+---
+
 ## [1.0.0] - 2026-01-27
 
 ### 🎉 Version initiale complète
