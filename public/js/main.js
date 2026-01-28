@@ -338,6 +338,8 @@
     initLobbyQuitButtons();
     initReactionSystem();
     initScoreboardSystem();
+    initGlobalSwipeSystem(); // v6.5 : Gestion pass-through des swipes
+    initKeyboardDetection();
     document.body.setAttribute('data-screen', 'screen-home');
     
     // RÈGLE D'OR : Initialisation état masqué sur page d'accueil
@@ -354,9 +356,139 @@
     if (scoreboardPanel) {
       scoreboardPanel.style.display = 'none';
     }
+  }
+  
+  // ========== SYSTÈME DE SWIPE GLOBAL PASS-THROUGH (v6.5) ==========
+  function initGlobalSwipeSystem() {
+    const { $ } = window.HOL;
+    const reactionTriggers = document.getElementById('reaction-triggers');
+    const scoreboardPanel = document.querySelector('.scoreboard-panel');
     
-    // ========== DÉTECTION DU CLAVIER (Keyboard-Aware HUD) ==========
-    initKeyboardDetection();
+    if (!reactionTriggers || !scoreboardPanel) {
+      console.warn('Global Swipe: éléments manquants');
+      return;
+    }
+    
+    let touchState = {
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0,
+      isTracking: false,
+      zone: null // 'right' ou 'bottom'
+    };
+    
+    // RÈGLE D'OR : Écoute globale avec { passive: true } pour ne jamais bloquer
+    document.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const startX = touch.clientX;
+      const startY = touch.clientY;
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      
+      // Vérifier si un modal est ouvert (anti-conflit)
+      const modal = $('modal');
+      const modalRules = $('modal-rules-lobby');
+      if ((modal && modal.style.display === 'flex') || 
+          (modalRules && modalRules.classList.contains('active'))) {
+        console.log('🚫 Swipe désactivé : modal ouvert');
+        return;
+      }
+      
+      // Filtrage des zones (75% threshold)
+      if (startX > screenWidth * 0.75) {
+        // Zone droite : réactions
+        touchState = {
+          startX,
+          startY,
+          currentX: startX,
+          currentY: startY,
+          isTracking: true,
+          zone: 'right'
+        };
+        console.log('👆 Zone droite détectée', { x: startX, threshold: screenWidth * 0.75 });
+      } else if (startY > screenHeight * 0.75) {
+        // Zone basse : scoreboard
+        touchState = {
+          startX,
+          startY,
+          currentX: startX,
+          currentY: startY,
+          isTracking: true,
+          zone: 'bottom'
+        };
+        console.log('👆 Zone basse détectée', { y: startY, threshold: screenHeight * 0.75 });
+      }
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!touchState.isTracking) return;
+      
+      const touch = e.touches[0];
+      touchState.currentX = touch.clientX;
+      touchState.currentY = touch.clientY;
+    }, { passive: true });
+    
+    document.addEventListener('touchend', () => {
+      if (!touchState.isTracking) return;
+      
+      const deltaX = touchState.currentX - touchState.startX;
+      const deltaY = touchState.currentY - touchState.startY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const tapThreshold = 10; // Priorité au clic
+      const swipeThreshold = 30;
+      
+      // RÈGLE D'OR : Si mouvement < 10px, c'est un tap -> laisser passer
+      if (distance < tapThreshold) {
+        console.log('👆 Tap détecté (< 10px) : événement laissé au navigateur');
+        touchState.isTracking = false;
+        return;
+      }
+      
+      if (touchState.zone === 'right') {
+        // Zone réactions : vérifier vecteur horizontal
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+          console.log('👆 Swipe horizontal réactions', { deltaX, deltaY });
+          
+          if (deltaX < 0) {
+            // Swipe gauche : ouvrir
+            reactionTriggers.classList.add('is-open');
+            if (navigator.vibrate) navigator.vibrate(10);
+            console.log('✅ Réactions ouvertes');
+          } else {
+            // Swipe droite : fermer
+            reactionTriggers.classList.remove('is-open');
+            if (navigator.vibrate) navigator.vibrate(10);
+            console.log('✅ Réactions fermées');
+          }
+        } else {
+          console.log('👆 Mouvement vertical ignoré (scroll préservé)');
+        }
+      } else if (touchState.zone === 'bottom') {
+        // Zone scoreboard : vérifier vecteur vertical
+        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
+          console.log('👆 Swipe vertical scoreboard', { deltaY, deltaX });
+          
+          if (deltaY < 0) {
+            // Swipe haut : ouvrir
+            scoreboardPanel.classList.remove('is-hidden');
+            if (navigator.vibrate) navigator.vibrate(10);
+            console.log('✅ Scoreboard ouvert');
+          } else {
+            // Swipe bas : fermer
+            scoreboardPanel.classList.add('is-hidden');
+            if (navigator.vibrate) navigator.vibrate(10);
+            console.log('✅ Scoreboard fermé');
+          }
+        } else {
+          console.log('👆 Mouvement horizontal ignoré (scroll préservé)');
+        }
+      }
+      
+      touchState.isTracking = false;
+    }, { passive: true });
+    
+    console.log('✅ Système de swipe global initialisé (pass-through)');
   }
   
   // ========== DÉTECTION INTELLIGENTE DU CLAVIER ==========
@@ -390,98 +522,26 @@
 
   // ========== SYSTÈME DE SCOREBOARD ==========
   function initScoreboardSystem() {
-    const scoreboardTouchZone = document.getElementById('scoreboard-touch-zone');
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
     const scoreboardHandle = document.querySelector('.scoreboard-handle');
     
-    if (scoreboardTouchZone && scoreboardPanel) {
-      // ========== DESKTOP : Clic sur zone ou poignée pour toggle ==========
-      const toggleScoreboard = (e) => {
-        // Seulement sur desktop (pas mobile)
-        if (e.pointerType === 'mouse' || e.type === 'click') {
-          scoreboardPanel.classList.toggle('is-hidden');
-        }
-      };
-
-      scoreboardTouchZone.addEventListener('click', toggleScoreboard);
-      
-      // Clic sur la poignée elle-même (desktop)
-      if (scoreboardHandle) {
-        scoreboardHandle.addEventListener('click', (e) => {
-          e.stopPropagation();
-          scoreboardPanel.classList.toggle('is-hidden');
-        });
-      }
-
-      // ========== MOBILE : Swipe vertical pour ouvrir/fermer ==========
-      let startY = 0;
-      let currentY = 0;
-      let startX = 0;
-      let currentX = 0;
-      let isDragging = false;
-
-      const handleStart = (e) => {
-        console.log('👆 Scoreboard touchstart détecté', { y: e.touches?.[0]?.clientY });
-        isDragging = true;
-        startY = e.touches ? e.touches[0].clientY : e.clientY;
-        currentY = startY;
-        startX = e.touches ? e.touches[0].clientX : e.clientX;
-        currentX = startX;
-        e.preventDefault();
-      };
-
-      const handleMove = (e) => {
-        if (!isDragging) return;
-        currentY = e.touches ? e.touches[0].clientY : e.clientY;
-        currentX = e.touches ? e.touches[0].clientX : e.clientX;
-        e.preventDefault();
-      };
-
-      const handleEnd = () => {
-        if (!isDragging) return;
-        isDragging = false;
-
-        const deltaY = currentY - startY;
-        const deltaX = currentX - startX;
-        const threshold = 30; // Seuil optimisé pour déclencher le swipe
-        
-        // RÈGLE D'OR : Ne déclencher que si mouvement vertical > mouvement horizontal
-        if (Math.abs(deltaY) < Math.abs(deltaX)) {
-          console.log('👆 Scoreboard : mouvement horizontal ignoré (scroll préservé)');
-          return; // Laisser le scroll horizontal naturel
-        }
-        
-        console.log('👆 Scoreboard swipe détecté', { deltaY, deltaX, threshold });
-
-        if (deltaY > threshold) {
-          // Swipe vers le bas -> fermer
-          console.log('✅ Fermeture scoreboard');
-          scoreboardPanel.classList.add('is-hidden');
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-        } else if (deltaY < -threshold) {
-          // Swipe vers le haut -> ouvrir
-          console.log('✅ Ouverture scoreboard');
-          scoreboardPanel.classList.remove('is-hidden');
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-        } else {
-          console.log('❌ Swipe trop faible', { deltaY });
-        }
-      };
-
-      // Touch events (mobile)
-      scoreboardTouchZone.addEventListener('touchstart', handleStart, { passive: false });
-      scoreboardTouchZone.addEventListener('touchmove', handleMove, { passive: false });
-      scoreboardTouchZone.addEventListener('touchend', handleEnd);
-
-      // Mouse events (desktop) - seulement pour le drag
-      scoreboardTouchZone.addEventListener('mousedown', handleStart);
-      document.addEventListener('mousemove', handleMove);
-      document.addEventListener('mouseup', handleEnd);
+    if (!scoreboardPanel) {
+      console.warn('Scoreboard: panneau manquant');
+      return;
     }
+
+    console.log('Scoreboard initialisé');
+
+    // ========== DESKTOP : Clic sur handle pour toggle ==========
+    if (scoreboardHandle) {
+      scoreboardHandle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        scoreboardPanel.classList.toggle('is-hidden');
+      });
+    }
+
+    // ========== MOBILE : PASS-THROUGH SWIPE (v6.5) ==========
+    // Les événements sont gérés globalement dans initGlobalSwipeSystem()
   }
 
   // ==================== ARCADE BUBBLES : Réactions ====================
@@ -493,7 +553,6 @@
     const displayArea = document.getElementById('reaction-display-area');
     const reactionTriggers = document.getElementById('reaction-triggers');
     const reactionHandle = document.querySelector('.reaction-handle');
-    const reactionTouchZone = document.getElementById('reaction-touch-zone');
 
     if (!triggers.length || !displayArea) {
       console.warn('Arcade Bubbles: éléments manquants', { triggers: triggers.length, displayArea: !!displayArea });
@@ -502,96 +561,16 @@
 
     console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
 
-    // ========== GESTION DE LA ZONE TACTILE INVISIBLE ==========
-    
-    if (reactionTouchZone && reactionTriggers) {
-      // ========== DESKTOP : Clic sur zone ou poignée pour toggle ==========
-      const toggleReactions = (e) => {
-        // Seulement sur desktop (pas mobile)
-        if (e.pointerType === 'mouse' || e.type === 'click') {
-          reactionTriggers.classList.toggle('is-open');
-        }
-      };
-
-      reactionTouchZone.addEventListener('click', toggleReactions);
-      
-      // Clic sur la poignée elle-même (desktop)
-      if (reactionHandle) {
-        reactionHandle.addEventListener('click', (e) => {
-          e.stopPropagation();
-          reactionTriggers.classList.toggle('is-open');
-        });
-      }
-
-      // ========== MOBILE : Swipe horizontal pour ouvrir/fermer ==========
-      let startX = 0;
-      let currentX = 0;
-      let startY = 0;
-      let currentY = 0;
-      let isDragging = false;
-
-      const handleStart = (e) => {
-        console.log('👆 Reactions touchstart détecté', { x: e.touches?.[0]?.clientX });
-        isDragging = true;
-        startX = e.touches ? e.touches[0].clientX : e.clientX;
-        currentX = startX;
-        startY = e.touches ? e.touches[0].clientY : e.clientY;
-        currentY = startY;
-        e.preventDefault();
-      };
-
-      const handleMove = (e) => {
-        if (!isDragging) return;
-        currentX = e.touches ? e.touches[0].clientX : e.clientX;
-        currentY = e.touches ? e.touches[0].clientY : e.clientY;
-        e.preventDefault();
-      };
-
-      const handleEnd = () => {
-        if (!isDragging) return;
-        isDragging = false;
-
-        const deltaX = currentX - startX;
-        const deltaY = currentY - startY;
-        const threshold = 30; // Seuil optimisé pour déclencher le swipe
-        
-        // RÈGLE D'OR : Ne déclencher que si mouvement horizontal > mouvement vertical
-        if (Math.abs(deltaX) < Math.abs(deltaY)) {
-          console.log('👆 Reactions : mouvement vertical ignoré (scroll préservé)');
-          return; // Laisser le scroll vertical naturel
-        }
-        
-        console.log('👆 Reactions swipe détecté', { deltaX, deltaY, threshold });
-
-        if (deltaX > threshold) {
-          // Swipe vers la droite -> fermer
-          console.log('✅ Fermeture réactions');
-          reactionTriggers.classList.remove('is-open');
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-        } else if (deltaX < -threshold) {
-          // Swipe vers la gauche -> ouvrir
-          console.log('✅ Ouverture réactions');
-          reactionTriggers.classList.add('is-open');
-          if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-        } else {
-          console.log('❌ Swipe trop faible', { deltaX });
-        }
-      };
-
-      // Touch events (mobile)
-      reactionTouchZone.addEventListener('touchstart', handleStart, { passive: false });
-      reactionTouchZone.addEventListener('touchmove', handleMove, { passive: false });
-      reactionTouchZone.addEventListener('touchend', handleEnd);
-
-      // Mouse events (desktop) - seulement pour le drag
-      reactionTouchZone.addEventListener('mousedown', handleStart);
-      document.addEventListener('mousemove', handleMove);
-      document.addEventListener('mouseup', handleEnd);
+    // ========== DESKTOP : Clic sur handle pour toggle ==========
+    if (reactionHandle) {
+      reactionHandle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        reactionTriggers.classList.toggle('is-open');
+      });
     }
+
+    // ========== MOBILE : PASS-THROUGH SWIPE (v6.5) ==========
+    // Les événements sont gérés globalement dans initGlobalSwipeSystem()
 
     // Gestion des clics sur les boutons de réaction
     triggers.forEach(btn => {

@@ -558,7 +558,7 @@
 /* ARCADE BUBBLES : Système de Réactions Latérales */
 /* ==================== */
 
-/* Zone tactile invisible sur le bord droit pour ouvrir/fermer */
+/* Zone tactile invisible sur le bord droit - PASS-THROUGH (v6.5) */
 #reaction-touch-zone {
     position: fixed !important;
     right: 0 !important;
@@ -567,14 +567,14 @@
     height: 100vh;
     height: 100dvh;
     z-index: 19999 !important;
-    cursor: pointer;
     /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
-    pointer-events: auto !important;
-    /* RÈGLE D'OR : Permettre le scroll vertical même dans la zone */
-    touch-action: pan-y;
+    /* RÈGLE D'OR v6.5 : pointer-events: none pour ne JAMAIS bloquer les clics */
+    pointer-events: none !important;
+    /* Les événements sont gérés via document.addEventListener */
+    touch-action: auto;
 }
 
 /* Triggers à droite (ergonomie droitier) */
@@ -615,9 +615,9 @@
     transform: translateY(-50%) translateX(0) !important;
 }
 
-/* RÈGLE D'OR : Réduire opacité et désactiver clics quand clavier ouvert */
+/* RÈGLE D'OR v6.5 : Transparence contextuelle quand clavier ouvert */
 body.keyboard-open #reaction-triggers {
-    opacity: 0.3;
+    opacity: 0.2;
 }
 
 body.keyboard-open #reaction-triggers .btn-reaction {

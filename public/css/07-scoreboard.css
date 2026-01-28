@@ -25,11 +25,6 @@
     overflow: visible;
 }
 
-/* RÈGLE D'OR : Réduire l'opacité quand clavier ouvert */
-body.keyboard-open .scoreboard-panel {
-    opacity: 0.3;
-}
-
 @media (min-width: 768px) {
     .scoreboard-panel {
         max-width: 500px;
@@ -46,7 +41,7 @@ body.keyboard-open .scoreboard-panel {
     display: none !important;
 }
 
-/* Zone tactile invisible en bas de l'écran pour ouvrir/fermer */
+/* Zone tactile invisible en bas de l'écran - PASS-THROUGH (v6.5) */
 #scoreboard-touch-zone {
     position: fixed !important;
     bottom: 0 !important;
@@ -56,23 +51,31 @@ body.keyboard-open .scoreboard-panel {
     height: 25vh; /* 25% du bas de l'écran */
     height: 25dvh;
     z-index: 1199 !important;
-    cursor: pointer;
     /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
-    /* RÈGLE D'OR : Ne pas interférer avec les boutons au-dessus */
-    pointer-events: auto !important;
-    /* RÈGLE D'OR : Permettre le scroll horizontal même dans la zone */
-    touch-action: pan-x;
+    /* RÈGLE D'OR v6.5 : pointer-events: none pour ne JAMAIS bloquer les clics */
+    pointer-events: none !important;
+    /* Les événements sont gérés via document.addEventListener */
+    touch-action: auto;
     /* Transition fluide */
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* RÈGLE D'OR : Élargir la zone quand clavier ouvert (40dvh) */
+/* RÈGLE D'OR v6.5 : Élargir la zone à 40% quand clavier ouvert */
 body.keyboard-open #scoreboard-touch-zone {
     height: 40vh;
     height: 40dvh;
+}
+
+/* Transparence contextuelle quand clavier ouvert */
+body.keyboard-open .scoreboard-panel {
+    opacity: 0.2;
+}
+
+body.keyboard-open .scoreboard-handle {
+    opacity: 0.2;
 }
 
 @media (min-width: 768px) {
