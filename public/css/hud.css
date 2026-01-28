@@ -1,7 +1,6 @@
 #reaction-touch-zone,
 #scoreboard-touch-zone {
     pointer-events: none !important;
-}
 
 .scoreboard-handle,
 .btn-reaction {
