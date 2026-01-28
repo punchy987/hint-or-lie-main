@@ -407,6 +407,12 @@
     }, { passive: false });
     let lastMoveTime = 0;
     let lastMoveY = 0;
+    let lastMoveX = 0;
+    // Pour rAF
+    let scoreboardTargetY = 0;
+    let reactionsTargetX = 0;
+    let scoreboardRaf = null;
+    let reactionsRaf = null;
     document.addEventListener('touchmove', (e) => {
       if (!touchState.isTracking) return;
       const touch = e.touches[0];
@@ -423,17 +429,39 @@
         let translateY = dy;
         if (translateY < 0) translateY = 0;
         if (translateY > panelHeight - 50) translateY = panelHeight - 50;
-        scoreboardPanel.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+        scoreboardTargetY = translateY;
         lastMoveTime = e.timeStamp;
         lastMoveY = touchState.currentY;
+        if (!scoreboardRaf) {
+          const animateScoreboard = () => {
+            scoreboardPanel.style.transform = `translateX(-50%) translateY(${scoreboardTargetY}px)`;
+            if (touchState.isTracking && touchState.axis === 'y' && touchState.zone === 'bottom') {
+              scoreboardRaf = requestAnimationFrame(animateScoreboard);
+            } else {
+              scoreboardRaf = null;
+            }
+          };
+          scoreboardRaf = requestAnimationFrame(animateScoreboard);
+        }
       } else if (touchState.axis === 'x' && touchState.zone === 'right') {
         const panelWidth = reactionTriggers.offsetWidth;
         let translateX = dx;
         if (translateX > 0) translateX = 0;
         if (translateX < -(panelWidth - 15)) translateX = -(panelWidth - 15);
-        reactionTriggers.style.transform = `translateY(-50%) translateX(${translateX}px)`;
+        reactionsTargetX = translateX;
         lastMoveTime = e.timeStamp;
         lastMoveX = touchState.currentX;
+        if (!reactionsRaf) {
+          const animateReactions = () => {
+            reactionTriggers.style.transform = `translateY(-50%) translateX(${reactionsTargetX}px)`;
+            if (touchState.isTracking && touchState.axis === 'x' && touchState.zone === 'right') {
+              reactionsRaf = requestAnimationFrame(animateReactions);
+            } else {
+              reactionsRaf = null;
+            }
+          };
+          reactionsRaf = requestAnimationFrame(animateReactions);
+        }
       }
     }, { passive: false });
     document.addEventListener('touchend', (e) => {
@@ -443,33 +471,36 @@
       let snap = false;
       // Scoreboard (vertical)
       if (touchState.zone === 'bottom' && touchState.axis === 'y') {
-        scoreboardPanel.style.transition = '';
-        scoreboardPanel.style.transform = '';
         const panelHeight = scoreboardPanel.offsetHeight;
         const ySnapPoints = [0, panelHeight - 50];
         const snapThreshold = panelHeight * 0.2; // 20% du panneau
-        // Calcul de la vélocité
         const dt = e.timeStamp - lastMoveTime;
         const dyMove = touchState.currentY - lastMoveY;
         const velocity = dt > 0 ? dyMove / dt : 0;
         let targetState = null;
-        // Snap logique : seuil de distance OU vélocité
+        let snapTo = 0;
         if (dy > snapThreshold || velocity > 0.5) {
           scoreboardPanel.classList.add('is-hidden');
           scoreboardPanel.dataset.manuallyClosed = '1';
-          targetState = 'closed';
+          snapTo = panelHeight - 50;
         } else {
           scoreboardPanel.classList.remove('is-hidden');
           delete scoreboardPanel.dataset.manuallyClosed;
-          targetState = 'open';
+          snapTo = 0;
         }
-        console.log('[HOL] Scoreboard Snap configuré : Ouvert=0 / Fermé=' + (panelHeight - 50));
-        console.log('[HOL] Snap vertical : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
+        // Transition rebond cubic-bezier (back-out)
+        scoreboardPanel.style.transition = 'transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1)';
+        scoreboardPanel.style.transform = `translateX(-50%) translateY(${snapTo}px)`;
+        // Nettoyage après la transition
+        scoreboardPanel.addEventListener('transitionend', function cleanup(e) {
+          if (e.propertyName === 'transform') {
+            scoreboardPanel.style.transition = '';
+            scoreboardPanel.removeEventListener('transitionend', cleanup);
+          }
+        });
       }
       // Réactions (horizontal)
       if (touchState.zone === 'right' && touchState.axis === 'x') {
-        reactionTriggers.style.transition = '';
-        reactionTriggers.style.transform = '';
         const panelWidth = reactionTriggers.offsetWidth;
         const xSnapPoints = [0, panelWidth - 15];
         const snapThreshold = panelWidth * 0.3; // 30% du panneau
@@ -477,19 +508,35 @@
         const dxMove = touchState.currentX - lastMoveX;
         const velocity = dt > 0 ? dxMove / dt : 0;
         let targetState = null;
+        let snapTo = 0;
         if (dx > snapThreshold || velocity > 0.5) {
           reactionTriggers.classList.remove('is-open');
           targetState = 'closed';
+          snapTo = -(panelWidth - 15);
           if (navigator.vibrate) navigator.vibrate(15);
         } else {
           reactionTriggers.classList.add('is-open');
           targetState = 'open';
+          snapTo = 0;
           if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         }
+        // Transition rebond cubic-bezier (back-out)
+        reactionTriggers.style.transition = 'transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1)';
+        reactionTriggers.style.transform = `translateY(-50%) translateX(${snapTo}px)`;
+        // Nettoyage après la transition
+        reactionTriggers.addEventListener('transitionend', function cleanup(e) {
+          if (e.propertyName === 'transform') {
+            reactionTriggers.style.transition = '';
+            reactionTriggers.removeEventListener('transitionend', cleanup);
+          }
+        });
         console.log('[HOL] Reaction Snap configuré : Ouvert=0 / Fermé=' + (panelWidth - 15));
         console.log('[HOL] Snap horizontal : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
       }
       touchState.isTracking = false;
+      // Stop rAF loops
+      scoreboardRaf = null;
+      reactionsRaf = null;
     }, { passive: false });
     console.log('[HOL] Système tactile initialisé sans erreur');
   }
@@ -508,7 +555,6 @@
         }
       }
     });
-    
     // Détecte la fermeture du clavier via perte de focus
     document.addEventListener('focusout', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
