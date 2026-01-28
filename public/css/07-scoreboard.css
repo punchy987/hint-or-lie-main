@@ -23,7 +23,10 @@
     cursor: default;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
     overflow: visible;
-    will-change: transform, opacity; /* Optimisation pour animation */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 @media (min-width: 768px) {
@@ -88,6 +91,10 @@ body.keyboard-open .scoreboard-handle {
 
 /* BARRE HANDLE DISCRÈTE : ligne fine de 30px collée au panel */
 .scoreboard-handle {
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
     content: '▼ TABLEAU DE SCORE';
     display: flex;
     align-items: center;

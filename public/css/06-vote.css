@@ -63,6 +63,10 @@
 
 /* Les Cartes : Conteneur parent avec scroll-snap */
 .vote-card {
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
     width: 110px !important;
     height: 160px !important;
     flex: 0 0 110px;

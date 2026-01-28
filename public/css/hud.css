@@ -92,6 +92,10 @@ body {
 
 /* ========== RÉACTIONS : TIROIR, BOUTONS, BULLES ========== */
 #reaction-triggers {
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
     position: fixed;
     right: 0;
     top: 50%;
@@ -110,6 +114,10 @@ body {
     transform: translateY(-50%) translateX(0);
 }
 .reaction-handle {
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
     width: 32px;
     height: 80px;
     margin-left: 0;
@@ -214,6 +222,10 @@ body {
     z-index: 20000;
 }
 .reaction-bubble {
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
     position: absolute;
     bottom: 50px;
     left: 0;
