@@ -427,7 +427,13 @@
         lastMoveTime = e.timeStamp;
         lastMoveY = touchState.currentY;
       } else if (touchState.axis === 'x' && touchState.zone === 'right') {
-        reactionTriggers.style.transform = `translateY(-50%) translateX(${Math.min(0, dx)}px)`;
+        const panelWidth = reactionTriggers.offsetWidth;
+        let translateX = dx;
+        if (translateX > 0) translateX = 0;
+        if (translateX < -(panelWidth - 15)) translateX = -(panelWidth - 15);
+        reactionTriggers.style.transform = `translateY(-50%) translateX(${translateX}px)`;
+        lastMoveTime = e.timeStamp;
+        lastMoveX = touchState.currentX;
       }
     }, { passive: false });
     document.addEventListener('touchend', (e) => {
@@ -464,16 +470,25 @@
       if (touchState.zone === 'right' && touchState.axis === 'x') {
         reactionTriggers.style.transition = '';
         reactionTriggers.style.transform = '';
-        const threshold = window.innerWidth * 0.3;
-        if (dx < -threshold || (Math.abs(dx) > 40 && e.timeStamp - touchState.startTime < 220)) {
-          reactionTriggers.classList.add('is-open');
-          snap = true;
-        } else if (dx > threshold) {
+        const panelWidth = reactionTriggers.offsetWidth;
+        const xSnapPoints = [0, panelWidth - 15];
+        const snapThreshold = panelWidth * 0.3; // 30% du panneau
+        const dt = e.timeStamp - lastMoveTime;
+        const dxMove = touchState.currentX - lastMoveX;
+        const velocity = dt > 0 ? dxMove / dt : 0;
+        let targetState = null;
+        if (dx > snapThreshold || velocity > 0.5) {
           reactionTriggers.classList.remove('is-open');
-          snap = true;
+          targetState = 'closed';
+          if (navigator.vibrate) navigator.vibrate(15);
+        } else {
+          reactionTriggers.classList.add('is-open');
+          targetState = 'open';
+          if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         }
+        console.log('[HOL] Reaction Snap configuré : Ouvert=0 / Fermé=' + (panelWidth - 15));
+        console.log('[HOL] Snap horizontal : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
       }
-      if (snap && navigator.vibrate) navigator.vibrate(10);
       touchState.isTracking = false;
     }, { passive: false });
     console.log('[HOL] Système tactile initialisé sans erreur');

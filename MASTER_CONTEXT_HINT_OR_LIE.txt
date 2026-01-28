@@ -1,4 +1,29 @@
 ﻿================================================================================
+ MISE À JOUR — 28 JANVIER 2026 (v7.2)
+================================================================================
+
+SYSTÈME SWIPE HORIZONTAL RÉACTIONS (v7.2) — FRICTION AIMANTÉE, AXIS LOCK, FLUIDITÉ
+
+1. Friction/snap magnétique horizontal sur #reaction-triggers (panneau réactions) :
+   - Snap points : Ouvert = 0, Fermé = panelWidth - 15
+   - Seuil de snap : 30% de la largeur ou vélocité > 0.5px/ms
+   - Feedback haptique : 15ms fermeture, [10,30,10] ouverture
+   - Axis lock prioritaire horizontal (deltaX > deltaY + 10)
+   - Fluidité CSS : transition désactivée pendant le drag, activée uniquement sur le snap final (.is-open)
+   - Reset home : translateX(120%) hors écran
+   - Ouverture lobby : animation fluide 0.4s
+
+2. Règle d'or : #reaction-triggers n'a jamais de transition active pendant le drag (transition: none !important), uniquement lors du snap (is-open).
+
+3. Logs de confirmation dans la console lors du snap.
+
+Fichiers concernés :
+   - public/js/main.js (initGlobalSwipeSystem, friction/snap, axis lock, feedback)
+   - public/css/hud.css (transition none par défaut, transition sur .is-open)
+
+Validé le 28/01/2026 — UX fluide, sans latence tactile.
+================================================================================
+================================================================================
  RÈGLE D'OR DE L'INTÉGRITÉ LOGIQUE
 ================================================================================
 

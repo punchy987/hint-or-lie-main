@@ -592,6 +592,7 @@
     overflow: visible;
     /* Padding pour espacer du bord */
     padding: 12px 0;
+    transition: none !important;
 }
 
 /* RÈGLE D'OR : Masquer complètement sur page d'accueil (y compris le bouton) */
@@ -611,6 +612,7 @@
 /* État ouvert : tiroir complètement déployé */
 #reaction-triggers.is-open {
     transform: translateY(-50%) translateX(0) !important;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
 /* RÈGLE D'OR v6.5 : Transparence contextuelle quand clavier ouvert */
