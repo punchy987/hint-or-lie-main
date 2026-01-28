@@ -38,17 +38,18 @@
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
     const reactionTriggers = document.getElementById('reaction-triggers');
     if (scoreboardPanel) {
-      if (screenId !== 'screen-home') {
-        scoreboardPanel.style.display = 'flex';
+      if (screenId === 'screen-home') {
+        scoreboardPanel.classList.add('is-hidden');
       } else {
-        scoreboardPanel.style.display = 'none';
+        scoreboardPanel.classList.remove('is-hidden');
       }
     }
     if (reactionTriggers) {
-      if (screenId !== 'screen-home') {
-        reactionTriggers.style.display = 'flex';
+      if (screenId === 'screen-home') {
+        reactionTriggers.classList.remove('is-open');
+        reactionTriggers.classList.add('is-hidden');
       } else {
-        reactionTriggers.style.display = 'none';
+        reactionTriggers.classList.remove('is-hidden');
       }
     }
   };

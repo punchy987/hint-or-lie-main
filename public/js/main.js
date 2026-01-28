@@ -417,20 +417,44 @@
         reactionTriggers.style.transform = `translateY(-50%) translateX(${Math.min(0, dx)}px)`;
       }
     }, { passive: false });
-    document.addEventListener('touchend', () => {
+    document.addEventListener('touchend', (e) => {
       if (!touchState.isTracking) return;
-      if (touchState.zone === 'right') {
-        reactionTriggers.style.transition = '';
-        reactionTriggers.style.transform = '';
-      } else if (touchState.zone === 'bottom') {
+      const dx = touchState.currentX - touchState.startX;
+      const dy = touchState.currentY - touchState.startY;
+      let snap = false;
+      // Scoreboard (vertical)
+      if (touchState.zone === 'bottom' && touchState.axis === 'y') {
         scoreboardPanel.style.transition = '';
         scoreboardPanel.style.transform = '';
+        const threshold = window.innerHeight * 0.3;
+        if (dy < -threshold || (Math.abs(dy) > 40 && e.timeStamp - touchState.startTime < 220)) {
+          scoreboardPanel.classList.remove('is-hidden');
+          snap = true;
+        } else if (dy > threshold) {
+          scoreboardPanel.classList.add('is-hidden');
+          snap = true;
+        }
       }
+      // Réactions (horizontal)
+      if (touchState.zone === 'right' && touchState.axis === 'x') {
+        reactionTriggers.style.transition = '';
+        reactionTriggers.style.transform = '';
+        const threshold = window.innerWidth * 0.3;
+        if (dx < -threshold || (Math.abs(dx) > 40 && e.timeStamp - touchState.startTime < 220)) {
+          reactionTriggers.classList.add('is-open');
+          snap = true;
+        } else if (dx > threshold) {
+          reactionTriggers.classList.remove('is-open');
+          snap = true;
+        }
+      }
+      if (snap && navigator.vibrate) navigator.vibrate(10);
       touchState.isTracking = false;
     }, { passive: false });
+    console.log('[HOL] Système tactile initialisé sans erreur');
   }
-      
-  }
+
+// ...existing code...
   
   // ========== DÉTECTION INTELLIGENTE DU CLAVIER ==========
   function initKeyboardDetection() {

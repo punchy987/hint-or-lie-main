@@ -10,7 +10,8 @@
         },
         "npx cap": true,
         "git commit": true,
-        "git push": true
+        "git push": true,
+        "npx kill-port": true
     },
     "geminicodeassist.agentYoloMode": true,
     "github.copilot.chat.agent.autoFix": true
