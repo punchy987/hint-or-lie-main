@@ -1,12 +1,19 @@
 /* 08-home.css — Styles pour la page d'accueil (screen-home) */
 @import './01-tokens.css';
 
-/* ===== HOME PANEL ===== */
+/* ===== HOME PANEL — RÈGLE D'OR : Full-screen immersif ===== */
 .home-panel {
-    width: 95%;
-    max-width: 450px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 2rem 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .home-panel {
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
 }
 
 .home-panel * {

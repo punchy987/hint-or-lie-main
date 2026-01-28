@@ -2,15 +2,14 @@
    SCOREBOARD BOTTOM SHEET (HUD)
    ========================================= */
 
-/* Le conteneur principal qui coulisse */
+/* Le conteneur principal qui coulisse — RÈGLE D'OR : Full-screen immersif */
 .scoreboard-panel {
     position: fixed !important;
     bottom: 0;
     left: 50%;
     /* État par défaut : visible (pour lobby/jeu) */
     transform: translateX(-50%) translateY(0);
-    width: 95%;
-    max-width: 500px;
+    width: 100%;
     background: rgba(27, 36, 48, 0.9) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -23,6 +22,12 @@
     cursor: default;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
     overflow: visible;
+}
+
+@media (min-width: 768px) {
+    .scoreboard-panel {
+        max-width: 500px;
+    }
 }
 
 /* État Caché (Complètement masqué sauf poignée) */
@@ -41,13 +46,20 @@
     bottom: 0 !important;
     left: 50% !important;
     transform: translateX(-50%);
-    width: 95%;
-    max-width: 500px;
+    width: 100%;
     height: 40px;
     z-index: 1199 !important;
     cursor: pointer;
     /* Zone invisible */
     background: transparent;
+    pointer-events: auto !important;
+}
+
+@media (min-width: 768px) {
+    #scoreboard-touch-zone {
+        max-width: 500px;
+    }
+}
     pointer-events: auto !important;
 }
 

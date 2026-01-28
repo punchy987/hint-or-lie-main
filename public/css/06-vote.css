@@ -35,7 +35,7 @@
     opacity: 0.3;
 }
 
-/* Carrousel Horizontal 3D : Scroll Snap + Flip Cards */
+/* Carrousel Horizontal 3D : Scroll Snap + Flip Cards — RÈGLE D'OR : Full-screen immersif */
 .vote-grid, #hints {
     display: flex;
     flex-direction: row;
@@ -43,9 +43,11 @@
     align-items: center;
     justify-content: flex-start;
     gap: 16px;
-    padding: 20px;
+    padding: 20px 0.5rem;
     padding-bottom: 20px;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
     overflow-x: scroll;
     overflow-y: visible;
     scroll-snap-type: x mandatory;
