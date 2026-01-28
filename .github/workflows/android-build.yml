@@ -15,6 +15,11 @@ jobs:
           node-version: '22'
       - name: Install Dependencies
         run: npm install
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
       - name: Capacitor Sync
         run: npx cap sync android
       - name: Build with Gradle
