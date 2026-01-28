@@ -564,9 +564,9 @@
     right: 0 !important;
     top: 50% !important;
     transform: translateY(-50%);
-    width: 60px;
-    /* Hauteur = celle du panneau de réactions */
-    height: calc(7 * 56px + 8 * 12px + 24px);
+    width: 80px;
+    /* Hauteur = celle du panneau de réactions + 40px pour dépasser */
+    height: calc(7 * 56px + 8 * 12px + 24px + 40px);
     z-index: 19999 !important;
     cursor: pointer;
     /* Zone invisible (debug: rendre visible avec background rouge) */
