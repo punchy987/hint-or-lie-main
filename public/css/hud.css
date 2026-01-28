@@ -637,14 +637,18 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     border-radius: 0 2px 2px 0;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Animation pulse permanente */
+    /* Animation pulse permanente quand panneau fermé */
+    opacity: 1;
+}
+
+/* RÈGLE D'OR : Animation pulse uniquement quand panneau fermé */
+#reaction-triggers.is-persistent:not(.is-open) .reaction-handle {
     animation: handleGlowPulse 3s infinite ease-in-out;
 }
 
-/* RÈGLE D'OR : Cacher complètement quand panneau fermé (pas .is-open) */
-#reaction-triggers:not(.is-open) .reaction-handle {
-    left: -20px; /* Complètement hors vue */
-    opacity: 0;
+/* RÈGLE D'OR : Cacher poignée seulement sur HOME (panneau complètement masqué) */
+[data-screen="screen-home"] .reaction-handle {
+    display: none;
 }
 
 /* RÈGLE D'OR : Activer pointer-events sur desktop pour clic */
@@ -660,33 +664,12 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     display: none;
 }
 
-/* RÈGLE D'OR : Apparition au hover (desktop) */
+/* RÈGLE D'OR : Intensification au hover (desktop) */
 @media (hover: hover) and (pointer: fine) {
-    #reaction-touch-zone:hover ~ #reaction-triggers .reaction-handle,
-    #reaction-triggers:hover .reaction-handle {
-        left: 0px; /* Avance légèrement au hover */
-        box-shadow: -2px 0 8px var(--primary);
-    }
-}
-
-/* RÈGLE D'OR : Animation peek périodique quand fermé */
-#reaction-triggers.is-persistent:not(.is-open) .reaction-handle {
-    animation: handlePeek 8s infinite ease-in-out;
-}
-
-@keyframes handlePeek {
-    0%, 90%, 100% {
-        left: -20px;
-        opacity: 0;
-    }
-    5%, 10% {
-        left: -2px;
+    .reaction-handle:hover {
+        box-shadow: -2px 0 12px var(--primary);
         opacity: 1;
     }
-}
-
-.reaction-handle:hover {
-    box-shadow: -2px 0 12px var(--primary);
 }
 
 /* Animation glow pulse : respiration néon subtile */
