@@ -65,9 +65,11 @@
       if (scoreboardPanel) {
         if (!targetScreen) {
           // Retour à l'accueil : masquer complètement
+          scoreboardPanel.style.display = 'none';
           scoreboardPanel.classList.add('is-hidden');
         } else {
           // Sur tous les autres écrans : visible avec poignée
+          scoreboardPanel.style.display = '';
           scoreboardPanel.classList.remove('is-hidden');
         }
       }
@@ -337,6 +339,21 @@
     initReactionSystem();
     initScoreboardSystem();
     document.body.setAttribute('data-screen', 'screen-home');
+    
+    // RÈGLE D'OR : Initialisation état masqué sur page d'accueil
+    const reactionTriggers = document.getElementById('reaction-triggers');
+    const reactionDisplayArea = document.getElementById('reaction-display-area');
+    const scoreboardPanel = document.querySelector('.scoreboard-panel');
+    
+    if (reactionTriggers) {
+      reactionTriggers.style.display = 'none';
+    }
+    if (reactionDisplayArea) {
+      reactionDisplayArea.style.display = 'none';
+    }
+    if (scoreboardPanel) {
+      scoreboardPanel.style.display = 'none';
+    }
   }
 
   // ========== SYSTÈME DE SCOREBOARD ==========
