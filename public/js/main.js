@@ -343,15 +343,26 @@
   function initScoreboardSystem() {
     const scoreboardTouchZone = document.getElementById('scoreboard-touch-zone');
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
+    const scoreboardHandle = document.querySelector('.scoreboard-handle');
     
     if (scoreboardTouchZone && scoreboardPanel) {
-      // ========== DESKTOP : Clic pour toggle ==========
-      scoreboardTouchZone.addEventListener('click', (e) => {
+      // ========== DESKTOP : Clic sur zone ou poignée pour toggle ==========
+      const toggleScoreboard = (e) => {
         // Seulement sur desktop (pas mobile)
-        if (e.pointerType === 'mouse') {
+        if (e.pointerType === 'mouse' || e.type === 'click') {
           scoreboardPanel.classList.toggle('is-hidden');
         }
-      });
+      };
+
+      scoreboardTouchZone.addEventListener('click', toggleScoreboard);
+      
+      // Clic sur la poignée elle-même (desktop)
+      if (scoreboardHandle) {
+        scoreboardHandle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          scoreboardPanel.classList.toggle('is-hidden');
+        });
+      }
 
       // ========== MOBILE : Swipe vertical pour ouvrir/fermer ==========
       let startY = 0;
@@ -424,15 +435,26 @@
 
     // ========== GESTION DE LA ZONE TACTILE INVISIBLE ==========
     const reactionTouchZone = document.getElementById('reaction-touch-zone');
+    const reactionHandle = document.querySelector('.reaction-handle');
     
     if (reactionTouchZone && reactionTriggers) {
-      // ========== DESKTOP : Clic pour toggle ==========
-      reactionTouchZone.addEventListener('click', (e) => {
+      // ========== DESKTOP : Clic sur zone ou poignée pour toggle ==========
+      const toggleReactions = (e) => {
         // Seulement sur desktop (pas mobile)
-        if (e.pointerType === 'mouse') {
+        if (e.pointerType === 'mouse' || e.type === 'click') {
           reactionTriggers.classList.toggle('is-open');
         }
-      });
+      };
+
+      reactionTouchZone.addEventListener('click', toggleReactions);
+      
+      // Clic sur la poignée elle-même (desktop)
+      if (reactionHandle) {
+        reactionHandle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          reactionTriggers.classList.toggle('is-open');
+        });
+      }
 
       // ========== MOBILE : Swipe horizontal pour ouvrir/fermer ==========
       let startX = 0;
