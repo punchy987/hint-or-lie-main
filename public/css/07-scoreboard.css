@@ -27,7 +27,7 @@
 
 /* RÈGLE D'OR : Réduire l'opacité quand clavier ouvert */
 body.keyboard-open .scoreboard-panel {
-    opacity: 0.4;
+    opacity: 0.3;
 }
 
 @media (min-width: 768px) {
@@ -36,9 +36,9 @@ body.keyboard-open .scoreboard-panel {
     }
 }
 
-/* État Caché (Complètement masqué sauf poignée) */
+/* État Caché (Flush design : seule la bande de 30px visible) */
 .scoreboard-panel.is-hidden {
-    transform: translateX(-50%) translateY(100%);
+    transform: translateX(-50%) translateY(calc(100% - 30px));
 }
 
 /* RÈGLE D'OR : Masquer complètement sur page d'accueil */
@@ -63,6 +63,8 @@ body.keyboard-open .scoreboard-panel {
     /* background: rgba(255, 0, 0, 0.3) !important; */
     /* RÈGLE D'OR : Ne pas interférer avec les boutons au-dessus */
     pointer-events: auto !important;
+    /* RÈGLE D'OR : Permettre le scroll horizontal même dans la zone */
+    touch-action: pan-x;
     /* Transition fluide */
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -132,7 +134,7 @@ body.keyboard-open #scoreboard-touch-zone {
 
 /* RÈGLE D'OR : Réduire l'opacité du handle quand clavier ouvert */
 body.keyboard-open .scoreboard-handle {
-    opacity: 0.4;
+    opacity: 0.3;
 }
 
 /* RÈGLE D'OR : Cacher quand scoreboard est masqué */

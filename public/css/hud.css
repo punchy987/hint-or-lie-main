@@ -573,6 +573,8 @@
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: auto !important;
+    /* RÈGLE D'OR : Permettre le scroll vertical même dans la zone */
+    touch-action: pan-y;
 }
 
 /* Triggers à droite (ergonomie droitier) */
@@ -603,9 +605,9 @@
     display: none !important;
 }
 
-/* État persistant (LOBBY/JEU) : tiroir caché mais poignée visible */
+/* État persistant (LOBBY/JEU) : tiroir caché, seule ligne néon de 2px visible */
 #reaction-triggers.is-persistent {
-    transform: translateY(-50%) translateX(100%) !important;
+    transform: translateY(-50%) translateX(calc(100% - 2px)) !important;
 }
 
 /* État ouvert : tiroir complètement déployé */
@@ -615,7 +617,7 @@
 
 /* RÈGLE D'OR : Réduire opacité et désactiver clics quand clavier ouvert */
 body.keyboard-open #reaction-triggers {
-    opacity: 0.5;
+    opacity: 0.3;
 }
 
 body.keyboard-open #reaction-triggers .btn-reaction {

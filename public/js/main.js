@@ -416,6 +416,8 @@
       // ========== MOBILE : Swipe vertical pour ouvrir/fermer ==========
       let startY = 0;
       let currentY = 0;
+      let startX = 0;
+      let currentX = 0;
       let isDragging = false;
 
       const handleStart = (e) => {
@@ -423,12 +425,15 @@
         isDragging = true;
         startY = e.touches ? e.touches[0].clientY : e.clientY;
         currentY = startY;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        currentX = startX;
         e.preventDefault();
       };
 
       const handleMove = (e) => {
         if (!isDragging) return;
         currentY = e.touches ? e.touches[0].clientY : e.clientY;
+        currentX = e.touches ? e.touches[0].clientX : e.clientX;
         e.preventDefault();
       };
 
@@ -437,8 +442,16 @@
         isDragging = false;
 
         const deltaY = currentY - startY;
+        const deltaX = currentX - startX;
         const threshold = 30; // Seuil optimisé pour déclencher le swipe
-        console.log('👆 Scoreboard swipe détecté', { deltaY, threshold });
+        
+        // RÈGLE D'OR : Ne déclencher que si mouvement vertical > mouvement horizontal
+        if (Math.abs(deltaY) < Math.abs(deltaX)) {
+          console.log('👆 Scoreboard : mouvement horizontal ignoré (scroll préservé)');
+          return; // Laisser le scroll horizontal naturel
+        }
+        
+        console.log('👆 Scoreboard swipe détecté', { deltaY, deltaX, threshold });
 
         if (deltaY > threshold) {
           // Swipe vers le bas -> fermer
@@ -513,6 +526,8 @@
       // ========== MOBILE : Swipe horizontal pour ouvrir/fermer ==========
       let startX = 0;
       let currentX = 0;
+      let startY = 0;
+      let currentY = 0;
       let isDragging = false;
 
       const handleStart = (e) => {
@@ -520,12 +535,15 @@
         isDragging = true;
         startX = e.touches ? e.touches[0].clientX : e.clientX;
         currentX = startX;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        currentY = startY;
         e.preventDefault();
       };
 
       const handleMove = (e) => {
         if (!isDragging) return;
         currentX = e.touches ? e.touches[0].clientX : e.clientX;
+        currentY = e.touches ? e.touches[0].clientY : e.clientY;
         e.preventDefault();
       };
 
@@ -534,8 +552,16 @@
         isDragging = false;
 
         const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
         const threshold = 30; // Seuil optimisé pour déclencher le swipe
-        console.log('👆 Reactions swipe détecté', { deltaX, threshold });
+        
+        // RÈGLE D'OR : Ne déclencher que si mouvement horizontal > mouvement vertical
+        if (Math.abs(deltaX) < Math.abs(deltaY)) {
+          console.log('👆 Reactions : mouvement vertical ignoré (scroll préservé)');
+          return; // Laisser le scroll vertical naturel
+        }
+        
+        console.log('👆 Reactions swipe détecté', { deltaX, deltaY, threshold });
 
         if (deltaX > threshold) {
           // Swipe vers la droite -> fermer
