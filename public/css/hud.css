@@ -1,4 +1,85 @@
+@import './01-tokens.css';
+@import './02-base.css';
+@import './03-components.css';
+@import './04-phase.css';
+@import './05-hints.css';
+@import './06-vote.css';
+@import './07-scoreboard.css';
+@import './08-home.css';
+@import './08-lobby-header.css';
+@import './09-spectator.css';
+@import './11-results-mobile.css';
+@import './98-responsive.css';
+@import './99-pwa-update.css';
+
 /* Disable transition during user drag for better performance */
 .is-dragging {
     transition: none !important;
+}
+
+/* SCOPE ROOT : Activation globale du HUD */
+.hud-root, body.hud-root {
+    --hud-enabled: 1;
+}
+
+/* LAYOUT CONTAINERS */
+.hud-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.hud-top { z-index: 1200; }
+.hud-main { flex: 1; align-items: center; }
+.hud-bottom { z-index: 1000; padding: 0.75rem; }
+
+/* PANELS MAPPING */
+.panel {
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    padding: 1.5rem;
+    backdrop-filter: blur(var(--blur));
+    width: 100%;
+    max-width: 100%;
+}
+.panel--compact {
+    padding: 0.8rem;
+    border-radius: var(--radius-sm);
+}
+
+/* SCREEN CONTAINERS */
+.screen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+/* TOAST SYSTÈME */
+.hud-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    border-radius: 999px;
+    z-index: 1300;
+    padding: 0.75rem 2rem;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+#toast { display: none; }
+#toast:not(:empty) { display: block; }
+
+/* LOBBY STYLES */
+#screen-lobby {
+    padding: 1.5rem 1rem;
+}
+#screen-lobby h2 {
+    text-align: center;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
 }
