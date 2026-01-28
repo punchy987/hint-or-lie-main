@@ -588,7 +588,6 @@
     gap: 12px;
     z-index: 20000 !important;
     pointer-events: auto !important;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
     visibility: visible !important;
     overflow: visible;
     /* Padding pour espacer du bord */
@@ -840,17 +839,6 @@ body.keyboard-open #reaction-triggers .btn-reaction {
         border-radius: 12px;
         /* Ajouter un espacement entre les boutons */
         margin: 4px 0;
-    }
-    
-    /* Poignée plus accessible sur mobile */
-    .reaction-handle {
-        width: 70px !important;
-        height: 120px !important;
-        left: -70px !important;
-        border-radius: 16px 0 0 16px !important;
-        /* RÈGLE D'OR : Zone tactile ENCORE plus étendue sur mobile */
-        padding: 30px 15px !important;
-        margin: -30px -15px !important;
     }
     
     /* Gap réduit pour optimiser l'espace vertical */

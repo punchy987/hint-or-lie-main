@@ -79,7 +79,7 @@ body.keyboard-open #scoreboard-touch-zone {
     }
 }
 
-/* BARRE HANDLE EN RELIEF : visible par défaut, cachée seulement si scoreboard masqué */
+/* BARRE HANDLE DISCRÈTE : ligne fine de 30px collée au panel */
 .scoreboard-handle {
     content: '▼ TABLEAU DE SCORE';
     display: flex;
@@ -87,14 +87,14 @@ body.keyboard-open #scoreboard-touch-zone {
     justify-content: center;
     gap: 8px;
     
-    /* Position absolute pour dépasser */
+    /* Position absolute collée au panel */
     position: absolute;
-    /* RÈGLE D'OR : Visible par défaut (scoreboard ouvert) */
-    bottom: -50px;
+    /* RÈGLE D'OR : Collée au panel (pas de gap) */
+    bottom: -30px;
     left: 0;
     
-    /* Dimensions et couleur */
-    height: 50px;
+    /* Dimensions fines et discrètes */
+    height: 30px;
     width: 100%;
     background: linear-gradient(135deg, 
         rgba(52, 168, 83, 0.12) 0%, 
@@ -104,15 +104,15 @@ body.keyboard-open #scoreboard-touch-zone {
     border-radius: 20px 20px 0 0;
     border-bottom: 1px solid rgba(52, 168, 83, 0.2);
     
-    /* Effet relief embossé */
+    /* Effet relief embossé subtil */
     box-shadow: 
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 -1px 0 rgba(0, 0, 0, 0.25),
         0 2px 8px rgba(0, 0, 0, 0.2);
     
-    /* Typographie */
+    /* Typographie réduite */
     font-family: 'Lexend', sans-serif !important;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 800;
     letter-spacing: 2px;
     color: rgba(52, 168, 83, 0.9);
@@ -122,7 +122,8 @@ body.keyboard-open #scoreboard-touch-zone {
     cursor: pointer;
     user-select: none;
     pointer-events: none;
-    transition: bottom 0.3s ease-out, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* RÈGLE D'OR : Feedback tactile mobile */
     -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
