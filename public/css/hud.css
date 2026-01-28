@@ -655,9 +655,9 @@
     text-transform: uppercase;
 }
 
-/* RÈGLE D'OR : Cacher quand panneau fermé (pas .is-open) */
+/* RÈGLE D'OR : Cacher complètement quand panneau fermé (pas .is-open) */
 #reaction-triggers:not(.is-open) .reaction-handle {
-    left: -100px;
+    left: -150px;
 }
 
 /* RÈGLE D'OR : Activer pointer-events sur desktop pour clic */
@@ -701,7 +701,7 @@
 
 @keyframes handlePeek {
     0%, 90%, 100% {
-        left: -100px;
+        left: -150px;
     }
     5%, 10% {
         left: -70px;
