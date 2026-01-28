@@ -535,15 +535,31 @@
 
     // Réception des réactions des autres joueurs
     socket.on('reaction-broadcast', ({ emoji, name }) => {
+      console.log('[REACTION] 📨 Broadcast reçu:', { emoji, name });
       createReactionBubble(emoji, name, displayArea);
     });
+    
+    // DEBUG : Test automatique au chargement (à supprimer en production)
+    if (displayArea) {
+      setTimeout(() => {
+        console.log('[REACTION] 🧪 Test automatique de bulle...');
+        createReactionBubble('🎉', 'Test Auto', displayArea);
+      }, 2000);
+    }
   }
 
   function createReactionBubble(emoji, playerName, container) {
-    console.log('Création bulle:', { emoji, playerName, container: container?.id });
+    console.log('[REACTION] Création bulle:', { emoji, playerName, container: container?.id });
+    console.log('[REACTION] Container display:', container ? window.getComputedStyle(container).display : 'N/A');
+    console.log('[REACTION] Container z-index:', container ? window.getComputedStyle(container).zIndex : 'N/A');
     
     if (!container) {
-      console.error('Container manquant pour bulle');
+      console.error('[REACTION] ❌ Container manquant pour bulle');
+      return;
+    }
+    
+    if (window.getComputedStyle(container).display === 'none') {
+      console.error('[REACTION] ❌ Container est display:none!');
       return;
     }
 
@@ -565,12 +581,18 @@
     bubble.appendChild(nameSpan);
     container.appendChild(bubble);
 
-    console.log('Bulle ajoutée au DOM:', bubble);
+    console.log('[REACTION] ✅ Bulle ajoutée au DOM:', bubble);
+    console.log('[REACTION] Position bulle:', {
+      bottom: bubble.style.bottom || window.getComputedStyle(bubble).bottom,
+      left: bubble.style.left,
+      zIndex: window.getComputedStyle(bubble).zIndex,
+      animation: window.getComputedStyle(bubble).animation
+    });
 
     // Suppression automatique après l'animation (3.2s)
     setTimeout(() => {
       bubble.remove();
-      console.log('Bulle supprimée');
+      console.log('[REACTION] 🗑️ Bulle supprimée:', emoji);
     }, 3200);
   }
 

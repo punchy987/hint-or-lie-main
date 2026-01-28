@@ -683,7 +683,8 @@
     left: 20px !important;
     width: 150px !important;
     height: 100vh !important;
-    z-index: 20000 !important;
+    /* RÈGLE D'OR : Z-index très élevé pour passer au-dessus de tout */
+    z-index: 21000 !important;
     pointer-events: none !important;
     overflow: visible !important;
 }
@@ -691,7 +692,8 @@
 /* Bulle individuelle */
 .reaction-bubble {
     position: absolute !important;
-    bottom: 50px !important;
+    /* RÈGLE D'OR : Démarrer au-dessus du scoreboard (hauteur scoreboard ≈ 200px) */
+    bottom: 220px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -711,6 +713,8 @@
     animation: arcade-float-up 3s ease-out forwards;
     will-change: transform, opacity;
     pointer-events: none !important;
+    /* Debug : Assurer la visibilité */
+    z-index: 21000 !important;
 }
 
 .reaction-bubble-emoji {
@@ -740,11 +744,16 @@
         transform: translateY(-20px) scale(1.2);
         opacity: 1;
     }
+    20% {
+        transform: translateY(-40px) scale(1);
+        opacity: 1;
+    }
     90% {
         opacity: 1;
     }
     100% {
-        transform: translateY(-80vh) scale(1);
+        /* RÈGLE D'OR : Monter jusqu'en haut de l'écran */
+        transform: translateY(-70vh) scale(1);
         opacity: 0;
     }
 }
