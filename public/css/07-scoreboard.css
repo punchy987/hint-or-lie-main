@@ -42,24 +42,21 @@
 }
 
 /* Zone tactile invisible en bas de l'écran - PASS-THROUGH (v6.5) */
+
 #scoreboard-touch-zone {
     position: fixed !important;
     bottom: 0 !important;
     left: 50% !important;
     transform: translateX(-50%);
     width: 100%;
-    height: 25vh; /* 25% du bas de l'écran */
-    height: 25dvh;
+    height: 40vh; /* 40% du bas de l'écran (v6.8) */
+    height: 40dvh;
     z-index: 1199 !important;
-    /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
-    /* RÈGLE D'OR v6.5 : pointer-events: none pour ne JAMAIS bloquer les clics */
     pointer-events: none !important;
-    /* Les événements sont gérés via document.addEventListener */
     touch-action: auto;
-    /* Transition fluide */
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

@@ -559,21 +559,19 @@
 /* ==================== */
 
 /* Zone tactile invisible sur le bord droit - PASS-THROUGH (v6.5) */
+
 #reaction-touch-zone {
     position: fixed !important;
     right: 0 !important;
     top: 0 !important;
-    width: 25vw; /* 25% du bord droit */
+    width: 50vw; /* 50% du bord droit (v6.8) */
     height: 100vh;
     height: 100dvh;
     z-index: 19999 !important;
-    /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
-    /* RÈGLE D'OR v6.5 : pointer-events: none pour ne JAMAIS bloquer les clics */
     pointer-events: none !important;
-    /* Les événements sont gérés via document.addEventListener */
     touch-action: auto;
 }
 

@@ -19,7 +19,13 @@ points d'ancrage CRITIQUES pour :
  MISE À JOUR — 28 JANVIER 2026 (v6.8)
 ================================================================================
 
+
  MASTER CLEANUP & FLUID HUD - PRODUCTION-READY :
+
+ 1. Zones tactiles élargies (v6.8) :
+    ✅ Réactions : #reaction-touch-zone passe à 50% du bord droit (width: 50vw)
+    ✅ Scoreboard : #scoreboard-touch-zone passe à 40% du bas de l'écran (height: 40vh)
+    (Clavier ouvert : scoreboard reste à 40vh)
 
  0. Nettoyage Radical (v6.8) - Zero Technical Debt
     ✅ Fichiers orphelins supprimés :
