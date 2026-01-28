@@ -391,7 +391,9 @@
       target: null
     };
 
+    let swipeDetection = false;
     document.addEventListener('touchstart', function(e) {
+      swipeDetection = false;
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
@@ -405,6 +407,27 @@
         touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone, axis: null, locked: false, target };
         target.classList.add('is-dragging');
         target.style.transition = 'none';
+        swipeDetection = true;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!touchState.isTracking) return;
+      const touch = e.touches[0];
+      touchState.currentX = touch.clientX;
+      touchState.currentY = touch.clientY;
+      const dx = touchState.currentX - touchState.startX;
+      const dy = touchState.currentY - touchState.startY;
+      if (!touchState.locked && (Math.abs(dx) > 30 || Math.abs(dy) > 30)) {
+        // On bloque le scroll natif uniquement si un vrai swipe est détecté
+        e.preventDefault();
+        touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        touchState.locked = true;
+      }
+      if (touchState.axis === 'y' && touchState.zone === 'bottom') {
+        touchState.target.style.transform = `translateX(-50%) translateY(${dy > 0 ? dy : 0}px)`;
+      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
+        touchState.target.style.transform = `translateY(-50%) translateX(${dx < 0 ? dx : 0}px)`;
       }
     }, { passive: false });
 
