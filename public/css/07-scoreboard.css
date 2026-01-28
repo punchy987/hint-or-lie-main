@@ -58,7 +58,6 @@
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: none !important;
-    touch-action: auto;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

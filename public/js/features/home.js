@@ -128,11 +128,12 @@
 
     function initSocketRoom() {
         socket.on('system', ({ text }) => toast(text));
-        
+
         socket.on('connect', () => {
             socket.emit('getLeaderboard');
+            socket.emit('getPublicRooms'); // Correction : demande la liste des salons publics à chaque connexion
             state.me.id = socket.id;
-            
+
             // Tentative de reconnexion automatique si on a un code de salle en mémoire
             const savedRoomCode = localStorage.getItem('hol_room_code');
             if (savedRoomCode && /^\d{4}$/.test(savedRoomCode)) {
@@ -140,15 +141,15 @@
                 setTimeout(() => {
                     const persistentId = window.HOL.getPersistentId();
                     const deviceId = window.HOL.getDeviceId();
-                    
+
                     // Marquer qu'on tente une reconnexion automatique
                     state.attemptingAutoReconnect = true;
-                    
+
                     // Tenter de rejoindre automatiquement la salle
                     socket.emit('hello', { deviceId, persistentId });
-                    socket.emit('joinRoom', { 
-                        code: savedRoomCode, 
-                        deviceId, 
+                    socket.emit('joinRoom', {
+                        code: savedRoomCode,
+                        deviceId,
                         persistentId,
                         autoReconnect: true // Flag pour indiquer que c'est une reconnexion auto
                     });
