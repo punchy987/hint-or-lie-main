@@ -16,10 +16,130 @@ points d'ancrage CRITIQUES pour :
    avant toute modification.
 
 ================================================================================
- MISE À JOUR — 28 JANVIER 2026 (v6.1.1)
+ MISE À JOUR — 28 JANVIER 2026 (v6.5 - v6.6)
 ================================================================================
 
- OPTIMISATIONS MOBILE-FIRST & UX TACTILE :
+ SYSTÈME DE GESTES NON-BLOQUANTS & HUD INTELLIGENT :
+
+ 1. Pass-Through Global (v6.5) - Architecture Révolutionnaire
+    ✅ Logique document-level : document.addEventListener({ passive: true })
+    ✅ Zones intelligentes 75% threshold :
+       - Bord droit (startX > 75% largeur) → surveillance réactions
+       - Bas écran (startY > 75% hauteur) → surveillance scoreboard
+    
+    ✅ Détection TAP vs SWIPE :
+       - Mouvement < 10px = TAP → laisse passer au navigateur (clics boutons)
+       - Mouvement > 30px = SWIPE → déclenche action panneau
+    
+    ✅ Vecteur directionnel :
+       - Math.abs(deltaX) > Math.abs(deltaY) → swipe horizontal (réactions)
+       - Math.abs(deltaY) > Math.abs(deltaX) → swipe vertical (scoreboard)
+       - Mouvement perpendiculaire ignoré → scroll préservé
+    
+    ✅ Anti-conflit modal :
+       - Détection automatique si modal ouvert (#modal, #modal-rules-lobby)
+       - Swipe désactivé si modal actif
+    
+    ✅ Zones tactiles CSS :
+       - #reaction-touch-zone : pointer-events: none !important
+       - #scoreboard-touch-zone : pointer-events: none !important
+       - touch-action: auto (gestion JS pure)
+       - Ne bloquent JAMAIS les clics sur boutons/inputs
+    
+    ✅ Feedback haptique :
+       - navigator.vibrate(10) sur swipe réussi
+       - Transitions fluides 0.3s cubic-bezier
+    
+    Fichiers modifiés :
+       - public/js/main.js (initGlobalSwipeSystem)
+       - public/css/hud.css (#reaction-touch-zone)
+       - public/css/07-scoreboard.css (#scoreboard-touch-zone)
+
+ 2. Poignées Visuelles Toujours Visibles (v6.6)
+    ✅ Poignée Réactions (bord gauche panneau) :
+       - Définition CSS complète ajoutée (était manquante)
+       - Position : absolute, left: 0, top: 50%, translateY(-50%)
+       - Dimensions : 2px largeur × 60px hauteur
+       - Couleur : var(--primary) avec glow néon
+       - Animation : reactionHandleBreath (3s infinite)
+         * Scale vertical : 95% ↔ 105%
+         * Opacity pulse : 0.6 ↔ 1
+         * Glow néon : 4px ↔ 8px + lueur dorée
+       - Visible quand panneau ouvert/fermé
+       - Cachée uniquement sur HOME (display: none)
+    
+    ✅ Poignée Scoreboard (au-dessus panneau) :
+       - Position : absolute, bottom: -30px (desktop), -44px (mobile)
+       - Dimensions : 30px hauteur desktop, 44px mobile
+       - Texte : "▼ TABLEAU DE SCORE" (0.65rem desktop, 0.6rem mobile)
+       - Animation : scoreboardHandleBreath (3s infinite)
+         * Scale horizontal : 97% ↔ 100%
+         * Opacity pulse : 0.7 ↔ 1
+         * Box-shadow intensifié avec lueur verte
+       - Toujours visible (suppression animation peek contradictoire)
+       - Opacité 0.2 quand clavier ouvert
+    
+    ✅ Animations discrètes :
+       - Panneaux 100% immobiles (pas de translateX/Y)
+       - Seulement poignées animées (scale + glow)
+       - Respiration lente 3s pour effet subtil
+       - Attire l'attention sans être intrusif
+    
+    Fichiers modifiés :
+       - public/css/hud.css (.reaction-handle, @keyframes reactionHandleBreath)
+       - public/css/07-scoreboard.css (.scoreboard-handle, @keyframes scoreboardHandleBreath)
+
+ 3. Bulles Emoji - Noms Joueurs Lisibles (v6.6)
+    ✅ Couleur : #FFFFFF (blanc pur)
+    ✅ Text-shadow : contour noir multi-couches (5 couches)
+       - Lisibilité maximale sur tous les fonds
+       - Contour uniforme à 360°
+    ✅ Font-weight : 800 (extra-bold) maintenu
+    ✅ Font-size : 0.75rem
+    
+    Structure garantie :
+       - .reaction-bubble-name : display: block !important
+       - .reaction-bubble-name : opacity: 1 !important
+       - .reaction-bubble : overflow: visible, min-height: 60px
+    
+    Fichier : public/css/hud.css (.reaction-bubble-name)
+
+ 4. Keyboard-Aware HUD (conservé de v6.3)
+    ✅ Transparence contextuelle :
+       - Réactions : opacity 0.2 quand clavier ouvert
+       - Scoreboard : opacity 0.2 quand clavier ouvert (panel + handle)
+    ✅ Zone scoreboard élargie : 25dvh → 40dvh avec clavier
+    ✅ Détection : focusin/focusout sur INPUT/TEXTAREA
+    ✅ Classe : body.keyboard-open
+    
+    Fichiers :
+       - public/js/main.js (initKeyboardDetection)
+       - public/css/hud.css (body.keyboard-open styles)
+       - public/css/07-scoreboard.css (body.keyboard-open styles)
+
+ 5. Nettoyage Code (v6.6)
+    ✅ Suppression ~15 console.log() de debug
+    ✅ Suppression test automatique bulle 'Test Auto'
+    ✅ Suppression duplication body.keyboard-open .scoreboard-handle
+    ✅ Code production-ready
+    ✅ Commentaires DEBUG conservés pour développement futur
+    
+    Fichiers :
+       - public/js/main.js (-68 lignes)
+       - public/css/07-scoreboard.css (-5 lignes)
+
+ COMMITS GITHUB :
+    - b15c69f : v6.5 Système de Gestes Non-Bloquants
+    - 1d801c6 : fix définition CSS .reaction-handle
+    - 9e69adc : fix poignée réactions visible quand fermé
+    - f12d7df : fix scoreboard handle toujours visible
+    - 3762df0 : feat animations discrètes poignées
+    - fe31bef : fix noms joueurs bulles emoji blanc
+    - 18120af : chore nettoyage code
+
+================================================================================
+ OPTIMISATIONS MOBILE-FIRST & UX TACTILE (HISTORIQUE v6.1.1)
+================================================================================
 
  1. Full-Screen Immersif Mobile-First (v6.1)
     ✅ Suppression effet cadre "enfermé" : 100% largeur sur mobile
