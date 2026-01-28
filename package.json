@@ -6,6 +6,10 @@
   "author": "Mits",
   "license": "ISC",
   "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/ios": "^8.0.2",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
     "socket.io": "^4.8.1"

@@ -1,7 +1,13 @@
 (function () {
   window.HOL = window.HOL || {};
   
-  const socket = io({
+  // Configuration de l'URL du serveur (support mobile)
+  let serverUrl = '';
+  if (typeof getServerUrl === 'function') {
+    serverUrl = getServerUrl();
+  }
+  
+  const socket = io(serverUrl, {
     transports: ['websocket', 'polling'],
     reconnectionAttempts: 5,
     timeout: 10000
