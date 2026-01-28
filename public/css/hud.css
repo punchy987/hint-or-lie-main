@@ -641,9 +641,9 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     opacity: 1;
 }
 
-/* RÈGLE D'OR : Animation pulse uniquement quand panneau fermé */
+/* RÈGLE D'OR : Animation discrète uniquement sur la poignée (pas le panneau) */
 #reaction-triggers.is-persistent:not(.is-open) .reaction-handle {
-    animation: handleGlowPulse 3s infinite ease-in-out;
+    animation: reactionHandleBreath 3s infinite ease-in-out;
 }
 
 /* RÈGLE D'OR : Cacher poignée seulement sur HOME (panneau complètement masqué) */
@@ -672,15 +672,17 @@ body.keyboard-open #reaction-triggers .btn-reaction {
     }
 }
 
-/* Animation glow pulse : respiration néon subtile */
-@keyframes handleGlowPulse {
+/* Animation respiration discrète : poignée seulement, panneau immobile */
+@keyframes reactionHandleBreath {
     0%, 100% {
-        opacity: 0.2;
+        transform: translateY(-50%) scaleY(0.95);
+        opacity: 0.6;
         box-shadow: -1px 0 4px var(--primary);
     }
     50% {
-        opacity: 0.5;
-        box-shadow: -1px 0 6px var(--primary);
+        transform: translateY(-50%) scaleY(1.05);
+        opacity: 1;
+        box-shadow: -1px 0 8px var(--primary), -1px 0 12px rgba(232, 197, 71, 0.3);
     }
 }
 
