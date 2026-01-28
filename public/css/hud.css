@@ -656,7 +656,8 @@
 
 /* RÈGLE D'OR : Cacher complètement quand panneau fermé (pas .is-open) */
 #reaction-triggers:not(.is-open) .reaction-handle {
-    left: -150px;
+    left: -20px; /* Complètement hors vue */
+    opacity: 0;
 }
 
 /* RÈGLE D'OR : Activer pointer-events sur desktop pour clic */
@@ -666,30 +667,18 @@
     }
 }
 
-/* Ajouter un indicateur visuel sur la poignée */
-.reaction-handle::before {
-    content: '◀';
-    font-size: 1rem;
-    opacity: 0.8;
-}
-
+/* Pas d'indicateur visuel texte, juste la ligne néon */
+.reaction-handle::before,
 .reaction-handle::after {
-    content: 'RÉACTIONS';
-    font-size: 0.65rem;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    letter-spacing: 2px;
+    display: none;
 }
 
-#reaction-triggers.is-open .reaction-handle::before {
-    content: '▶';
-}
-
-/* RÈGLE D'OR : Apparition au hover (desktop) - déjà visible, juste avancer un peu */
+/* RÈGLE D'OR : Apparition au hover (desktop) */
 @media (hover: hover) and (pointer: fine) {
     #reaction-touch-zone:hover ~ #reaction-triggers .reaction-handle,
     #reaction-triggers:hover .reaction-handle {
-        left: -50px; /* Avance un peu plus au hover */
+        left: 0px; /* Avance légèrement au hover */
+        box-shadow: -2px 0 8px var(--primary);
     }
 }
 
@@ -700,21 +689,29 @@
 
 @keyframes handlePeek {
     0%, 90%, 100% {
-        left: -150px;
+        left: -20px;
+        opacity: 0;
     }
     5%, 10% {
-        left: -70px;
+        left: -2px;
+        opacity: 1;
     }
 }
 
 .reaction-handle:hover {
-    background: linear-gradient(180deg, 
-        rgba(52, 168, 83, 0.18) 0%, 
-        rgba(52, 168, 83, 0.12) 100%);
-    box-shadow: 
-        inset 1px 0 1px rgba(255, 255, 255, 0.2),
-        inset -1px 0 1px rgba(0, 0, 0, 0.25),
-        -2px 0 12px rgba(52, 168, 83, 0.3);
+    box-shadow: -2px 0 12px var(--primary);
+}
+
+/* Animation glow pulse : respiration néon subtile */
+@keyframes handleGlowPulse {
+    0%, 100% {
+        opacity: 0.2;
+        box-shadow: -1px 0 4px var(--primary);
+    }
+    50% {
+        opacity: 0.5;
+        box-shadow: -1px 0 6px var(--primary);
+    }
 }
 
 /* Animation breathe : Respiration scale subtile */

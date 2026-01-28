@@ -405,7 +405,7 @@
         isDragging = false;
 
         const deltaY = currentY - startY;
-        const threshold = 50; // Seuil minimum pour valider le swipe
+        const threshold = 30; // Seuil optimisé pour déclencher le swipe
         console.log('👆 Scoreboard swipe détecté', { deltaY, threshold });
 
         if (deltaY > threshold) {
@@ -413,14 +413,14 @@
           console.log('✅ Fermeture scoreboard');
           scoreboardPanel.classList.add('is-hidden');
           if (navigator.vibrate) {
-            navigator.vibrate(15);
+            navigator.vibrate(10);
           }
         } else if (deltaY < -threshold) {
           // Swipe vers le haut -> ouvrir
           console.log('✅ Ouverture scoreboard');
           scoreboardPanel.classList.remove('is-hidden');
           if (navigator.vibrate) {
-            navigator.vibrate([10, 30, 10]);
+            navigator.vibrate(10);
           }
         } else {
           console.log('❌ Swipe trop faible', { deltaY });
@@ -502,7 +502,7 @@
         isDragging = false;
 
         const deltaX = currentX - startX;
-        const threshold = 50; // Seuil minimum pour valider le swipe
+        const threshold = 30; // Seuil optimisé pour déclencher le swipe
         console.log('👆 Reactions swipe détecté', { deltaX, threshold });
 
         if (deltaX > threshold) {
@@ -510,14 +510,14 @@
           console.log('✅ Fermeture réactions');
           reactionTriggers.classList.remove('is-open');
           if (navigator.vibrate) {
-            navigator.vibrate(15);
+            navigator.vibrate(10);
           }
         } else if (deltaX < -threshold) {
           // Swipe vers la gauche -> ouvrir
           console.log('✅ Ouverture réactions');
           reactionTriggers.classList.add('is-open');
           if (navigator.vibrate) {
-            navigator.vibrate([10, 30, 10]);
+            navigator.vibrate(10);
           }
         } else {
           console.log('❌ Swipe trop faible', { deltaX });

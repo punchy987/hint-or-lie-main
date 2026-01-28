@@ -47,8 +47,8 @@
     left: 50% !important;
     transform: translateX(-50%);
     width: 100%;
-    height: 15vh; /* 15% du bas de l'écran */
-    height: 15dvh;
+    height: 25vh; /* 25% du bas de l'écran */
+    height: 25dvh;
     z-index: 1199 !important;
     cursor: pointer;
     /* Zone invisible (debug: rendre visible avec background rouge) */
@@ -133,7 +133,7 @@
     .scoreboard-handle {
         bottom: -44px;
         height: 44px;
-        font-size: 0.75rem;
+        font-size: 0.6rem;
         letter-spacing: 1.5px;
         /* Zone tactile visible mais discrète */
         border: 2px solid rgba(52, 168, 83, 0.3);
