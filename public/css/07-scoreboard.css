@@ -163,17 +163,17 @@
         bottom: -120px;
     }
     5%, 10% {
-        bottom: -50px;
+        bottom: -30px; /* Montre la barre de 30px */
     }
 }
 
 @media (max-width: 640px) {
     @keyframes scoreboardPeek {
         0%, 90%, 100% {
-            bottom: -130px;
+            bottom: -120px;
         }
         5%, 10% {
-            bottom: -80px;
+            bottom: -44px; /* Montre la barre de 44px sur mobile */
         }
     }
 }
@@ -337,21 +337,6 @@
 
 .status-icon-waiting {
     animation: statusPulse 1.5s infinite;
-}
-
-/* Animation Game Juice : Entrée du panneau avec overshoot */
-@keyframes slideUpBounce {
-    0% { 
-        transform: translateX(-50%) translateY(120%);
-        opacity: 0;
-    }
-    60% { 
-        transform: translateX(-50%) translateY(-5%);
-    }
-    100% { 
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
 }
 
 /* Highlight du joueur local */
