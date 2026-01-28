@@ -2,16 +2,16 @@
     /* Core colors — Matte Grey Arcade (Dualité Vert/Rouge) */
     --bg-main: #2F3542;
     --bg-dark: #2F3542;
-    --primary: #48BB78;
-    --color-primary: #48BB78;
-    --accent-cyan: #48BB78; /* Alias pour compatibilité */
+    --primary: #34A853;
+    --color-primary: #34A853;
+    --accent-cyan: #34A853; /* Alias pour compatibilité */
     --glass-bg: rgba(255,255,255,0.03);
     --glass-border: rgba(241,242,246,0.1);
 
     /* Team colors */
-    --color-crew: #48BB78;
-    --color-impostor: #F56565;
-    --color-impostor-alt: #F56565;
+    --color-crew: #34A853;
+    --color-impostor: #EA4335;
+    --color-impostor-alt: #EA4335;
 
     /* Matte gray palette */
     --mat-gray-900: #2F3542;

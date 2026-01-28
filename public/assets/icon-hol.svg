@@ -67,7 +67,7 @@
   
   <!-- Fond avec border-radius 20% et effet relief -->
   <rect x="0" y="0" width="512" height="512" rx="102.4" ry="102.4" 
-        fill="#2F3542" filter="url(#bgEmboss)"/>
+        fill="#0F1419" filter="url(#bgEmboss)"/>
   
   <!-- Bordure subtile pour définition -->
   <rect x="1" y="1" width="510" height="510" rx="102.4" ry="102.4" 
@@ -80,7 +80,7 @@
           font-family="Lexend, sans-serif" 
           font-weight="800" 
           font-size="240" 
-          fill="#48BB78"
+          fill="#34A853"
           text-anchor="middle">H</text>
     
     <!-- Lettre L en rouge impostor -->
@@ -88,7 +88,7 @@
           font-family="Lexend, sans-serif" 
           font-weight="800" 
           font-size="240" 
-          fill="#F56565"
+          fill="#EA4335"
           text-anchor="middle">L</text>
   </g>
   

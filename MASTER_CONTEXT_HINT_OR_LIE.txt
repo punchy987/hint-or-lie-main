@@ -21,7 +21,7 @@ points d'ancrage CRITIQUES pour :
 Design : Matte Grey Arcade (Relief Embossé + Typography Lexend)
    ✅ Thème Matte Grey Arcade avec reliefs tactiles 3D
    ✅ Palette : #2F3542 (bg-main), #F1F2F6 (text)
-   ✅ Couleurs sémantiques : #48BB78 (crew green), #F56565 (impostor red)
+   ✅ Couleurs sémantiques Google : #34A853 (crew green), #EA4335 (impostor red)
    ✅ Jaune arcade (#E8C547) REMPLACÉ par dualité vert/rouge
    ✅ Police : Lexend (400, 600, 800) forcée globalement avec !important
    ✅ Effets de relief : box-shadow inset (light+dark) sur tous les éléments
@@ -34,12 +34,12 @@ Design : Matte Grey Arcade (Relief Embossé + Typography Lexend)
 Tokens CSS (public/css/01-tokens.css) :
    --bg-main: #2F3542 (anthracite matte)
    --text-main: #F1F2F6 (off-white)
-   --color-primary: #48BB78 (green crew - REMPLACE le jaune)
-   --primary: #48BB78 (green crew)
-   --accent-cyan: #48BB78 (green crew)
-   --color-crew: #48BB78 (green sage)
-   --color-impostor: #F56565 (red coral)
-   --color-impostor-alt: #F56565 (red variant)
+   --color-primary: #34A853 (green Google - REMPLACE le jaune)
+   --primary: #34A853 (green Google)
+   --accent-cyan: #34A853 (green Google)
+   --color-crew: #34A853 (green Google)
+   --color-impostor: #EA4335 (red Google)
+   --color-impostor-alt: #EA4335 (red Google variant)
    --relief-light: rgba(255,255,255,0.15)
    --relief-dark: rgba(0,0,0,0.3)
    --relief-bg: #3a4150
@@ -283,8 +283,8 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
    border-radius: 12px
    background: transparent — Floating Matte
    
-   .theme-crew → color: var(--color-crew) — Green #48BB78
-   .theme-impostor → color: var(--color-impostor) — Red #F56565
+   .theme-crew → color: var(--color-crew) — Green Google #34A853
+   .theme-impostor → color: var(--color-impostor) — Red Google #EA4335
 
  WORD CARD (#crew-word-chip) :
    background: transparent — Floating Matte
@@ -716,7 +716,7 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
 
  ✅ REFONTE DESIGN "TACTILE ARCADE PREMIUM" COMPLÉTÉE :
     ✅ Police Lexend (400, 600, 800) forcée globalement avec !important
-    ✅ Palette Matte Grey (#2F3542 bg, #E8C547 primary, #48BB78 crew, #F56565 impostor)
+    ✅ Palette Google (#2F3542 bg, #34A853 crew, #EA4335 impostor)
     ✅ Effets de relief embossé (box-shadow inset) sur tous les boutons/panels
     ✅ Arcade Bars (.arcade-bar) avec fond jaune transparent + relief 3D
     ✅ Typography Scale : base 1.1rem, titles 2.5rem, buttons 1.2rem (800 weight)
@@ -1437,8 +1437,8 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     Objectif : Icône app cohérente avec le design Tactile Arcade Premium
     
     ✅ Fichier créé : public/assets/icon-hol.svg (512×512)
-       - Fond : #2F3542 (--bg-main) avec border-radius 20% (102.4px)
-       - Lettres bicolores : H en vert #48BB78, L en rouge #F56565
+       - Fond : #0F1419 (noir cyber profond) avec border-radius 20% (102.4px)
+       - Lettres bicolores : H en vert #34A853, L en rouge #EA4335
        - Police : Lexend 800, taille 240px
        - Safe zone : Contenu dans cercle 410px de diamètre (maskable Android)
        
@@ -1482,8 +1482,8 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        CSS (hud.css) :
        - .logo-loader : fond --bg-main, bordure rgba(255,255,255,0.1)
        - .logo-letter : text-shadow multi-couches (highlight, ombre, profondeur)
-       - .logo-h : color: var(--color-crew) (#48BB78)
-       - .logo-l : color: var(--color-impostor) (#F56565)
+       - .logo-h : color: var(--color-crew) (#34A853)
+       - .logo-l : color: var(--color-impostor) (#EA4335)
        - Gap : 2px, letter-spacing : -4px
     
     ✅ Logo page d'accueil (.logo-square dans home-header) :
@@ -1508,24 +1508,39 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     Objectif : Réactions sociales ergonomiques droitier avec bulles flottantes arcade
     
     ✅ Structure HTML (public/index.html) :
-       - #reaction-triggers : 7 boutons verticaux à droite
+       - #reaction-triggers : 7 boutons verticaux à droite avec poignée
+         * .reaction-handle : Trait vertical 4×40px (Toggle pour déployer/replier)
          * Emojis : 😂, 🤔, 🤨, 🔥, 💀, 😭, 😡
          * Attributs : data-emoji, title pour accessibilité
        - #reaction-display-area : Zone d'affichage gauche (150px width)
        - Conteneurs persistants (hors screens) pour disponibilité permanente
     
     ✅ Design CSS (public/css/hud.css) :
-       Triggers à droite (Tiroir avec animation) :
-       - Position : fixed right: 20px, top: 50%, transform: translateY(-50%)
-       - État masqué par défaut : translateX(120%) (hors écran)
-       - Classe .is-active : translateX(0) avec transition 0.6s cubic-bezier
-       - Box-shadow quand actif : -4px 0 16px rgba(0,0,0,0.4) (effet profondeur)
-       - Dimensions boutons : 48×48px (taille tactile optimale)
+       Tiroir déployable à droite (Style Scoreboard) :
+       - Position : fixed right: 0, top: 50%, transform: translateY(-50%)
+       - État masqué par défaut : translateX(120%) (complètement hors champ)
+       - Classe .is-persistent : translateX(calc(100% - 15px)) — poignée visible (replié)
+       - Classe .is-open : translateX(0) — tiroir complètement déployé
+       - Transition : 0.4s cubic-bezier(0.4, 0, 0.2, 1) (identique scoreboard)
+       - z-index : 20000 (au-dessus de tout)
+       
+       Poignée (.reaction-handle) :
+       - Dimensions : 4px largeur × 40px hauteur
+       - Couleur : linear-gradient vert crew (--color-primary)
+       - Border-radius : 2px 0 0 2px (arrondi côté gauche)
+       - Effet embossé : inset box-shadow + relief
+       - Hover : Glow rgba(0,255,136,0.4) + intensification
+       - Cursor : pointer
+       - Position : margin-left: auto (aligné à gauche du conteneur)
+       
+       Boutons réactions (.btn-reaction) :
+       - Dimensions : 48×48px desktop, 40×40px mobile
        - Fond : var(--relief-bg) avec relief embossé multi-couches
+       - Font-size : 1.5rem desktop, 1.25rem mobile
+       - Border-radius : 12px
        - Hover : translateX(-2px) + scale(1.05) + box-shadow intensifié
        - Active : scale(0.95) + box-shadow réduit
        - Disabled : opacity 0.4, cursor not-allowed
-       - z-index : 20000 (au-dessus de tout)
        
        Display à gauche :
        - Position : fixed bottom: 0, left: 20px
@@ -1552,6 +1567,8 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     
     ✅ Logique JavaScript Client (public/js/main.js) :
        initReactionSystem() :
+       - Toggle tiroir : Click sur .reaction-handle → classList.toggle('is-open')
+       - Auto-fermeture : Après sélection emoji → classList.remove('is-open') (garde .is-persistent)
        - Cooldown global : 2 secondes après chaque clic
        - Désactivation : Tous boutons disabled pendant cooldown
        - Émission uniquement : socket.emit('player-reaction', { emoji, name })
@@ -1567,10 +1584,12 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        - Bulles empilées au même endroit (bottom: 50px fixe en CSS)
        
        Cinématique tiroir (updateUIFromState) :
-       - Lobby/Hints/Voting/Reveal : Ajoute classe .is-active → tiroir glisse depuis droite
-       - Home : Retire classe .is-active → tiroir glisse hors-champ
-       - Permanence : Classe conservée pendant toutes les phases de jeu
-       - Transition fluide : cubic-bezier(0.175, 0.885, 0.32, 1.275) sur 0.6s
+       - screen-home : Retire .is-persistent et .is-open → tiroir masqué totalement (120%)
+       - screen-lobby : Ajoute .is-persistent → poignée glisse depuis droite (animation d'entrée)
+       - screen-hint/vote/reveal : Maintient .is-persistent → poignée reste accessible
+       - Permanence : Classe .is-persistent conservée pendant toutes les phases de jeu
+       - Transition fluide : cubic-bezier(0.4, 0, 0.2, 1) sur 0.4s (cohérence scoreboard)
+       - Sécurité : Auto-fermeture ne retire QUE .is-open, jamais .is-persistent
     
     ✅ Logique Serveur (routes/sockets/index.js) :
        - Listener : socket.on('player-reaction', ({ emoji, name }))
@@ -1578,27 +1597,116 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        - Diffusion synchronisée : Tous joueurs de la salle (y compris expéditeur) reçoivent au même moment
     
     ✅ Ergonomie optimisée :
+       - Tiroir déployable : Style scoreboard avec poignée verte embossée
+       - Toggle au clic : Ouverture/fermeture fluide 0.4s
+       - Auto-fermeture : Après sélection pour ne pas masquer le jeu
+       - Masquage total : Complètement invisible sur screen-home (120%)
+       - Apparition contextuelle : Poignée glisse au lobby, reste pendant le jeu
        - Triggers à droite : Accès pouce droit facile
-       - Tiroir animé : Apparition contextuelle (uniquement en jeu)
        - Bulles à gauche : Pas de masquage des triggers ni du contenu principal
        - Montée arcade : Trajectoire verticale fluide jusqu'en haut (80vh)
        - Variation horizontale : left aléatoire 0-50px pour diversité
        - Cooldown anti-spam : Préserve lisibilité et performances
        - Synchronisation parfaite : Tous voient la même bulle au même moment
+       - Adaptation mobile : Boutons 40px pour éviter masquage contenu
+
+ TIROIR RÉACTIONS DÉPLOYABLE (STYLE SCOREBOARD) [27 JANVIER 2026] :
+    Objectif : Système de tiroir pliable/dépliable avec poignée, cohérent avec le scoreboard
+    
+    ✅ Structure HTML (public/index.html) :
+       - .reaction-handle : Poignée de toggle au début de #reaction-triggers
+       - Titre : "Réactions" (attribut title pour accessibilité)
+    
+    ✅ Design CSS (public/css/hud.css) :
+       États du tiroir (3 niveaux) :
+       1. Masqué (défaut) : translateX(120%) — complètement hors champ
+       2. Replié (.is-persistent) : translateX(calc(100% - 15px)) — poignée visible
+       3. Ouvert (.is-open) : translateX(0) — tiroir complètement déployé
+       
+       Poignée (.reaction-handle) :
+       - Dimensions : 4px × 40px (trait vertical fin)
+       - Position : margin-left: auto (côté gauche du conteneur)
+       - Couleur : linear-gradient vert crew (rgba(0,255,136))
+       - Relief embossé : inset box-shadow multi-couches
+       - Border-radius : 2px 0 0 2px (arrondi gauche uniquement)
+       - Hover : Intensification + glow rgba(0,255,136,0.4)
+       - Cursor : pointer
+       
+       Transitions :
+       - Duration : 0.4s (identique scoreboard)
+       - Timing : cubic-bezier(0.4, 0, 0.2, 1) (identique scoreboard)
+       - Smooth : transform only (optimisation GPU)
+    
+    ✅ Logique JavaScript (public/js/main.js) :
+       Toggle interactif :
+       - Click .reaction-handle → classList.toggle('is-open')
+       - Bascule ouvert/replié sans affecter .is-persistent
+       
+       Apparition/Disparition contextuelle (updateUIFromState) :
+       - screen-home : classList.remove('is-persistent', 'is-open') → masquage total
+       - screen-lobby : classList.add('is-persistent') → animation glissement poignée
+       - Autres screens : Maintient .is-persistent → poignée reste accessible
+       
+       Auto-fermeture intelligente :
+       - Après clic emoji : classList.remove('is-open') UNIQUEMENT
+       - Conservation : .is-persistent reste intacte pour garder poignée visible
+       - Comportement : Tiroir se replie automatiquement, poignée reste accessible
+    
+    ✅ Règle d'Or de Sécurité :
+       - JAMAIS retirer .is-persistent lors de l'auto-fermeture
+       - TOUJOURS vérifier l'écran avant de modifier les classes
+       - SEULEMENT retirer les deux classes sur screen-home
+       - Cohérence : Même pattern que scoreboard (.is-hidden)
+    
+    ✅ Impact UX :
+       - Masquage total sur accueil : Pas de pollution visuelle
+       - Apparition élégante : Glissement fluide au lobby
+       - Accessibilité permanente : Poignée visible pendant le jeu
+       - Interaction intuitive : Toggle clair, auto-fermeture pratique
+       - Cohérence visuelle : Design identique au scoreboard
 
  Fichiers modifiés session identité :
     ✅ public/assets/icon-hol.svg — Icône app SVG avec filtres relief (71 lignes)
-    ✅ public/index.html — theme-color, icônes SVG/PNG, logo HTML bicolore (3 zones)
+    ✅ public/index.html — theme-color, icônes SVG/PNG, logo HTML bicolore, poignée réactions (4 zones)
     ✅ public/manifest.json — HOL short_name, #2F3542, icons simplifiés
-    ✅ public/css/hud.css — .logo-letter styles + Arcade Bubbles complet (190 lignes)
+    ✅ public/css/hud.css — .logo-letter styles + Arcade Bubbles + tiroir déployable (220 lignes)
     ✅ public/css/08-home.css — .logo-square bicolore avec relief (32 lignes)
-    ✅ public/js/main.js — initReactionSystem + createReactionBubble + cinématique tiroir (85 lignes)
+    ✅ public/js/main.js — initReactionSystem + tiroir toggle + gestion contextuelle (110 lignes)
     ✅ routes/sockets/index.js — Listener player-reaction + broadcast (6 lignes)
 
  Corrections finales Arcade Bubbles [27 JANVIER 2026] :
     ✅ Animation "nuclear reset" : arcade-float-up avec translateY(-80vh)
     ✅ Suppression doublon affichage : Seul broadcast crée bulles (single source of truth)
     ✅ Cinématique tiroir : Apparition contextuelle avec .is-active (lobby→reveal)
+
+ PALETTE CYBER ARCADE (COULEURS VIBRANTES) [27 JANVIER 2026] :
+    Objectif : Palette harmonieuse et reconnaissable avec couleurs Google
+    
+    ✅ Couleurs finales retenues :
+       - Vert crew : #34A853 (Google Green) — Harmonieux et équilibré
+       - Rouge impostor : #EA4335 (Google Red) — Vibrant et reconnaissable
+       - Fond SVG : #0F1419 (noir cyber profond) — Contraste optimal
+    
+    ✅ Fichiers modifiés :
+       - public/css/01-tokens.css :
+         * --color-primary: #34A853
+         * --primary: #34A853
+         * --accent-cyan: #34A853
+         * --color-crew: #34A853
+         * --color-impostor: #EA4335
+         * --color-impostor-alt: #EA4335
+       
+       - public/assets/icon-hol.svg :
+         * fill="#34A853" pour lettre H
+         * fill="#EA4335" pour lettre L
+         * fill="#0F1419" pour fond (rect background)
+    
+    ✅ Identité visuelle renforcée :
+       - Contraste équilibré : Noir profond + couleurs saturées mais harmonieuses
+       - Lisibilité optimale : Palette Google reconnue universellement
+       - Esthétique moderne : Couleurs brand quality professionnelles
+       - Cohérence totale : Tous les tokens CSS pointent vers nouvelles couleurs
+       - Logo marquant : Dualité H/L avec palette Google reconnaissable
     ✅ Position bulles : absolute bottom: 50px, variation left random 0-50px
     ✅ Container reset : bottom: 0, left: 20px, overflow: visible
     ✅ Tous fichiers synchronisés et opérationnels
@@ -1714,8 +1822,8 @@ Nouvelles fonctionnalités : Tiroir contextuel + Bulles montée arcade + Synchro
     ✅ Fichier : public/js/main.js ligne 39 (updateUIFromState)
 
  Fichiers modifiés durant cette session d'optimisation :
-    ✅ public/css/01-tokens.css — --color-primary: #48BB78, --primary: #48BB78, --color-impostor-alt: #F56565
-    ✅ public/css/03-components.css — .input:focus border-color crew, .arcade-bar rgba(72,187,120,0.15)
+    ✅ public/css/01-tokens.css — --color-primary: #34A853, --primary: #34A853, --color-impostor-alt: #EA4335
+    ✅ public/css/03-components.css — .input:focus border-color crew, .arcade-bar rgba(52,168,83,0.15)
     ✅ public/css/04-phase.css — margin-bottom screen-header 12px, h2 titles 1.8rem
     ✅ public/css/05-hints.css — .word-card strong: var(--color-crew)
     ✅ public/css/06-vote.css — justify-content: center, aspect-ratio 2/3, width 110px, height 160px
@@ -1733,7 +1841,7 @@ Nouvelles fonctionnalités : Tiroir contextuel + Bulles montée arcade + Synchro
     ✅ public/js/features/results.js — vote classification, .vote-correct vs .vote-incorrect
 
  Nouvelles fonctionnalités UX/UI avancées :
-    ✅ Dualité couleurs : Vert crew (#48BB78) / Rouge impostor (#F56565) remplace jaune arcade
+    ✅ Dualité couleurs Google : Vert (#34A853) / Rouge (#EA4335) remplace jaune arcade
     ✅ Toast globalisé : Position fixed top 30px, z-index 10000, design arcade relief embossé
     ✅ Feedbacks temporaires : Tous messages disparaissent automatiquement (2.5-3.5s)
     ✅ Centrage cartes vote : justify-content: center pour alignement parfait

@@ -31,15 +31,18 @@
       // Gestion du tiroir de réactions
       const reactionTriggers = document.getElementById('reaction-triggers');
       if (reactionTriggers) {
-        // Afficher le tiroir uniquement pendant le jeu (lobby, hints, voting, reveal)
-        if (targetScreen) {
-          // Ajouter la classe is-active si pas déjà présente
-          if (!reactionTriggers.classList.contains('is-active')) {
-            reactionTriggers.classList.add('is-active');
+        // Masquage total sur l'écran d'accueil
+        if (!targetScreen) {
+          // Retour à l'accueil : retirer TOUTES les classes pour masquer complètement
+          reactionTriggers.classList.remove('is-persistent', 'is-open');
+        } else if (targetScreen === 'screen-lobby') {
+          // Au lobby : ajouter .is-persistent pour montrer la poignée
+          if (!reactionTriggers.classList.contains('is-persistent')) {
+            reactionTriggers.classList.add('is-persistent');
           }
-        } else {
-          // Retirer la classe is-active si on retourne à l'accueil
-          reactionTriggers.classList.remove('is-active');
+        } else if (targetScreen && !reactionTriggers.classList.contains('is-persistent')) {
+          // Autres écrans de jeu : s'assurer que .is-persistent est présent
+          reactionTriggers.classList.add('is-persistent');
         }
       }
 
@@ -402,6 +405,8 @@
 
     const triggers = document.querySelectorAll('.btn-reaction');
     const displayArea = document.getElementById('reaction-display-area');
+    const reactionTriggers = document.getElementById('reaction-triggers');
+    const reactionHandle = document.querySelector('.reaction-handle');
 
     if (!triggers.length || !displayArea) {
       console.warn('Arcade Bubbles: éléments manquants', { triggers: triggers.length, displayArea: !!displayArea });
@@ -409,6 +414,13 @@
     }
 
     console.log('Arcade Bubbles initialisé', { triggers: triggers.length, displayArea: displayArea.id });
+
+    // Toggle du tiroir au clic sur la poignée
+    if (reactionHandle && reactionTriggers) {
+      reactionHandle.addEventListener('click', () => {
+        reactionTriggers.classList.toggle('is-open');
+      });
+    }
 
     // Gestion des clics sur les boutons de réaction
     triggers.forEach(btn => {
@@ -426,6 +438,11 @@
         // Feedback haptique
         if (navigator.vibrate) {
           navigator.vibrate(30);
+        }
+
+        // Auto-fermeture du tiroir après sélection
+        if (reactionTriggers) {
+          reactionTriggers.classList.remove('is-open');
         }
 
         // Activer le cooldown (2 secondes)

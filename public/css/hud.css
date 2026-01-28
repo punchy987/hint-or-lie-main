@@ -521,7 +521,7 @@
 /* Triggers à droite (ergonomie droitier) */
 #reaction-triggers {
     position: fixed !important;
-    right: 20px !important;
+    right: 0 !important;
     top: 50% !important;
     transform: translateY(-50%) translateX(120%) !important;
     display: flex !important;
@@ -529,14 +529,45 @@
     gap: 8px;
     z-index: 20000 !important;
     pointer-events: auto !important;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
     visibility: visible !important;
 }
 
-/* État actif : tiroir visible avec effet de profondeur */
-#reaction-triggers.is-active {
+/* État persistant : tiroir avec poignée visible (replié) */
+#reaction-triggers.is-persistent {
+    transform: translateY(-50%) translateX(calc(100% - 15px)) !important;
+}
+
+/* État ouvert : tiroir complètement déployé */
+#reaction-triggers.is-open {
     transform: translateY(-50%) translateX(0) !important;
-    box-shadow: -4px 0 16px rgba(0,0,0,0.4);
+}
+
+/* Poignée (Handle) : Trait vertical fin avec effet embossé */
+.reaction-handle {
+    width: 4px;
+    height: 40px;
+    background: linear-gradient(180deg, 
+        rgba(0, 255, 136, 0.8) 0%, 
+        rgba(0, 200, 100, 0.6) 100%);
+    border-radius: 2px 0 0 2px;
+    cursor: pointer;
+    margin-left: auto;
+    box-shadow: 
+        inset 1px 0 1px rgba(255, 255, 255, 0.3),
+        inset -1px 0 1px rgba(0, 0, 0, 0.3),
+        -2px 0 4px rgba(0, 0, 0, 0.3);
+    transition: all var(--transition-fast);
+}
+
+.reaction-handle:hover {
+    background: linear-gradient(180deg, 
+        rgba(0, 255, 136, 1) 0%, 
+        rgba(0, 200, 100, 0.8) 100%);
+    box-shadow: 
+        inset 1px 0 1px rgba(255, 255, 255, 0.4),
+        inset -1px 0 1px rgba(0, 0, 0, 0.4),
+        -2px 0 8px rgba(0, 255, 136, 0.4);
 }
 
 .btn-reaction {
@@ -662,5 +693,12 @@
     #screen-vote .panel,
     #screen-result .panel {
         padding: 1.25rem;
+    }
+
+    /* Réactions : Boutons plus petits sur mobile */
+    .btn-reaction {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
     }
 }
