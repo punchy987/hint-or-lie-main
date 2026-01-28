@@ -367,147 +367,69 @@
       console.warn('Global Swipe: éléments manquants');
       return;
     }
-
     let touchState = {
       startX: 0,
       startY: 0,
       currentX: 0,
       currentY: 0,
-      startTime: 0,
       isTracking: false,
-      zone: null, // 'right' ou 'bottom'
-      axisLocked: null // 'x' ou 'y'
+      zone: null,
+      axis: null,
+      locked: false
     };
-
-    // Helper pour reset les styles
-    function resetTransforms() {
-      reactionTriggers.style.transition = '';
-      reactionTriggers.style.transform = '';
-      scoreboardPanel.style.transition = '';
-      scoreboardPanel.style.transform = '';
-    }
-
     document.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
-
-      // Désactive si modal ouvert
       const modal = $('modal');
       const modalRules = $('modal-rules-lobby');
-      if ((modal && modal.style.display === 'flex') ||
-          (modalRules && modalRules.classList.contains('active'))) {
-        touchState.isTracking = false;
+      if ((modal && modal.style.display === 'flex') || (modalRules && modalRules.classList.contains('active'))) {
+        console.log('[HUD-Swipe] Bloqué par modal');
         return;
       }
-
-      // Priorité scoreboard si dans les 10% du bas
-      if (startY > screenHeight * 0.9) {
-        touchState = {
-          startX, startY, currentX: startX, currentY: startY, startTime: Date.now(), isTracking: true, zone: 'bottom', axisLocked: null
-        };
-      } else if (startX > screenWidth * 0.75) {
-        touchState = {
-          startX, startY, currentX: startX, currentY: startY, startTime: Date.now(), isTracking: true, zone: 'right', axisLocked: null
-        };
-      } else {
-        touchState.isTracking = false;
+      if (startX > screenWidth * 0.75) {
+        touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone: 'right', axis: null, locked: false };
+        reactionTriggers.style.transition = 'none';
+        console.log('[HUD-Swipe] Detecté sur zone réactions');
+      } else if (startY > screenHeight * 0.75) {
+        touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone: 'bottom', axis: null, locked: false };
+        scoreboardPanel.style.transition = 'none';
+        console.log('[HUD-Swipe] Detecté sur zone scoreboard');
       }
-      // Désactive transitions pour drag fluide
-      if (touchState.zone === 'right') reactionTriggers.style.transition = 'none';
-      if (touchState.zone === 'bottom') scoreboardPanel.style.transition = 'none';
-    }, { passive: true });
-
+    }, { passive: false });
     document.addEventListener('touchmove', (e) => {
       if (!touchState.isTracking) return;
       const touch = e.touches[0];
       touchState.currentX = touch.clientX;
       touchState.currentY = touch.clientY;
-
       const dx = touchState.currentX - touchState.startX;
       const dy = touchState.currentY - touchState.startY;
-
-      // Verrouillage d'axe après 8px
-      if (!touchState.axisLocked) {
-        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-          touchState.axisLocked = (Math.abs(dx) > Math.abs(dy)) ? 'x' : 'y';
-        } else {
-          return;
-        }
+      if (!touchState.locked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        touchState.locked = true;
       }
-
-      // Réactions (horizontal)
-      if (touchState.zone === 'right' && touchState.axisLocked === 'x') {
-        let translate = dx;
-        // Aimanté : résistance si on va trop loin
-        if ((reactionTriggers.classList.contains('is-open') && dx > 0) || (!reactionTriggers.classList.contains('is-open') && dx < 0)) {
-          translate *= 0.5;
-        }
-        // Limite max 120px
-        translate = Math.max(Math.min(translate, 120), -120);
-        reactionTriggers.style.transform = `translateY(-50%) translateX(${reactionTriggers.classList.contains('is-open') ? 0 : 120 + translate}px)`;
-      }
-      // Scoreboard (vertical)
-      if (touchState.zone === 'bottom' && touchState.axisLocked === 'y') {
-        let translate = dy;
-        // Aimanté : résistance si on va trop loin
-        if ((scoreboardPanel.classList.contains('is-hidden') && dy < 0) || (!scoreboardPanel.classList.contains('is-hidden') && dy > 0)) {
-          translate *= 0.5;
-        }
-        // Limite max 200px
-        translate = Math.max(Math.min(translate, 200), -200);
-        scoreboardPanel.style.transform = `translateX(-50%) translateY(${scoreboardPanel.classList.contains('is-hidden') ? 'calc(100% - 30px)' : '0px'} + ${translate}px)`;
+      if (touchState.axis === 'y' && touchState.zone === 'bottom') {
+        e.preventDefault();
+        scoreboardPanel.style.transform = `translateX(-50%) translateY(${Math.max(0, dy)}px)`;
+      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
+        reactionTriggers.style.transform = `translateY(-50%) translateX(${Math.min(0, dx)}px)`;
       }
     }, { passive: false });
-
-    document.addEventListener('touchend', (e) => {
+    document.addEventListener('touchend', () => {
       if (!touchState.isTracking) return;
-      const now = Date.now();
-      const dt = now - touchState.startTime;
-      const dx = touchState.currentX - touchState.startX;
-      const dy = touchState.currentY - touchState.startY;
-      const absDx = Math.abs(dx);
-      const absDy = Math.abs(dy);
-      let snapped = false;
-
-      // Réactions (horizontal)
-      if (touchState.zone === 'right' && touchState.axisLocked === 'x') {
-        const velocity = absDx / (dt || 1); // px/ms
-        const threshold = window.innerWidth * 0.3;
-        // Snap ouverture/fermeture
-        if ((dx < -threshold) || (velocity > 0.5 && dx < 0)) {
-          reactionTriggers.classList.add('is-open');
-          snapped = true;
-        } else if ((dx > threshold) || (velocity > 0.5 && dx > 0)) {
-          reactionTriggers.classList.remove('is-open');
-          snapped = true;
-        }
-        // Transition smooth
-        reactionTriggers.style.transition = 'transform 0.3s cubic-bezier(0.2,0.8,0.2,1)';
+      if (touchState.zone === 'right') {
+        reactionTriggers.style.transition = '';
         reactionTriggers.style.transform = '';
-        if (snapped && navigator.vibrate) navigator.vibrate(10);
-      }
-      // Scoreboard (vertical)
-      if (touchState.zone === 'bottom' && touchState.axisLocked === 'y') {
-        const velocity = absDy / (dt || 1); // px/ms
-        const threshold = window.innerHeight * 0.3;
-        if ((dy < -threshold) || (velocity > 0.5 && dy < 0)) {
-          scoreboardPanel.classList.remove('is-hidden');
-          snapped = true;
-        } else if ((dy > threshold) || (velocity > 0.5 && dy > 0)) {
-          scoreboardPanel.classList.add('is-hidden');
-          snapped = true;
-        }
-        scoreboardPanel.style.transition = 'transform 0.3s cubic-bezier(0.2,0.8,0.2,1)';
+      } else if (touchState.zone === 'bottom') {
+        scoreboardPanel.style.transition = '';
         scoreboardPanel.style.transform = '';
-        if (snapped && navigator.vibrate) navigator.vibrate(10);
       }
-      // Reset state
       touchState.isTracking = false;
-      touchState.axisLocked = null;
     }, { passive: false });
+  }
+      
   }
   
   // ========== DÉTECTION INTELLIGENTE DU CLAVIER ==========

@@ -567,17 +567,12 @@
     width: 50vw; /* 50% du bord droit (v6.8) */
     height: 100vh;
     height: 100dvh;
-    z-index: 19999 !important;
+    z-index: 15000 !important;
     background: transparent;
     /* DEBUG : décommenter pour voir la zone */
     /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: none !important;
-    touch-action: none !important;
-}
-
-/* Optimisation GPU pour le panneau de réactions */
-#reaction-triggers {
-    will-change: transform;
+    touch-action: auto;
 }
 
 /* Triggers à droite (ergonomie droitier) */

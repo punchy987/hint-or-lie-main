@@ -34,16 +34,21 @@
       if (el) el.style.display = (id === screenId) ? '' : 'none';
     }
     document.body.setAttribute('data-screen', screenId);
-    // RÈGLE D'OR : Gérer l'affichage du scoreboard selon l'écran
-    const sb = document.getElementById('scoreboard');
-    if (sb) {
-      if (HOL.SCORE_SCREENS.has(screenId)) {
-        // Visible dans les écrans de jeu
-        sb.style.display = 'block';
-        document.getElementById(screenId).appendChild(sb);
+    // HUD v7.0 : Affichage permanent des panneaux hors home
+    const scoreboardPanel = document.querySelector('.scoreboard-panel');
+    const reactionTriggers = document.getElementById('reaction-triggers');
+    if (scoreboardPanel) {
+      if (screenId !== 'screen-home') {
+        scoreboardPanel.style.display = 'flex';
       } else {
-        // Masqué sur la page d'accueil
-        sb.style.display = 'none';
+        scoreboardPanel.style.display = 'none';
+      }
+    }
+    if (reactionTriggers) {
+      if (screenId !== 'screen-home') {
+        reactionTriggers.style.display = 'flex';
+      } else {
+        reactionTriggers.style.display = 'none';
       }
     }
   };
