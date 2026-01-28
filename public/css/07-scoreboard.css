@@ -3,30 +3,47 @@
    ========================================= */
 
 /* Le conteneur principal qui coulisse — RÈGLE D'OR : Full-screen immersif */
+
+/* =========================================
+   SCOREBOARD BOTTOM SHEET (HUD) - v7.5 FIXED
+   ========================================= */
+
 .scoreboard-panel {
     position: fixed !important;
     bottom: 0;
     left: 50%;
-    /* État par défaut : visible (pour lobby/jeu) */
+    /* RÈGLE D'OR : On combine TOUJOURS X et Y pour préserver le centrage */
     transform: translateX(-50%) translateY(calc(100% - 50px));
     width: 100%;
+    max-width: 500px; /* Centrage sur desktop */
     background: rgba(27, 36, 48, 0.9) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(232, 197, 71, 0.2);
+    border: 1px solid rgba(52, 168, 83, 0.2); /* Vert Crew */
     border-bottom: none;
     border-radius: 20px 20px 0 0;
     z-index: 1200;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 0 0 20px 0 !important;
-    cursor: default;
-    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
-    overflow: visible;
-    will-change: transform, opacity;
+    
+    /* OPTIMISATION GPU */
+    will-change: transform;
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
+    transform-style: preserve-3d;
+
+    transition: transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1);
+    padding: 0 0 20px 0 !important;
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* État OUVERT : On garde le -50% X ! */
+.scoreboard-panel.is-open {
+    transform: translateX(-50%) translateY(0) !important;
+    display: block !important;
+}
+
+/* État CACHÉ (Sortie d'écran totale) */
+.scoreboard-panel.is-hidden {
+    transform: translateX(-50%) translateY(100%) !important;
+    pointer-events: none;
 }
 
 @media (min-width: 768px) {
