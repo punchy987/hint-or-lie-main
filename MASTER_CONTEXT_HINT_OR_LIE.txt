@@ -2063,6 +2063,70 @@ Nouvelles fonctionnalités : Drag/Swipe + Logique contextuelle + Animations hand
     ⚠️ Reconnexion rapide (<1s) : Quelques cas edge où le joueur n'est pas immédiatement restauré
     ⚠️ Condition reconnexion : Logique `oldSocketId !== socket.id` fonctionne presque parfaitement mais nécessite tests supplémentaires
 
+================================================================================
+ DÉPLOIEMENT MOBILE — CAPACITOR & CI/CD [27 JANVIER 2026]
+================================================================================
+
+ ✅ CONFIGURATION CAPACITOR :
+    ✅ Git initialisé à la racine du projet
+    ✅ Installation @capacitor/core et @capacitor/cli
+    ✅ Initialisation Capacitor : nom "Hint or Lie", package ID "com.hol.game"
+    ✅ Web directory configuré : public/
+    ✅ Plateformes Android et iOS ajoutées (dossiers android/ et ios/)
+    ✅ Installation @capacitor/android et @capacitor/ios
+
+ ✅ CONFIGURATION SERVEUR EXTERNALISÉE :
+    ✅ Fichier public/js/config/server-config.js créé
+    ✅ Structure simple : production (Render) + development (localhost)
+    ✅ Détection automatique environnement basée sur hostname
+    ✅ Function getServerUrl() : retourne URL selon contexte
+    ✅ Function isMobileApp() : détecte si app native via window.Capacitor
+    ✅ Modification public/index.html : Ajout script server-config.js
+    ✅ Modification public/js/core/socket.js : io(serverUrl) avec URL dynamique
+
+ Configuration serveur actuelle :
+    production: 'https://ton-nom-de-projet.onrender.com'
+    development: 'http://localhost:3000'
+
+ ✅ GITHUB ACTIONS WORKFLOW — BUILD ANDROID APK :
+    ✅ Fichier .github/workflows/android-build.yml créé
+    ✅ Déclenchement : Push sur branch main
+    ✅ Runner : ubuntu-latest
+    ✅ Steps configurés :
+       - Checkout code (actions/checkout@v3)
+       - Setup Node.js 22 (actions/setup-node@v4) — Requis pour Capacitor CLI
+       - Setup Java 21 (actions/setup-java@v4, distribution temurin) — Requis pour Gradle
+       - Installation dépendances npm
+       - Synchronisation Capacitor (npx cap sync android)
+       - Permissions Gradle (chmod +x gradlew)
+       - Build APK Debug (./gradlew assembleDebug)
+       - Upload artifact (actions/upload-artifact@v4)
+    ✅ Artifact généré : app-debug.apk
+    ✅ Rétention : 30 jours par défaut
+    ✅ Mode Debug : Pas de signature officielle, distribution rapide entre amis
+
+ Fichiers créés/modifiés pour mobile :
+    ✅ capacitor.config.json — Configuration Capacitor principale
+    ✅ public/js/config/server-config.js — URL serveur externalisée
+    ✅ public/index.html — Import script config (ligne 13)
+    ✅ public/js/core/socket.js — Support URL dynamique (lignes 4-14)
+    ✅ .github/workflows/android-build.yml — Pipeline CI/CD Android
+    ✅ CAPACITOR_SETUP.md — Documentation complète setup mobile
+    ✅ android/ — Projet Android natif (généré)
+    ✅ ios/ — Projet iOS natif (généré)
+
+ Commandes utiles :
+    npx cap sync — Synchronise web assets vers plateformes natives
+    npx cap sync android — Sync uniquement Android
+    npx cap open android — Ouvre projet dans Android Studio
+    npx cap open ios — Ouvre projet dans Xcode (macOS requis)
+
+ Notes importantes :
+    ⚠️ Remplacer 'https://ton-nom-de-projet.onrender.com' par URL Render réelle
+    ⚠️ Design CSS/JS préservé : Aucune modification du Tactile Arcade Premium
+    ⚠️ Node.js 22+ requis pour Capacitor CLI (configuré dans workflow)
+    ⚠️ Java 21 requis pour Gradle Android (configuré dans workflow)
+
  Ce fichier est la SOURCE DE VÉRITÉ pour :
     ✅ Les IDs et classes critiques (NE PAS MODIFIER — RÈGLE D'OR)
     ✅ Le design validé (Tactile Arcade Premium avec Lexend + Relief Embossé)
@@ -2081,6 +2145,4 @@ Nouvelles fonctionnalités : Drag/Swipe + Logique contextuelle + Animations hand
     ✅ L'interface densifiée et optimisée pour grands lobbies
     ✅ Le système de persistance joueurs avec UUID et reconnexion automatique
     ✅ La gestion des déconnexions avec timeouts différenciés et conservation des scores
-
-
-
+    ✅ La configuration mobile complète avec Capacitor et CI/CD automatisé
