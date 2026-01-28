@@ -34,7 +34,11 @@
 
 /* État Caché (Flush design : seule la bande de 30px visible) */
 .scoreboard-panel.is-hidden {
-    transform: translateX(-50%) translateY(calc(100% - 30px));
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    display: none !important;
 }
 
 /* RÈGLE D'OR : Masquer complètement sur page d'accueil */
@@ -124,7 +128,7 @@ body.keyboard-open .scoreboard-handle {
     /* Interaction */
     cursor: pointer;
     user-select: none;
-    pointer-events: none;
+        pointer-events: auto !important;
     transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
@@ -364,4 +368,37 @@ body.keyboard-open .scoreboard-handle {
     .scoreboard-panel {
         max-width: 600px;
     }
+    position: relative;
+}
+.scoreboard-label-text {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(52, 168, 83, 0.9);
+    letter-spacing: 1px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+.scoreboard-close-text {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #e24545;
+    letter-spacing: 1px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+.scoreboard-panel:not(.is-hidden) .scoreboard-label-text {
+    display: none;
+}
+.scoreboard-panel:not(.is-hidden) .scoreboard-close-text {
+    display: block;
 }

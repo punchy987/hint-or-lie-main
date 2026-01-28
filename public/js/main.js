@@ -507,11 +507,17 @@
     
     if (!scoreboardPanel) return;
 
-    // ========== DESKTOP : Clic sur handle pour toggle ==========
+    // ========== Clic sur la poignée pour ouvrir/fermer ========== 
     if (scoreboardHandle) {
       scoreboardHandle.addEventListener('click', (e) => {
         e.stopPropagation();
-        scoreboardPanel.classList.toggle('is-hidden');
+        if (scoreboardPanel.classList.contains('is-hidden')) {
+          scoreboardPanel.classList.remove('is-hidden');
+          delete scoreboardPanel.dataset.manuallyClosed;
+        } else {
+          scoreboardPanel.classList.add('is-hidden');
+          scoreboardPanel.dataset.manuallyClosed = '1';
+        }
       });
     }
 
@@ -535,7 +541,11 @@
     if (reactionHandle) {
       reactionHandle.addEventListener('click', (e) => {
         e.stopPropagation();
-        reactionTriggers.classList.toggle('is-open');
+        if (reactionTriggers.classList.contains('is-open')) {
+          reactionTriggers.classList.remove('is-open');
+        } else {
+          reactionTriggers.classList.add('is-open');
+        }
       });
     }
 

@@ -241,7 +241,10 @@
         <!-- Scoreboard (Injecté dynamiquement par helpers.js) -->
         <!-- RÈGLE D'OR : Masqué par défaut sur la page d'accueil -->
         <div id="scoreboard" class="panel scoreboard-panel is-hidden">
-            <div class="scoreboard-handle">▼ TABLEAU DE SCORE</div>
+                        <div class="scoreboard-handle">
+                            <span class="scoreboard-label-text">tableau de score</span>
+                            <span class="scoreboard-close-text">fermer</span>
+                        </div>
             <h3 class="label-secondary">Tableau de Score</h3>
             <ul id="score-list"></ul>
         </div>
@@ -261,7 +264,10 @@
     <!-- Système Arcade Bubbles : Réactions Latérales -->
     <!-- RÈGLE D'OR : Masqué par défaut sur la page d'accueil -->
     <div id="reaction-triggers">
-        <div class="reaction-handle" title="Réactions"></div>
+                <div class="reaction-handle" title="Réactions">
+                      <span class="reaction-label-text">réactions</span>
+                      <span class="reaction-close-text">fermer</span>
+                </div>
         <button class="btn-reaction" data-emoji="😂" title="Rire">😂</button>
         <button class="btn-reaction" data-emoji="🤔" title="Réfléchir">🤔</button>
         <button class="btn-reaction" data-emoji="🤨" title="Doute">🤨</button>
