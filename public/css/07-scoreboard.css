@@ -47,11 +47,13 @@
     left: 50% !important;
     transform: translateX(-50%);
     width: 100%;
-    height: 40px;
+    height: 60px;
     z-index: 1199 !important;
     cursor: pointer;
-    /* Zone invisible */
+    /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
+    /* DEBUG : décommenter pour voir la zone */
+    /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: auto !important;
 }
 

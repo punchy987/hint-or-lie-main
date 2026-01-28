@@ -564,13 +564,15 @@
     right: 0 !important;
     top: 50% !important;
     transform: translateY(-50%);
-    width: 40px;
+    width: 60px;
     /* Hauteur = celle du panneau de réactions */
     height: calc(7 * 56px + 8 * 12px + 24px);
     z-index: 19999 !important;
     cursor: pointer;
-    /* Zone invisible */
+    /* Zone invisible (debug: rendre visible avec background rouge) */
     background: transparent;
+    /* DEBUG : décommenter pour voir la zone */
+    /* background: rgba(255, 0, 0, 0.3) !important; */
     pointer-events: auto !important;
 }
 

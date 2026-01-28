@@ -370,6 +370,7 @@
       let isDragging = false;
 
       const handleStart = (e) => {
+        console.log('👆 Scoreboard touchstart détecté', { y: e.touches?.[0]?.clientY });
         isDragging = true;
         startY = e.touches ? e.touches[0].clientY : e.clientY;
         currentY = startY;
@@ -388,19 +389,24 @@
 
         const deltaY = currentY - startY;
         const threshold = 50; // Seuil minimum pour valider le swipe
+        console.log('👆 Scoreboard swipe détecté', { deltaY, threshold });
 
         if (deltaY > threshold) {
           // Swipe vers le bas -> fermer
+          console.log('✅ Fermeture scoreboard');
           scoreboardPanel.classList.add('is-hidden');
           if (navigator.vibrate) {
             navigator.vibrate(15);
           }
         } else if (deltaY < -threshold) {
           // Swipe vers le haut -> ouvrir
+          console.log('✅ Ouverture scoreboard');
           scoreboardPanel.classList.remove('is-hidden');
           if (navigator.vibrate) {
             navigator.vibrate([10, 30, 10]);
           }
+        } else {
+          console.log('❌ Swipe trop faible', { deltaY });
         }
       };
 
@@ -461,6 +467,7 @@
       let isDragging = false;
 
       const handleStart = (e) => {
+        console.log('👆 Reactions touchstart détecté', { x: e.touches?.[0]?.clientX });
         isDragging = true;
         startX = e.touches ? e.touches[0].clientX : e.clientX;
         currentX = startX;
@@ -479,19 +486,24 @@
 
         const deltaX = currentX - startX;
         const threshold = 50; // Seuil minimum pour valider le swipe
+        console.log('👆 Reactions swipe détecté', { deltaX, threshold });
 
         if (deltaX > threshold) {
           // Swipe vers la droite -> fermer
+          console.log('✅ Fermeture réactions');
           reactionTriggers.classList.remove('is-open');
           if (navigator.vibrate) {
             navigator.vibrate(15);
           }
         } else if (deltaX < -threshold) {
           // Swipe vers la gauche -> ouvrir
+          console.log('✅ Ouverture réactions');
           reactionTriggers.classList.add('is-open');
           if (navigator.vibrate) {
             navigator.vibrate([10, 30, 10]);
           }
+        } else {
+          console.log('❌ Swipe trop faible', { deltaX });
         }
       };
 
