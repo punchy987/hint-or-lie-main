@@ -1,16 +1,45 @@
 (function () {
   window.HOL = window.HOL || {};
   
-  // Configuration de l'URL du serveur (support mobile)
+  // RÈGLE D'OR : Configuration de l'URL du serveur (support mobile)
   let serverUrl = '';
   if (typeof getServerUrl === 'function') {
     serverUrl = getServerUrl();
   }
   
+  console.log('[GUARD] Socket logging active');
+  console.log('[Socket] Connexion au serveur:', serverUrl || 'URL relative');
+  
   const socket = io(serverUrl, {
     transports: ['websocket', 'polling'],
     reconnectionAttempts: 5,
     timeout: 10000
+  });
+
+  // RÈGLE D'OR : Gestion des événements de connexion pour informer l'utilisateur
+  socket.on('connect', () => {
+    console.log('[Socket] ✅ Connecté au serveur');
+    if (window.HOL.toast) {
+      window.HOL.toast('Connecté au serveur ✅', 1500);
+    }
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('[Socket] ❌ Déconnecté:', reason);
+    if (window.HOL.toast) {
+      window.HOL.toast('Déconnexion du serveur ⚠️', 2500, true);
+    }
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('[Socket] ❌ Erreur de connexion:', error.message);
+    if (window.HOL.toast) {
+      window.HOL.toast('Impossible de se connecter au serveur ⚠️', 3000, true);
+    }
+  });
+
+  socket.on('error', (error) => {
+    console.error('[Socket] ❌ Erreur:', error);
   });
 
   socket.on('spectatorMode', ({ phase, message }) => {

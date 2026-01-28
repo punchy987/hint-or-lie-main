@@ -6,11 +6,13 @@
  * 
  * En développement, utilisez l'URL locale.
  * En production, remplacez par l'URL de votre serveur déployé.
+ * 
+ * RÈGLE D'OR : Le port local doit correspondre au port du server.js (5500)
  */
 
 const SERVER_CONFIG = {
   production: 'https://ton-nom-de-projet.onrender.com', // Remplace par ton URL Render
-  development: 'http://localhost:3000'
+  development: 'http://localhost:5500'  // Port correspondant au server.js
 };
 
 /**
@@ -19,8 +21,15 @@ const SERVER_CONFIG = {
  * @returns {string} L'URL du serveur
  */
 function getServerUrl() {
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1';
+  const hostname = window.location.hostname;
+  
+  // Détection localhost : inclut localhost, 127.0.0.1 et adresses IPv4 locales
+  const isLocalhost = hostname === 'localhost' || 
+                      hostname === '127.0.0.1' ||
+                      hostname.startsWith('192.168.') ||
+                      hostname.startsWith('10.') ||
+                      hostname.startsWith('172.');
+  
   return isLocalhost ? SERVER_CONFIG.development : SERVER_CONFIG.production;
 }
 

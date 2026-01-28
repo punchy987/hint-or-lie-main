@@ -25,6 +25,9 @@ catch { console.log('⚠️ Firebase non configuré — tests sans persistence.'
 // branchement sockets
 setupSockets(io, db);
 
-// listen
+// RÈGLE D'OR : Port par défaut 5500 - doit correspondre à server-config.js
 const PORT = process.env.PORT || 5500;
-server.listen(PORT, () => console.log('Hint or Lie — port', PORT));
+server.listen(PORT, () => {
+  console.log('Hint or Lie — port', PORT);
+  console.log('🎮 Serveur prêt sur http://localhost:' + PORT);
+});
