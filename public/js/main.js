@@ -36,7 +36,15 @@
           // Retour à l'accueil : retirer TOUTES les classes pour masquer complètement
           reactionTriggers.classList.remove('is-persistent', 'is-open');
         } else if (targetScreen === 'screen-lobby') {
-          // Au lobby : ajouter .is-persistent pour montrer la poignée
+          // Au lobby : ajouter .is-persistent pour montrer la poignée + ouvrir auto
+          if (!reactionTriggers.classList.contains('is-persistent')) {
+            reactionTriggers.classList.add('is-persistent');
+          }
+          // Ouverture automatique au lobby
+          reactionTriggers.classList.add('is-open');
+        } else if (targetScreen === 'screen-hint') {
+          // Phase hints : fermer automatiquement mais garder poignée visible
+          reactionTriggers.classList.remove('is-open');
           if (!reactionTriggers.classList.contains('is-persistent')) {
             reactionTriggers.classList.add('is-persistent');
           }
@@ -420,6 +428,57 @@
       reactionHandle.addEventListener('click', () => {
         reactionTriggers.classList.toggle('is-open');
       });
+
+      // ========== DRAG/SWIPE HORIZONTAL POUR LES RÉACTIONS ==========
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+
+      const handleStart = (e) => {
+        // Démarrer le drag depuis n'importe où sur le tiroir
+        isDragging = true;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        currentX = startX;
+        e.preventDefault();
+      };
+
+      const handleMove = (e) => {
+        if (!isDragging) return;
+        currentX = e.touches ? e.touches[0].clientX : e.clientX;
+        e.preventDefault();
+      };
+
+      const handleEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const deltaX = currentX - startX;
+        const threshold = 50; // Seuil minimum pour valider le swipe
+
+        if (deltaX > threshold) {
+          // Swipe vers la droite -> fermer
+          reactionTriggers.classList.remove('is-open');
+          if (navigator.vibrate) {
+            navigator.vibrate(15);
+          }
+        } else if (deltaX < -threshold) {
+          // Swipe vers la gauche -> ouvrir
+          reactionTriggers.classList.add('is-open');
+          if (navigator.vibrate) {
+            navigator.vibrate([10, 30, 10]);
+          }
+        }
+      };
+
+      // Touch events (mobile)
+      reactionTriggers.addEventListener('touchstart', handleStart, { passive: false });
+      reactionTriggers.addEventListener('touchmove', handleMove, { passive: false });
+      reactionTriggers.addEventListener('touchend', handleEnd);
+
+      // Mouse events (desktop)
+      reactionTriggers.addEventListener('mousedown', handleStart);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
     }
 
     // Gestion des clics sur les boutons de réaction

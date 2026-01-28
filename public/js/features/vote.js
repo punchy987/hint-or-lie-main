@@ -8,6 +8,8 @@
   let votingClosed = false;
   let myOwnHintText = null; // Stockage de mon propre indice pour l'identifier
   let voteConfirmTimer = null; // Timer pour le feedback temporaire
+  let selectedCard = null; // Carte actuellement sélectionnée dans la preview
+  let originalCardParent = null; // Emplacement d'origine dans le carrousel
 
   // Affiche un message temporaire d'interdiction
   function showNoSelfVoteMessage() {
@@ -136,71 +138,91 @@
           return;
         }
         
-        // SYSTÈME 3D FLIP : Révélation en deux temps
-        const isRevealed = card.classList.contains('revealed');
-        
-        if (!isRevealed) {
-          // PREMIER CLIC : Flip la carte (révèle l'indice)
-          // Retirer .revealed de toutes les autres cartes
-          box.querySelectorAll('.vote-card').forEach(b => {
-            b.classList.remove('revealed', 'selected');
-          });
-          
-          // Ajouter .revealed à cette carte (déclenchement du flip 3D)
-          card.classList.add('revealed');
-          
-          // Micro-vibration pour feedback de flip
-          if (navigator.vibrate) {
-            navigator.vibrate(20);
-          }
-        } else {
-          // DEUXIÈME CLIC : Valider le vote
-          myTarget = h.id;
-
-          // Retour haptique double tap pour validation
-          if (navigator.vibrate) {
-            navigator.vibrate([30, 50, 30]);
-          }
-
-          // Visuel : On retire la sélection des autres cartes et on allume celle-ci
-          box.querySelectorAll('.vote-card').forEach(b => b.classList.remove('selected'));
-          card.classList.add('selected');
-          
-          // Modifier l'instruction contextuelle (temporaire)
-          const instruction = document.querySelector('.vote-instruction');
-          if (instruction) {
-            // Clear le timer précédent si changement de vote
-            clearTimeout(voteConfirmTimer);
-            
-            // Sauvegarder le texte original s'il n'est pas déjà sauvegardé
-            if (!instruction.dataset.originalText) {
-              instruction.dataset.originalText = instruction.textContent;
-            }
-            
-            instruction.textContent = 'Vote enregistré ! ✓';
-            instruction.classList.add('voted');
-            
-            // Restaurer le texte original après 2.5 secondes
-            voteConfirmTimer = setTimeout(() => {
-              instruction.textContent = instruction.dataset.originalText || 'Sélectionnez une carte pour voter';
-              instruction.classList.remove('voted');
-            }, 2500);
-          }
-
-          // Envoi au serveur
-          socket.emit('submitVote', { hintId: h.id });
-
-          // Petit effet immédiat sur le compteur (UX fluide)
-          const pv = $('progress-vote');
-          if (pv) {
-            const [cur, tot] = (pv.textContent || '0/0').split('/').map(x => parseInt(x, 10) || 0);
-            if (cur < tot) pv.textContent = `${cur + 1}/${tot}`;
-          }
+        // Si une carte est déjà sélectionnée, la renvoyer dans le carrousel
+        if (selectedCard && selectedCard !== card) {
+          returnCardToCarousel(selectedCard);
         }
+        
+        // Animer vers la preview zone
+        moveCardToPreview(card, h.id);
       };
 
       box.appendChild(card);
     });
+  }
+  
+  // --- NOUVELLE FONCTION : Déplacer une carte vers la preview zone ---
+  function moveCardToPreview(card, hintId) {
+    const previewSlot = document.getElementById('vote-preview-slot');
+    const btnConfirm = document.getElementById('btn-confirm-vote');
+    
+    if (!previewSlot || !btnConfirm) return;
+    
+    // Sauvegarder l'emplacement d'origine
+    originalCardParent = card.parentElement;
+    selectedCard = card;
+    myTarget = hintId;
+    
+    // Obtenir les positions
+    const cardRect = card.getBoundingClientRect();
+    const previewRect = previewSlot.getBoundingClientRect();
+    
+    // Calculer le déplacement
+    const deltaX = previewRect.left + previewRect.width/2 - (cardRect.left + cardRect.width/2);
+    const deltaY = previewRect.top + previewRect.height/2 - (cardRect.top + cardRect.height/2);
+    
+    // Marquer la carte comme "en preview"
+    card.classList.add('in-preview');
+    
+    // Appliquer la transformation
+    card.style.left = cardRect.left + 'px';
+    card.style.top = cardRect.top + 'px';
+    card.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.3)`;
+    
+    // Vibration de sélection
+    if (navigator.vibrate) {
+      navigator.vibrate(20);
+    }
+    
+    // Attendre la fin de l'animation, puis flip
+    setTimeout(() => {
+      card.classList.add('revealed');
+      
+      // Afficher le bouton de confirmation
+      btnConfirm.classList.add('visible');
+      previewSlot.classList.add('has-card');
+      
+      // Vibration de flip
+      if (navigator.vibrate) {
+        navigator.vibrate([10, 20, 10]);
+      }
+    }, 400);
+  }
+  
+  // --- NOUVELLE FONCTION : Renvoyer une carte dans le carrousel ---
+  function returnCardToCarousel(card) {
+    const previewSlot = document.getElementById('vote-preview-slot');
+    const btnConfirm = document.getElementById('btn-confirm-vote');
+    
+    // Masquer le bouton
+    if (btnConfirm) {
+      btnConfirm.classList.remove('visible');
+    }
+    
+    // Retirer l'état de preview
+    if (previewSlot) {
+      previewSlot.classList.remove('has-card');
+    }
+    
+    // Réinitialiser la carte
+    card.classList.remove('in-preview', 'revealed');
+    card.style.transform = '';
+    card.style.left = '';
+    card.style.top = '';
+    
+    // Réinitialiser les variables
+    selectedCard = null;
+    myTarget = null;
   }
   // ------------------------------------------
 
@@ -208,6 +230,7 @@
   function handleHintsForVote(hints, domain, round) {
     votingClosed = false;
     myTarget = null;
+    selectedCard = null;
 
     show('screen-vote');
     resetPhaseProgress();
@@ -216,6 +239,54 @@
     renderHintsWithVote(hints);     // Affiche les cartes
 
     const pv = $('progress-vote'); if (pv) pv.textContent = `0/${(hints || []).length}`;
+    
+    // Configurer le bouton de confirmation
+    const btnConfirm = document.getElementById('btn-confirm-vote');
+    if (btnConfirm) {
+      btnConfirm.onclick = () => {
+        if (!myTarget || !selectedCard) return;
+        
+        // Retour haptique de validation
+        if (navigator.vibrate) {
+          navigator.vibrate([30, 50, 30]);
+        }
+        
+        // Envoi du vote au serveur
+        socket.emit('submitVote', { hintId: myTarget });
+        
+        // Feedback visuel
+        const instruction = document.querySelector('.vote-instruction');
+        if (instruction) {
+          clearTimeout(voteConfirmTimer);
+          if (!instruction.dataset.originalText) {
+            instruction.dataset.originalText = instruction.textContent;
+          }
+          instruction.textContent = 'Vote enregistré ! ✓';
+          instruction.classList.add('voted');
+          
+          voteConfirmTimer = setTimeout(() => {
+            instruction.textContent = instruction.dataset.originalText || 'Touche une carte pour l\\'inspecter';
+            instruction.classList.remove('voted');
+          }, 2500);
+        }
+        
+        // Mise à jour du compteur
+        const pv = $('progress-vote');
+        if (pv) {
+          const [cur, tot] = (pv.textContent || '0/0').split('/').map(x => parseInt(x, 10) || 0);
+          if (cur < tot) pv.textContent = `${cur + 1}/${tot}`;
+        }
+        
+        // Masquer le bouton
+        btnConfirm.classList.remove('visible');
+        
+        // Désactiver la carte (vote confirmé)
+        if (selectedCard) {
+          selectedCard.classList.add('selected');
+          selectedCard.style.pointerEvents = 'none';
+        }
+      };
+    }
   }
 
   function initSocket() {

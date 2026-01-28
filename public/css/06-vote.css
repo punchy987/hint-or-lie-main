@@ -2,6 +2,21 @@
 /* ÉCRAN DE VOTE — Minimalist HUD */
 /* ==================== */
 
+/* Layout principal : conteneur flex vertical */
+#screen-vote {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+}
+
+#screen-vote .panel {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
 /* Instruction contextuelle HUD */
 .vote-instruction {
     font-family: 'Lexend', sans-serif;
@@ -21,24 +36,21 @@
 /* Carrousel Horizontal 3D : Scroll Snap + Flip Cards */
 .vote-grid, #hints {
     display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-    gap: 20px;
-    padding-top: 100px !important;
-    padding-bottom: 30px;
-    padding-left: 20px;
-    padding-right: 20px;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 20px;
+    padding-bottom: 20px;
     width: 100%;
-    max-height: 50vh;
-    overflow-x: auto;
-    overflow: visible;
+    overflow-x: scroll;
+    overflow-y: visible;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     perspective: 1000px;
-    margin-bottom: 60px;
+    position: relative;
 }
 
 .vote-grid::-webkit-scrollbar, #hints::-webkit-scrollbar {
@@ -54,8 +66,22 @@
     position: relative;
     scroll-snap-align: center;
     font-family: 'Lexend', sans-serif !important;
-    transform: translateY(60%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Carte en mode carrousel (par défaut) */
+.vote-card:not(.in-preview) {
+    transform: scale(0.9);
+    opacity: 0.7;
+}
+
+/* Carte déplacée vers la preview zone */
+.vote-card.in-preview {
+    position: fixed;
+    z-index: 100;
+    transform: scale(1.2);
+    opacity: 1;
+    pointer-events: none;
 }
 
 /* Le pivot 3D interne */
@@ -199,6 +225,85 @@
 .vote-card.is-me .card-front {
     opacity: 0.6;
     filter: grayscale(0.3);
+}
+
+/* ========== ZONE DE PREVIEW CENTRALE ========== */
+.vote-preview-slot {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 200px;
+    border: 3px dashed rgba(52, 168, 83, 0.4);
+    border-radius: 16px;
+    background: rgba(52, 168, 83, 0.05);
+    z-index: 50;
+    pointer-events: none;
+    transition: all 0.3s ease-out;
+}
+
+.vote-preview-slot.has-card {
+    border-color: rgba(52, 168, 83, 0.8);
+    background: rgba(52, 168, 83, 0.1);
+    box-shadow: 0 0 30px rgba(52, 168, 83, 0.3);
+}
+
+/* ========== BOUTON DE CONFIRMATION ========== */
+#btn-confirm-vote {
+    display: none;
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 16px 48px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #34A853 0%, #2d8f45 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    z-index: 200;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 12px rgba(52, 168, 83, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#btn-confirm-vote.visible {
+    display: block;
+    animation: btnSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#btn-confirm-vote:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 
+        0 6px 16px rgba(52, 168, 83, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#btn-confirm-vote:active {
+    transform: translateX(-50%) translateY(0);
+    box-shadow: 
+        0 2px 8px rgba(52, 168, 83, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes btnSlideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 /* Animations pour le message d'interdiction */

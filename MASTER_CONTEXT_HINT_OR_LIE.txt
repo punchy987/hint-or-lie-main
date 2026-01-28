@@ -1630,11 +1630,17 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        Poignée (.reaction-handle) :
        - Dimensions : 4px × 40px (trait vertical fin)
        - Position : margin-left: auto (côté gauche du conteneur)
-       - Couleur : linear-gradient vert crew (rgba(0,255,136))
+       - Couleur : linear-gradient vert Google (rgba(52,168,83))
        - Relief embossé : inset box-shadow multi-couches
        - Border-radius : 2px 0 0 2px (arrondi gauche uniquement)
-       - Hover : Intensification + glow rgba(0,255,136,0.4)
+       - Hover : Intensification + glow rgba(52,168,83,0.4)
        - Cursor : pointer
+       
+       Animation "saut" (handleGlowPulse) :
+       - Activée sur : .is-persistent:not(.is-open) (tiroir fermé mais visible)
+       - Durée : 3s infinite ease-in-out
+       - Effet : Pulse du glow de 4px à 20px avec intensité variable
+       - Objectif : Attirer l'attention sur la poignée fermée
        
        Transitions :
        - Duration : 0.4s (identique scoreboard)
@@ -1646,9 +1652,16 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        - Click .reaction-handle → classList.toggle('is-open')
        - Bascule ouvert/replié sans affecter .is-persistent
        
+       Drag/Swipe horizontal :
+       - touchstart/touchmove/touchend + mousedown/mousemove/mouseup
+       - Swipe droite (>50px) → fermer (classList.remove('is-open'))
+       - Swipe gauche (<-50px) → ouvrir (classList.add('is-open'))
+       - Feedback haptique : vibrate(15) fermeture, [10,30,10] ouverture
+       
        Apparition/Disparition contextuelle (updateUIFromState) :
        - screen-home : classList.remove('is-persistent', 'is-open') → masquage total
-       - screen-lobby : classList.add('is-persistent') → animation glissement poignée
+       - screen-lobby : classList.add('is-persistent', 'is-open') → ouverture auto
+       - screen-hint : classList.remove('is-open') → fermeture auto au début du jeu
        - Autres screens : Maintient .is-persistent → poignée reste accessible
        
        Auto-fermeture intelligente :
@@ -1664,9 +1677,11 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
     
     ✅ Impact UX :
        - Masquage total sur accueil : Pas de pollution visuelle
-       - Apparition élégante : Glissement fluide au lobby
+       - Apparition élégante : Glissement fluide au lobby + ouverture auto
+       - Fermeture contextuelle : Auto-fermeture au début du jeu (hints)
+       - Animation attrayante : Glow pulse sur poignée fermée
        - Accessibilité permanente : Poignée visible pendant le jeu
-       - Interaction intuitive : Toggle clair, auto-fermeture pratique
+       - Interaction intuitive : Toggle, drag/swipe, auto-fermeture pratique
        - Cohérence visuelle : Design identique au scoreboard
 
  Fichiers modifiés session identité :
@@ -1711,15 +1726,83 @@ Le jeu est composé de 5 écrans principaux qui utilisent les IDs suivants :
        - Esthétique moderne : Couleurs brand quality professionnelles
        - Cohérence totale : Tous les tokens CSS pointent vers nouvelles couleurs
        - Logo marquant : Dualité H/L avec palette Google reconnaissable
+
+ SYSTÈME DRAG/SWIPE INTERACTIF [27 JANVIER 2026] :
+    Objectif : Panneaux interactifs avec gestures tactiles pour scoreboard et réactions
+    
+    ✅ Scoreboard (drag vertical - déjà implémenté) :
+       Gestes :
+       - touchstart/touchmove/touchend + mousedown/mousemove/mouseup
+       - Zone sensible : 30px depuis le haut du panel (poignée)
+       - Swipe bas (>30px) → classList.add('is-hidden') - masquer
+       - Swipe haut (<-30px) → classList.remove('is-hidden') - afficher
+       - Click simple sur poignée → toggle .is-hidden
+       
+       Feedback haptique :
+       - Fermeture : vibrate(15) - rangement subtil
+       - Ouverture : vibrate([10,30,10]) - déploiement
+       
+       Animation handle (handlePullHint) :
+       - Durée : 2s infinite ease-in-out
+       - Effet : Respiration opacity 0.8 → 1 + text-shadow glow
+       - Couleur : rgba(52,168,83,0.4) - Google Green
+    
+    ✅ Réactions (drag horizontal - nouveau) :
+       Gestes :
+       - touchstart/touchmove/touchend + mousedown/mousemove/mouseup
+       - Zone sensible : Tout le tiroir #reaction-triggers
+       - Swipe droite (>50px) → classList.remove('is-open') - fermer
+       - Swipe gauche (<-50px) → classList.add('is-open') - ouvrir
+       - Click sur .reaction-handle → toggle .is-open
+       
+       Feedback haptique :
+       - Fermeture : vibrate(15) - rangement
+       - Ouverture : vibrate([10,30,10]) - déploiement
+       
+       Animation handle (handleGlowPulse) :
+       - Activée sur : .is-persistent:not(.is-open)
+       - Durée : 3s infinite ease-in-out
+       - Effet : Pulse box-shadow de 4px à 20px avec glow
+       - Couleur : rgba(52,168,83,0.6) - Google Green intense
+    
+    ✅ Logique contextuelle automatique :
+       screen-home :
+       - Réactions : classList.remove('is-persistent', 'is-open') - masquage total
+       
+       screen-lobby :
+       - Réactions : classList.add('is-persistent', 'is-open') - ouverture auto
+       - Objectif : Montrer les réactions disponibles dès l'arrivée au lobby
+       
+       screen-hint (début du jeu) :
+       - Réactions : classList.remove('is-open') - fermeture auto
+       - Conservation : .is-persistent reste pour garder poignée visible
+       - Objectif : Libérer l'espace pour le gameplay
+       
+       Autres screens (voting, reveal) :
+       - Réactions : Maintient .is-persistent - poignée accessible
+    
+    ✅ Contraintes respectées :
+       - Pas de renommage : #score-list, #reaction-triggers conservés
+       - Triangles CSS : Chevron ▼ dans ::before du scoreboard
+       - Palette Google : #34A853 (green) / #EA4335 (red)
+       - Relief 3D embossé : inset box-shadow multi-couches sur tous handles
+    
+    ✅ Impact UX :
+       - Interaction naturelle : Gestures tactiles intuitifs
+       - Feedback haptique : Confirmation sensorielle immédiate
+       - Animations attractives : Pulse/glow pour guider l'attention
+       - Logique intelligente : Ouverture/fermeture contextuelle automatique
+       - Accessibilité : Click simple en alternative au swipe
+
     ✅ Position bulles : absolute bottom: 50px, variation left random 0-50px
     ✅ Container reset : bottom: 0, left: 20px, overflow: visible
     ✅ Tous fichiers synchronisés et opérationnels
 
 ================================================================================
-FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v5.5]
+FIN DU FICHIER DE CONTEXTE — TACTILE ARCADE PREMIUM [v5.6]
 ================================================================================
-Dernière mise à jour : 27 janvier 2026 — Arcade Bubbles finalisé avec animation verticale
-Nouvelles fonctionnalités : Tiroir contextuel + Bulles montée arcade + Synchronisation parfaite
+Dernière mise à jour : 27 janvier 2026 — Système drag/swipe interactif implémenté
+Nouvelles fonctionnalités : Drag/Swipe + Logique contextuelle + Animations handles + Palette Google
 
  ✅ MODIFICATIONS SESSION DENSIFICATION & OPTIMISATION [26 JANVIER 2026] :
 

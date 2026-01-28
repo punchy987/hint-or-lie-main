@@ -22,11 +22,12 @@
     cursor: default;
     animation: slideUpBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s backwards;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
+    overflow: visible;
 }
 
-/* État Caché (Masqué mais poignée visible) */
+/* État Caché (Complètement masqué sauf poignée) */
 .scoreboard-panel.is-hidden {
-    transform: translateX(-50%) translateY(calc(100% - 50px));
+    transform: translateX(-50%) translateY(100%);
 }
 
 /* BARRE HANDLE EN RELIEF — Inspirée des arcade bars */
@@ -37,16 +38,21 @@
     justify-content: center;
     gap: 8px;
     
+    /* Position absolute pour dépasser */
+    position: absolute;
+    top: -50px;
+    left: 0;
+    
     /* Dimensions et couleur */
     height: 50px;
     width: 100%;
     background: linear-gradient(135deg, 
-        rgba(0, 255, 136, 0.12) 0%, 
-        rgba(0, 200, 100, 0.08) 100%);
+        rgba(52, 168, 83, 0.12) 0%, 
+        rgba(52, 168, 83, 0.08) 100%);
     
     /* Bordure supérieure arrondie */
     border-radius: 20px 20px 0 0;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    border-bottom: 1px solid rgba(52, 168, 83, 0.2);
     
     /* Effet relief embossé */
     box-shadow: 
@@ -59,15 +65,15 @@
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 2px;
-    color: rgba(0, 255, 136, 0.9);
+    color: rgba(52, 168, 83, 0.9);
     text-transform: uppercase;
     
     /* Interaction */
     cursor: grab;
     user-select: none;
     
-    /* Animation chevron */
-    animation: handlePullHint 2s infinite ease-in-out;
+    /* Animation chevron + breathe */
+    animation: handlePullHint 2s infinite ease-in-out, breathe 3s infinite ease-in-out;
 }
 
 /* Animation active lors du drag */
@@ -82,7 +88,17 @@
     }
     50% { 
         opacity: 1;
-        text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        text-shadow: 0 0 10px rgba(52, 168, 83, 0.4);
+    }
+}
+
+/* Animation breathe : Respiration scale subtile */
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
     }
 }
 
