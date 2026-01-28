@@ -369,10 +369,16 @@
     const { $ } = window.HOL;
     const reactionTriggers = document.getElementById('reaction-triggers');
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
+
     if (!reactionTriggers || !scoreboardPanel) {
       console.warn('Global Swipe: éléments manquants');
       return;
     }
+
+    const SCREEN_W = window.innerWidth;
+    const SCREEN_H = window.innerHeight;
+    const SAFETY_MARGIN = 10; // Pixels de sécurité pour Android
+
     let touchState = {
       startX: 0,
       startY: 0,
@@ -381,163 +387,118 @@
       isTracking: false,
       zone: null,
       axis: null,
-      locked: false
+      locked: false,
+      target: null
     };
+
     document.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       const startX = touch.clientX;
       const startY = touch.clientY;
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
       const modal = $('modal');
       const modalRules = $('modal-rules-lobby');
+
       if ((modal && modal.style.display === 'flex') || (modalRules && modalRules.classList.contains('active'))) {
         console.log('[HUD-Swipe] Bloqué par modal');
         return;
       }
-      if (startX > screenWidth * 0.75) {
-        touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone: 'right', axis: null, locked: false };
-        reactionTriggers.style.transition = 'none';
-        console.log('[HUD-Swipe] Detecté sur zone réactions');
-      } else if (startY > screenHeight * 0.75) {
-        touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone: 'bottom', axis: null, locked: false };
-        scoreboardPanel.style.transition = 'none';
-        console.log('[HUD-Swipe] Detecté sur zone scoreboard');
+      
+      let zone = null;
+      let target = null;
+      // Détection de zone
+      if (startX > SCREEN_W * 0.75) { // Zone de réaction (droite)
+        zone = 'right';
+        target = reactionTriggers;
+      } else if (startY > SCREEN_H * 0.5) { // Zone du scoreboard (moitié inférieure)
+        zone = 'bottom';
+        target = scoreboardPanel;
       }
+      
+      if(target) {
+        touchState = { startX, startY, currentX: startX, currentY: startY, isTracking: true, zone, axis: null, locked: false, target };
+        target.classList.add('is-dragging');
+        console.log(`[HUD-Swipe] Detecté sur zone ${zone}`);
+      }
+      
     }, { passive: false });
-    let lastMoveTime = 0;
-    let lastMoveY = 0;
-    let lastMoveX = 0;
-    // Pour rAF
-    let scoreboardTargetY = 0;
-    let reactionsTargetX = 0;
-    let scoreboardRaf = null;
-    let reactionsRaf = null;
+
     document.addEventListener('touchmove', (e) => {
       if (!touchState.isTracking) return;
+      
       const touch = e.touches[0];
       touchState.currentX = touch.clientX;
       touchState.currentY = touch.clientY;
       const dx = touchState.currentX - touchState.startX;
       const dy = touchState.currentY - touchState.startY;
+
+      // Verrouillage de l'axe après 5px de mouvement
       if (!touchState.locked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
         touchState.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         touchState.locked = true;
       }
+      
+      // Mouvement sur l'axe Y pour le scoreboard
       if (touchState.axis === 'y' && touchState.zone === 'bottom') {
-        const panelHeight = scoreboardPanel.offsetHeight;
-        let translateY = dy;
-        if (translateY < 0) translateY = 0;
-        if (translateY > panelHeight - 50) translateY = panelHeight - 50;
-        scoreboardTargetY = translateY;
-        lastMoveTime = e.timeStamp;
-        lastMoveY = touchState.currentY;
-        if (!scoreboardRaf) {
-          const animateScoreboard = () => {
-            scoreboardPanel.style.transform = `translateX(-50%) translateY(${scoreboardTargetY}px)`;
-            if (touchState.isTracking && touchState.axis === 'y' && touchState.zone === 'bottom') {
-              scoreboardRaf = requestAnimationFrame(animateScoreboard);
-            } else {
-              scoreboardRaf = null;
-            }
-          };
-          scoreboardRaf = requestAnimationFrame(animateScoreboard);
-        }
-      } else if (touchState.axis === 'x' && touchState.zone === 'right') {
-        const panelWidth = reactionTriggers.offsetWidth;
-        let translateX = dx;
-        if (translateX > 0) translateX = 0;
-        if (translateX < -(panelWidth - 15)) translateX = -(panelWidth - 15);
-        reactionsTargetX = translateX;
-        lastMoveTime = e.timeStamp;
-        lastMoveX = touchState.currentX;
-        if (!reactionsRaf) {
-          const animateReactions = () => {
-            reactionTriggers.style.transform = `translateY(-50%) translateX(${reactionsTargetX}px)`;
-            if (touchState.isTracking && touchState.axis === 'x' && touchState.zone === 'right') {
-              reactionsRaf = requestAnimationFrame(animateReactions);
-            } else {
-              reactionsRaf = null;
-            }
-          };
-          reactionsRaf = requestAnimationFrame(animateReactions);
-        }
+        let translateY = dy > 0 ? dy : 0; // Bloquer le mouvement vers le haut
+        touchState.target.style.transform = `translateX(-50%) translateY(${translateY}px)`;
+      } 
+      // Mouvement sur l'axe X pour les réactions
+      else if (touchState.axis === 'x' && touchState.zone === 'right') {
+        let translateX = dx < 0 ? dx : 0; // Bloquer le mouvement vers la gauche
+        touchState.target.style.transform = `translateY(-50%) translateX(${translateX}px)`;
       }
+
     }, { passive: false });
+
     document.addEventListener('touchend', (e) => {
-      if (!touchState.isTracking) return;
-      const dx = touchState.currentX - touchState.startX;
-      const dy = touchState.currentY - touchState.startY;
-      let snap = false;
-      // Scoreboard (vertical)
+      if (!touchState.isTracking || !touchState.locked) {
+        if(touchState.target) touchState.target.classList.remove('is-dragging');
+        touchState.isTracking = false;
+        return;
+      }
+      
+      const endX = touchState.currentX;
+      const endY = touchState.currentY;
+      
+      // Nettoyage initial
+      touchState.target.classList.remove('is-dragging');
+      touchState.target.style.transition = ''; // Laisser les transitions CSS reprendre le contrôle
+
+      // Scoreboard (Vertical)
       if (touchState.zone === 'bottom' && touchState.axis === 'y') {
-        const panelHeight = scoreboardPanel.offsetHeight;
-        const ySnapPoints = [0, panelHeight - 50];
-        const snapThreshold = panelHeight * 0.2; // 20% du panneau
-        const dt = e.timeStamp - lastMoveTime;
-        const dyMove = touchState.currentY - lastMoveY;
-        const velocity = dt > 0 ? dyMove / dt : 0;
-        let targetState = null;
-        let snapTo = 0;
-        if (dy > snapThreshold || velocity > 0.5) {
+        const isClosing = endY > (SCREEN_H * 0.9) || endY > (SCREEN_H - SAFETY_MARGIN);
+        
+        if (isClosing) {
           scoreboardPanel.classList.add('is-hidden');
           scoreboardPanel.dataset.manuallyClosed = '1';
-          snapTo = panelHeight - 50;
         } else {
           scoreboardPanel.classList.remove('is-hidden');
           delete scoreboardPanel.dataset.manuallyClosed;
-          snapTo = 0;
         }
-        // Transition rebond cubic-bezier (back-out)
-        scoreboardPanel.style.transition = 'transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1)';
-        scoreboardPanel.style.transform = `translateX(-50%) translateY(${snapTo}px)`;
-        // Nettoyage après la transition
-        scoreboardPanel.addEventListener('transitionend', function cleanup(e) {
-          if (e.propertyName === 'transform') {
-            scoreboardPanel.style.transition = '';
-            scoreboardPanel.removeEventListener('transitionend', cleanup);
-          }
-        });
+        // La transition CSS gère l'animation de snap
+        scoreboardPanel.style.transform = ''; // Reset pour que la classe CSS prenne effet
       }
-      // Réactions (horizontal)
+      
+      // Réactions (Horizontal)
       if (touchState.zone === 'right' && touchState.axis === 'x') {
-        const panelWidth = reactionTriggers.offsetWidth;
-        const xSnapPoints = [0, panelWidth - 15];
-        const snapThreshold = panelWidth * 0.3; // 30% du panneau
-        const dt = e.timeStamp - lastMoveTime;
-        const dxMove = touchState.currentX - lastMoveX;
-        const velocity = dt > 0 ? dxMove / dt : 0;
-        let targetState = null;
-        let snapTo = 0;
-        if (dx > snapThreshold || velocity > 0.5) {
+        const isClosing = endX > (SCREEN_W * 0.9) || endX > (SCREEN_W - SAFETY_MARGIN);
+        
+        if (isClosing) {
           reactionTriggers.classList.remove('is-open');
-          targetState = 'closed';
-          snapTo = -(panelWidth - 15);
-          if (navigator.vibrate) navigator.vibrate(15);
+           if (navigator.vibrate) navigator.vibrate(15);
         } else {
           reactionTriggers.classList.add('is-open');
-          targetState = 'open';
-          snapTo = 0;
           if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         }
-        // Transition rebond cubic-bezier (back-out)
-        reactionTriggers.style.transition = 'transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1)';
-        reactionTriggers.style.transform = `translateY(-50%) translateX(${snapTo}px)`;
-        // Nettoyage après la transition
-        reactionTriggers.addEventListener('transitionend', function cleanup(e) {
-          if (e.propertyName === 'transform') {
-            reactionTriggers.style.transition = '';
-            reactionTriggers.removeEventListener('transitionend', cleanup);
-          }
-        });
-        console.log('[HOL] Reaction Snap configuré : Ouvert=0 / Fermé=' + (panelWidth - 15));
-        console.log('[HOL] Snap horizontal : ' + (targetState === 'open' ? 'OUVERT' : 'FERMÉ'));
+         // La transition CSS gère l'animation de snap
+        reactionTriggers.style.transform = ''; // Reset pour que la classe CSS prenne effet
       }
+
+      // Réinitialisation de l'état
       touchState.isTracking = false;
-      // Stop rAF loops
-      scoreboardRaf = null;
-      reactionsRaf = null;
+      touchState.target = null;
     }, { passive: false });
+
     console.log('[HOL] Système tactile initialisé sans erreur');
   }
 

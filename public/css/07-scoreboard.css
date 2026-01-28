@@ -23,6 +23,7 @@
     cursor: default;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
     overflow: visible;
+    will-change: transform, opacity; /* Optimisation pour animation */
 }
 
 @media (min-width: 768px) {
