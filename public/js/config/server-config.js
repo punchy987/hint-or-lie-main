@@ -36,16 +36,23 @@ function getServerUrl() {
                       hostname.startsWith('10.') ||
                       hostname.startsWith('172.');
   
-  // Si production n'est pas configurée, toujours utiliser development
-  const serverUrl = (isLocalhost || !isProductionConfigured) 
-    ? SERVER_CONFIG.development 
-    : SERVER_CONFIG.production;
+  // RÈGLE D'OR : Force l'URL de production si on est sur un domaine de prod
+  const isRenderDomain = hostname.includes('.onrender.com') || 
+                         hostname.includes('.herokuapp.com') ||
+                         hostname.includes('.vercel.app');
+  
+  // Priorité : domaine de production > localhost
+  const serverUrl = isRenderDomain ? SERVER_CONFIG.production :
+                    (isLocalhost || !isProductionConfigured) ? SERVER_CONFIG.development : 
+                    SERVER_CONFIG.production;
   
   // Debug : afficher l'URL utilisée
   console.log('[ServerConfig] Hostname:', hostname);
   console.log('[ServerConfig] Is Localhost:', isLocalhost);
+  console.log('[ServerConfig] Is Production Domain:', isRenderDomain);
   console.log('[ServerConfig] Production configured:', isProductionConfigured);
   console.log('[ServerConfig] Using URL:', serverUrl);
+  console.log('[ServerConfig] Cache Buster: v3');
   
   return serverUrl;
 }
