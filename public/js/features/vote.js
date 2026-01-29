@@ -118,32 +118,25 @@
       }
 
       // Le clic sur la carte
-      card.onclick = () => {
+      card.onclick = (e) => {
+        console.log('[HOL] Carte cliquée:', h.id);
         if (votingClosed) return;
-        
         // INTERDICTION DE L'AUTO-VOTE
         if (isMyOwnHint) {
-          // Animation de secousse sur la carte
           card.classList.add('shake-error');
-          setTimeout(() => {
-            card.classList.remove('shake-error');
-          }, 300);
-          
-          // Vibration mobile si disponible
-          if (navigator.vibrate) {
-            navigator.vibrate(50);
-          }
-          
+          setTimeout(() => { card.classList.remove('shake-error'); }, 300);
+          if (navigator.vibrate) navigator.vibrate(50);
           showNoSelfVoteMessage();
           return;
         }
-        
         // Si une carte est déjà sélectionnée, la renvoyer dans le carrousel
         if (selectedCard && selectedCard !== card) {
           returnCardToCarousel(selectedCard);
         }
-        
-        // Animer vers la preview zone
+        // Si drag détecté, mais mouvement <5px, forcer le clic
+        if (typeof window.voteDragMoved !== 'undefined' && window.voteDragMoved && window.voteLastDragDist < 5) {
+          window.voteDragMoved = false;
+        }
         moveCardToPreview(card, h.id);
       };
 
@@ -342,7 +335,59 @@
     });
   }
 
-  function init() { initSocket(); }
+  // --- DRAG-TO-SCROLL pour la grille de vote (PC) ---
+  function enableVoteGridDragScroll() {
+    const grid = document.getElementById('hints');
+    if (!grid) return;
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let dragMoved = false;
+    let lastDragDist = 0;
+
+    grid.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // seulement clic gauche
+      isDown = true;
+      dragMoved = false;
+      lastDragDist = 0;
+      grid.classList.add('is-dragging');
+      startX = e.pageX - grid.offsetLeft;
+      scrollLeft = grid.scrollLeft;
+    });
+    grid.addEventListener('mouseleave', () => {
+      isDown = false;
+      grid.classList.remove('is-dragging');
+    });
+    grid.addEventListener('mouseup', () => {
+      isDown = false;
+      setTimeout(() => grid.classList.remove('is-dragging'), 10);
+    });
+    grid.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - grid.offsetLeft;
+      const walk = x - startX;
+      lastDragDist = Math.abs(walk);
+      if (lastDragDist > 5) dragMoved = true;
+      grid.scrollLeft = scrollLeft - walk;
+    });
+    // Désactive le clic sur les cartes si drag détecté
+    grid.addEventListener('click', (e) => {
+      window.voteDragMoved = dragMoved;
+      window.voteLastDragDist = lastDragDist;
+      if (dragMoved) {
+        e.stopPropagation();
+        e.preventDefault();
+        dragMoved = false;
+        lastDragDist = 0;
+      }
+    }, true);
+  }
+
+  function init() {
+    initSocket();
+    enableVoteGridDragScroll();
+  }
   
   window.HOL.features = window.HOL.features || {};
   window.HOL.features.vote = { init };

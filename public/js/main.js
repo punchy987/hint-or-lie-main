@@ -508,21 +508,21 @@
   function initScoreboardSystem() {
     const scoreboardPanel = document.querySelector('.scoreboard-panel');
     const scoreboardHandle = document.querySelector('.scoreboard-handle');
-    
     if (!scoreboardPanel) return;
-
-    // ========== Clic sur la poignée pour ouvrir/fermer ========== 
+    // Clic sur la poignée pour ouvrir/fermer
     if (scoreboardHandle) {
-      scoreboardHandle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (scoreboardPanel.classList.contains('is-hidden')) {
-          scoreboardPanel.classList.remove('is-hidden');
-          delete scoreboardPanel.dataset.manuallyClosed;
-        } else {
-          scoreboardPanel.classList.add('is-hidden');
-          scoreboardPanel.dataset.manuallyClosed = '1';
-        }
-      });
+        scoreboardHandle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (scoreboardPanel.classList.contains('is-hidden')) {
+                scoreboardPanel.classList.remove('is-hidden');
+                scoreboardPanel.classList.add('is-open');
+                delete scoreboardPanel.dataset.manuallyClosed;
+            } else {
+                scoreboardPanel.classList.add('is-hidden');
+                scoreboardPanel.classList.remove('is-open');
+                scoreboardPanel.dataset.manuallyClosed = '1';
+            }
+        });
     }
 
     // ========== MOBILE : PASS-THROUGH SWIPE (v6.5) ==========

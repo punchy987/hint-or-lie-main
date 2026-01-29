@@ -12,37 +12,49 @@
     position: fixed !important;
     bottom: 0;
     left: 50%;
-    /* RÈGLE D'OR : On combine TOUJOURS X et Y pour préserver le centrage */
-    transform: translateX(-50%) translateY(calc(100% - 50px));
+    transform: translateX(-50%) translateY(100%) !important;
     width: 100%;
-    max-width: 500px; /* Centrage sur desktop */
+    max-width: 500px;
     background: rgba(27, 36, 48, 0.9) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(52, 168, 83, 0.2); /* Vert Crew */
+    border: 1px solid rgba(52, 168, 83, 0.2);
     border-bottom: none;
     border-radius: 20px 20px 0 0;
     z-index: 1200;
-    
-    /* OPTIMISATION GPU */
     will-change: transform;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-
-    transition: transform 0.45s cubic-bezier(0.22, 1.15, 0.45, 1);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     padding: 0 0 20px 0 !important;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.4);
+    overflow: visible !important;
+}
+
+.scoreboard-handle {
+    height: 4px !important;
+    width: 60px !important;
+    background: var(--color-primary);
+    border-radius: 2px 2px 0 0;
+    box-shadow: 0 0 10px var(--color-primary);
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+    display: block;
+    will-change: auto;
+}
 }
 
 /* État OUVERT : On garde le -50% X ! */
 .scoreboard-panel.is-open {
-    transform: translateX(-50%) translateY(0) !important;
+    transform: translateY(0) !important;
     display: block !important;
 }
 
 /* État CACHÉ (Sortie d'écran totale) */
 .scoreboard-panel.is-hidden {
-    transform: translateX(-50%) translateY(100%) !important;
+    transform: translateY(calc(100% - 44px)) !important;
     pointer-events: none;
 }
 
@@ -111,59 +123,19 @@ body.keyboard-open .scoreboard-handle {
 
 /* BARRE HANDLE DISCRÈTE : ligne fine de 30px collée au panel */
 .scoreboard-handle {
-        will-change: transform;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        transform: translateZ(0);
-    content: '▼ TABLEAU DE SCORE';
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    
-    /* Position absolute collée au panel */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    transform: none !important;
-    
-    /* Dimensions fines et discrètes */
-    height: 30px;
-    width: 100%;
-    background: linear-gradient(135deg, 
-        rgba(52, 168, 83, 0.12) 0%, 
-        rgba(52, 168, 83, 0.08) 100%);
-    
-    /* Bordure supérieure arrondie */
-    border-radius: 20px 20px 0 0;
-    border-bottom: 1px solid rgba(52, 168, 83, 0.2);
-    
-    /* Effet relief embossé subtil */
-    box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-        0 2px 8px rgba(0, 0, 0, 0.2);
-    
-    /* Typographie réduite */
-    font-family: 'Lexend', sans-serif !important;
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: rgba(52, 168, 83, 0.9);
-    text-transform: uppercase;
-    
-    /* Interaction */
+    background: var(--relief-bg);
+    border-top: 2px solid var(--color-primary);
+    border-radius: 16px 16px 0 0;
+    gap: 10px;
     cursor: pointer;
-    user-select: none;
-        pointer-events: auto !important;
-    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* RÈGLE D'OR : Feedback tactile mobile */
-    -webkit-tap-highlight-color: rgba(52, 168, 83, 0.3);
-    touch-action: none;
+}
+.scoreboard-handle .handle-text,
+.scoreboard-handle .handle-icon {
+    color: #fff !important;
 }
 
 /* RÈGLE D'OR v6.5 : Poignée toujours visible (collée au-dessus du panneau) */
@@ -239,7 +211,7 @@ body.keyboard-open .scoreboard-handle {
 }
 
 /* Liste interne avec scroll */
-#score-list, #players {
+#score-list {
     list-style: none !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -247,6 +219,10 @@ body.keyboard-open .scoreboard-handle {
     max-height: 40vh;
     overflow-y: auto;
     scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#score-list::-webkit-scrollbar {
+    display: none;
 }
 
 /* RÈGLE D'OR : Scoreboard plus bas sur mobile pour ne pas masquer trop de contenu */

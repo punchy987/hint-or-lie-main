@@ -122,6 +122,10 @@
           roleEl.style.color = isImpostor ? 'var(--danger)' : 'var(--crew)';
         }
 
+        // Remplacer le texte du bouton par un emoji ➔
+        const sendBtn = ui.send();
+        if (sendBtn) sendBtn.textContent = '➔';
+
         const tipEl = ui.tip();
         if (tipEl && isImpostor) {
           tipEl.style.display = 'block';
@@ -139,7 +143,7 @@
         }
 
         const inputEl = ui.input(); if (inputEl) { inputEl.value = ''; inputEl.disabled = false; }
-        const sendBtn = ui.send(); if (sendBtn) sendBtn.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
         setRound(round);
       });
     });

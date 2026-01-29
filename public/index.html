@@ -243,13 +243,15 @@
 
         <!-- Scoreboard (Injecté dynamiquement par helpers.js) -->
         <!-- RÈGLE D'OR : Masqué par défaut sur la page d'accueil -->
-        <div id="scoreboard" class="panel scoreboard-panel is-hidden">
-                        <div class="scoreboard-handle">
-                            <span class="scoreboard-label-text">tableau de score</span>
-                            <span class="scoreboard-close-text">fermer</span>
-                        </div>
-            <h3 class="label-secondary">Tableau de Score</h3>
-            <ul id="score-list"></ul>
+        <div id="scoreboard" class="scoreboard-panel is-hidden">
+            <div class="scoreboard-handle">
+                <span class="handle-icon">▼</span>
+                <span class="handle-text">TABLEAU DE SCORE</span>
+            </div>
+            <div class="scoreboard-content">
+                <h3 class="label-secondary">Classement</h3>
+                <ul id="score-list"></ul>
+            </div>
         </div>
 
         <!-- Modale de Fin de Partie / GameOver -->

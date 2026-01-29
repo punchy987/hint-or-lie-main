@@ -1,4 +1,4 @@
-
+/* === LOBBY : GRILLE JOUEURS RESPONSIVE === */
 @import './01-tokens.css';
 @import './02-base.css';
 @import './03-components.css';
@@ -12,6 +12,55 @@
 @import './11-results-mobile.css';
 @import './98-responsive.css';
 @import './99-pwa-update.css';
+
+/* === LOBBY : GRILLE JOUEURS RESPONSIVE === */
+#players {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+}
+@media (min-width: 600px) {
+    #players {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+
+/* === CARTE JOUEUR MATTE RELIEF === */
+.player-card {
+    background: var(--relief-bg);
+    border: none;
+    border-radius: 16px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: inset 0 2px 3px var(--relief-light),
+                inset 0 -3px 4px var(--relief-dark),
+                0 4px 6px rgba(0,0,0,0.2);
+}
+.player-card .player-avatar {
+    width: clamp(50px, 8vh, 70px);
+    height: clamp(50px, 8vh, 70px);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    object-fit: cover;
+    margin-bottom: 8px;
+}
+.player-status {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 800;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.07);
+    color: var(--color-primary);
+    display: inline-block;
+}
 
 body[data-screen="screen-home"] > #global-transition-overlay .logo-letter {
     display: none !important;
@@ -150,48 +199,17 @@ body {
     transform: translateY(-50%) translateX(0);
 }
 .reaction-handle {
-        will-change: transform;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        transform: translateZ(0);
-    width: 32px;
-    height: 80px;
+    width: 4px !important;
+    height: 60px;
+    background: var(--color-primary);
+    border-radius: 2px 0 0 2px;
+    box-shadow: 0 0 10px var(--color-primary);
     margin-left: 0;
-    background: linear-gradient(180deg, var(--color-primary) 0%, #b6e3f4 100%);
-    border-radius: 8px 0 0 8px;
-    box-shadow: 0 0 8px 2px var(--color-primary), inset 0 0 4px #fff;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: handleGlowPulse 3s infinite ease-in-out;
     position: relative;
-}
-.reaction-label-text {
     display: block;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    letter-spacing: 1px;
-    pointer-events: none;
-    white-space: nowrap;
-}
-.reaction-close-text {
-    display: none;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #e24545;
-    letter-spacing: 1px;
-    pointer-events: none;
-    white-space: nowrap;
+    will-change: auto;
+    animation: none;
 }
 #reaction-triggers.is-open .reaction-label-text {
     display: none;

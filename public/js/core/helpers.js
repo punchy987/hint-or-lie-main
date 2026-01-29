@@ -83,6 +83,7 @@
     // Étape D : Baisser le rideau après un court délai
     await new Promise(resolve => setTimeout(resolve, 50));
     overlay.classList.remove('active');
+    overlay.style.pointerEvents = 'none';
   };
 
   HOL.toast = HOL.toast || function (msg, ms = 2200, isError = false) {

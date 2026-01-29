@@ -10,95 +10,79 @@
 
     list.innerHTML = '';
     const sorted = [...(players || [])].sort((a, b) => (b.score || 0) - (a.score || 0));
-
     sorted.forEach(p => {
       const li = document.createElement('li');
       li.className = 'player-row';
-      
-      // ✅ 1. LED avec logique de statut
+      // LED statut
       const led = document.createElement('div');
       led.className = 'status-led';
-      
-      // Nouvelle logique LED :
-      // Vert = actif en jeu ; Orange = lobby prêt ; Rouge = lobby non prêt ; Gris = déconnecté
       if (p.disconnected) {
         led.classList.add('status-offline');
       } else if (p.phase === 'lobby') {
         if (p.isReady || p.ready) {
-          led.classList.add('status-lobby-ready'); // orange
+          led.classList.add('status-lobby-ready');
         } else {
-          led.classList.add('status-lobby-notready'); // rouge
+          led.classList.add('status-lobby-notready');
         }
       } else {
-        led.classList.add('status-online'); // vert
+        led.classList.add('status-online');
       }
-      
       li.appendChild(led);
-
-      // ✅ 2. Avatar
+      // Avatar
       const img = document.createElement('img');
       const seed = (p.name || '').trim() || 'default';
       img.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
       img.className = 'player-avatar-small';
       img.alt = p.name || 'Joueur';
       li.appendChild(img);
-
-      // ✅ 3. Nom
+      // Nom
       const nameSpan = document.createElement('span');
       nameSpan.className = 'player-name';
       nameSpan.textContent = p.name || 'Joueur';
       li.appendChild(nameSpan);
-
-      // ✅ 4. Score
+      // Score
       const scoreSpan = document.createElement('span');
       scoreSpan.className = 'player-score';
       scoreSpan.textContent = `${p.score || 0} pts`;
       li.appendChild(scoreSpan);
-
-      // ✅ 5. Emoji de statut selon la phase
+      // Emoji de statut
       const emojiSpan = document.createElement('span');
       emojiSpan.className = 'status-icon';
-      
       const currentPhase = window.HOL?.state?.currentPhase || 'lobby';
       let emoji = '';
       let isWaiting = false;
-      
       if (p.disconnected) {
-        emoji = '❌'; // Croix rouge pour déconnecté
+        emoji = '❌';
       } else if (currentPhase === 'lobby') {
         if (p.isReady || p.ready) {
-          emoji = '✅'; // Check vert si prêt
+          emoji = '✅';
         } else {
-          emoji = '⏳'; // Sablier si en attente
+          emoji = '⏳';
           isWaiting = true;
         }
       } else if (currentPhase === 'hint') {
         if (p.hasSentHint || p.hintSent) {
-          emoji = '📤'; // Enveloppe envoyée
+          emoji = '📤';
         } else {
-          emoji = '✍️'; // Main qui écrit
+          emoji = '✍️';
           isWaiting = true;
         }
       } else if (currentPhase === 'vote') {
         if (p.hasVoted || p.voted) {
-          emoji = '🗳️'; // Urne de vote
+          emoji = '🗳️';
         } else {
-          emoji = '🤔'; // Visage pensif
+          emoji = '🤔';
           isWaiting = true;
         }
       }
-      
       emojiSpan.textContent = emoji;
       if (isWaiting) {
         emojiSpan.classList.add('status-icon-waiting');
       }
       li.appendChild(emojiSpan);
-
-      // Highlight du joueur local
       if (p.id === window.HOL?.state?.me?.id) {
         li.classList.add('me');
       }
-
       list.appendChild(li);
     });
   }

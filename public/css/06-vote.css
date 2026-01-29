@@ -119,8 +119,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 16px;
-    padding: 20px 0.5rem;
-    padding-bottom: 20px;
+    padding: 40px 0;
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -139,18 +138,30 @@
 
 /* Les Cartes : Conteneur parent avec scroll-snap */
 .vote-card {
-        will-change: transform, opacity;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
     width: 110px !important;
     height: 160px !important;
     flex: 0 0 110px;
-    cursor: pointer;
+    cursor: grab;
+    user-select: none;
     position: relative;
     scroll-snap-align: center;
     font-family: 'Lexend', sans-serif !important;
-    transition: none !important;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: auto !important;
+        z-index: 10;
+}
+.vote-grid.is-dragging {
+    scroll-snap-type: none !important;
+}
+.vote-grid.is-dragging .vote-card {
+    pointer-events: none;
+}
+.vote-grid:active {
+    cursor: grabbing;
 }
 
 /* Carte en mode carrousel (par défaut) */
@@ -345,6 +356,7 @@
     font-family: 'Lexend', sans-serif;
     font-size: 1.1rem;
     font-weight: 700;
+        z-index: 5;
     letter-spacing: 0.5px;
     color: #FFFFFF;
     background: linear-gradient(135deg, #34A853 0%, #2d8f45 100%);

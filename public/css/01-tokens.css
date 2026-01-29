@@ -50,9 +50,11 @@
 
     /* Typography Scale */
     --font-size-base: 1.1rem;
-    --font-size-title: clamp(1.3rem, 4vh, 1.8rem);
-    --font-size-label: 0.9rem;
-    --gap-compact: 12px;
+    --font-size-title: clamp(1.1rem, 4vh, 1.5rem);
+    --font-size-label: 0.85rem;
+    --gap-compact: 8px;
+    --gap-main: clamp(8px, 2vh, 16px);
+    --screen-padding: clamp(10px, 3vh, 20px);
 
     /* Semantic tokens (for compatibility) */
     --font-sans: 'Lexend', sans-serif;
