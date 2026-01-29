@@ -13,6 +13,10 @@
 @import './98-responsive.css';
 @import './99-pwa-update.css';
 
+body[data-screen="screen-home"] > #global-transition-overlay .logo-letter {
+    display: none !important;
+}
+
 #reaction-touch-zone,
 #scoreboard-touch-zone {
     pointer-events: none !important;
@@ -86,11 +90,32 @@ body {
     color: var(--text-main);
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
-#toast { display: none; }
+
 #toast {
+    display: none;
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    min-width: 180px;
+    max-width: 90vw;
+    background: var(--glass-bg, rgba(30,30,30,0.95));
+    color: var(--text-main, #fff);
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    z-index: 99999;
+    padding: 0.75rem 2rem;
+    text-align: center;
     pointer-events: none !important;
+    opacity: 0.98;
+    transition: opacity 0.2s;
 }
-#toast:not(:empty) { display: block; }
+#toast:not(:empty) {
+    display: block;
+}
 
 #screen-lobby {
     padding: 1.5rem 1rem;

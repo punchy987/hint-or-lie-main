@@ -16,7 +16,7 @@
     
     <!-- Configuration du serveur pour mobile -->
     <!-- RÈGLE D'OR : Cache busting pour forcer le rechargement après modification -->
-    <script src="/js/config/server-config.js?v=3"></script>
+    <!-- script déplacé plus bas pour garantir le bon ordre de chargement -->
     
     <link rel="stylesheet" href="/css/hud.css">
     <link rel="stylesheet" href="/css/10-version-update.css">
@@ -34,11 +34,12 @@
     <link rel="stylesheet" href="/css/12-android-fixes.css">
 
     <!-- Global Transition Overlay (anti-FOPC) -->
-    <div id="global-transition-overlay">
-        <div class="logo-loader">
-            <span class="logo-letter logo-h">H</span><span class="logo-letter logo-l">L</span>
-        </div>
-    </div>
+    <!-- Suppression du logo HL blanc en haut à gauche -->
+    <!-- <div id="global-transition-overlay"> -->
+    <!--     <div class="logo-loader"> -->
+    <!--         <span class="logo-letter logo-h">H</span><span class="logo-letter logo-l">L</span> -->
+    <!--     </div> -->
+    <!-- </div> -->
 
     <!-- Overlays Cinématiques (Transitions de phase) -->
     <div id="role-reveal-overlay" class="cinematic-overlay" style="display:none">
@@ -193,7 +194,7 @@
         <!-- Écran Phase Vote -->
         <section id="screen-vote" class="screen" style="display: none;">
             <div class="phase-bar"><div class="phase-progress"><div class="bar"></div></div></div>
-            <div class="panel">
+            <div class="panel vote-panel-vertical">
                 <header class="screen-header">
                     <button class="btn-quit-to-lobby" id="btn-lobby-vote">🏠</button>
                     <div class="theme-container">
@@ -205,11 +206,13 @@
                         <div id="progress-vote" class="pill">0/0</div>
                     </div>
                 </header>
-                <h2 class="instruction">Qui ment ?</h2>
-                <p class="vote-instruction">Touche une carte pour l'inspecter</p>
-                <div class="vote-preview-slot" id="vote-preview-slot"></div>
-                <div id="hints" class="vote-grid"></div>
-                <button id="btn-confirm-vote">Confirmer mon vote</button>
+                <div class="vote-vertical-layout">
+                    <h2 class="instruction">Qui ment ?</h2>
+                    <p class="vote-instruction">Touche une carte pour l'inspecter</p>
+                    <div class="vote-preview-slot" id="vote-preview-slot"></div>
+                    <div id="hints" class="vote-grid"></div>
+                    <button id="btn-confirm-vote">Confirmer mon vote</button>
+                </div>
             </div>
         </section>
 
@@ -298,6 +301,8 @@
     <script defer src="/js/core/dom.js"></script>
     <script defer src="/js/core/helpers.js"></script>
     <script defer src="/js/core/state.js"></script>
+    <!-- server-config.js doit être chargé avant socket.js pour getServerUrl() -->
+    <script src="/js/config/server-config.js?v=3"></script>
     <script defer src="/js/core/socket.js"></script>
     <script defer src="/js/core/version-check.js"></script>
   
@@ -311,6 +316,9 @@
     <script defer src="/js/dev/guard.js"></script>
     
     <script defer src="/js/main.js"></script>
+
+    <!-- Toast global pour messages système -->
+    <div id="toast"></div>
 
 </body>
 </html>

@@ -155,74 +155,100 @@
   function moveCardToPreview(card, hintId) {
     const previewSlot = document.getElementById('vote-preview-slot');
     const btnConfirm = document.getElementById('btn-confirm-vote');
-    
     if (!previewSlot || !btnConfirm) return;
-    
+
     // Sauvegarder l'emplacement d'origine
     originalCardParent = card.parentElement;
     selectedCard = card;
     myTarget = hintId;
-    
-    // Obtenir les positions
-    const cardRect = card.getBoundingClientRect();
-    const previewRect = previewSlot.getBoundingClientRect();
-    
-    // Calculer le déplacement
-    const deltaX = previewRect.left + previewRect.width/2 - (cardRect.left + cardRect.width/2);
-    const deltaY = previewRect.top + previewRect.height/2 - (cardRect.top + cardRect.height/2);
-    
-    // Marquer la carte comme "en preview"
+
+    // Déplacer la carte dans la zone de preview (sans fade-out)
+    previewSlot.innerHTML = '';
+    previewSlot.appendChild(card);
+    card.classList.remove('revealed');
+    console.log('[VOTE] remove revealed', card, card.parentElement?.id);
     card.classList.add('in-preview');
-    
-    // Appliquer la transformation
-    card.style.left = cardRect.left + 'px';
-    card.style.top = cardRect.top + 'px';
-    card.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.3)`;
-    
+    card.style.left = '';
+    card.style.top = '';
+    card.style.transform = '';
+
     // Vibration de sélection
     if (navigator.vibrate) {
       navigator.vibrate(20);
     }
-    
-    // Attendre la fin de l'animation, puis flip
-    setTimeout(() => {
-      card.classList.add('revealed');
-      
-      // Afficher le bouton de confirmation
-      btnConfirm.classList.add('visible');
-      previewSlot.classList.add('has-card');
-      
-      // Vibration de flip
-      if (navigator.vibrate) {
-        navigator.vibrate([10, 20, 10]);
-      }
-    }, 400);
+
+    // Animation de flip : on force le reflow puis on ajoute revealed une seule fois
+    void card.offsetWidth;
+    card.classList.add('revealed');
+    console.log('[VOTE] add revealed', card, card.parentElement?.id);
+    btnConfirm.classList.add('visible');
+    // Vibration de flip
+    if (navigator.vibrate) {
+      navigator.vibrate([10, 20, 10]);
+    }
   }
   
   // --- NOUVELLE FONCTION : Renvoyer une carte dans le carrousel ---
   function returnCardToCarousel(card) {
     const previewSlot = document.getElementById('vote-preview-slot');
     const btnConfirm = document.getElementById('btn-confirm-vote');
-    
     // Masquer le bouton
     if (btnConfirm) {
       btnConfirm.classList.remove('visible');
     }
-    
-    // Retirer l'état de preview
-    if (previewSlot) {
-      previewSlot.classList.remove('has-card');
+    // Animation de retour : on anime la carte de la preview vers sa place d'origine
+    if (originalCardParent) {
+      // Obtenir la position actuelle (preview)
+      const previewRect = card.getBoundingClientRect();
+      // Créer un placeholder à la place d'origine
+      const placeholder = document.createElement('div');
+      placeholder.className = 'vote-card placeholder';
+      placeholder.style.width = card.offsetWidth + 'px';
+      placeholder.style.height = card.offsetHeight + 'px';
+      originalCardParent.insertBefore(placeholder, originalCardParent.children[Array.from(originalCardParent.children).indexOf(card)]);
+      // Obtenir la position cible (carrousel)
+      const targetRect = placeholder.getBoundingClientRect();
+      // Appliquer la position absolue à la carte
+      card.style.position = 'fixed';
+      card.style.left = previewRect.left + 'px';
+      card.style.top = previewRect.top + 'px';
+      card.style.zIndex = 2000;
+      document.body.appendChild(card);
+      // Forcer le reflow
+      void card.offsetWidth;
+      // Lancer l'animation
+      card.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1)';
+      card.style.left = targetRect.left + 'px';
+      card.style.top = targetRect.top + 'px';
+      card.style.transform = 'scale(1)';
+      setTimeout(() => {
+        // Nettoyer l'animation
+        card.style.transition = '';
+        card.style.position = '';
+        card.style.left = '';
+        card.style.top = '';
+        card.style.zIndex = '';
+        card.classList.remove('in-preview', 'revealed');
+        console.log('[VOTE] remove revealed (return)', card, card.parentElement?.id);
+        // Remettre la carte dans le carrousel
+        originalCardParent.replaceChild(card, placeholder);
+        // Vider la zone de preview
+        if (previewSlot) previewSlot.innerHTML = '';
+        // Réinitialiser les variables
+        selectedCard = null;
+        myTarget = null;
+      }, 400);
+    } else {
+      // Fallback sans animation
+      card.classList.remove('in-preview', 'revealed');
+      console.log('[VOTE] remove revealed (return fallback)', card, card.parentElement?.id);
+      card.style.transform = '';
+      card.style.left = '';
+      card.style.top = '';
+      if (previewSlot) previewSlot.innerHTML = '';
+      selectedCard = null;
+      myTarget = null;
     }
-    
-    // Réinitialiser la carte
-    card.classList.remove('in-preview', 'revealed');
-    card.style.transform = '';
-    card.style.left = '';
-    card.style.top = '';
-    
-    // Réinitialiser les variables
-    selectedCard = null;
-    myTarget = null;
   }
   // ------------------------------------------
 
